@@ -6,7 +6,8 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.7",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "@types/mathjs": "^9.4.2",
     "@types/node": "^20.9.0",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -39,7 +41,6 @@
     "eslint-config-next": "^15.0.0",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.5",
-    "typescript": "^5.2.2",
-    "@types/mathjs": "^11.0.0"
+    "typescript": "^5.2.2"
   }
 }

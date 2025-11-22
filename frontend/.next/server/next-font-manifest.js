@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\n  \"app\": {},\n  \"appUsingSizeAdjust\": false,\n  \"pages\": {\n    \"/\": [],\n    \"/[...slug]\": []\n  },\n  \"pagesUsingSizeAdjust\": false\n}"

@@ -1,0 +1,33 @@
+{
+  "name": "@quantummin/moderation-service",
+  "version": "1.0.0",
+  "description": "Automated content moderation service for QuantumMin",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@google-cloud/language": "^6.1.0",
+    "@google-cloud/vision": "^4.0.2",
+    "@elastic/elasticsearch": "^8.10.0",
+    "@quantummin/shared": "*",
+    "fastify": "^4.24.3",
+    "node-fetch": "^3.3.2",
+    "ioredis": "^5.3.2",
+    "date-fns": "^2.30.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "ts-node-dev": "^2.0.0",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "eslint": "^8.53.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "ts-jest": "^29.1.1"
+  }
+}

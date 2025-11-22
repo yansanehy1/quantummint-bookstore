@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Barrka/.gemini/antigravity/scratch/quantummin-bookstore/frontend/pages/%5B...slug%5D.tsx"],"sourcesContent":["import dynamic from 'next/dynamic';\r\nconst SPA = dynamic(() => import('../src/App'), { ssr: false });\r\nexport default function CatchAll() {\r\n  return <SPA />;\r\n}"],"names":[],"mappings":";;;;;AAAA;;;;AACA,MAAM,MAAM,IAAA,+IAAO,EAAC;;;;;;IAA8B,KAAK;;AACxC,SAAS;IACtB,qBAAO,qKAAC;;;;;AACV","debugId":null}}]
+}

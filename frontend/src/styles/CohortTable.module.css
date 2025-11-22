@@ -1,0 +1,15 @@
+.retentionCell {
+  transition: background-color 0.2s ease;
+}
+
+.retentionCell0 { background-color: rgba(59, 130, 246, 0); }
+.retentionCell10 { background-color: rgba(59, 130, 246, 0.1); }
+.retentionCell20 { background-color: rgba(59, 130, 246, 0.2); }
+.retentionCell30 { background-color: rgba(59, 130, 246, 0.3); }
+.retentionCell40 { background-color: rgba(59, 130, 246, 0.4); }
+.retentionCell50 { background-color: rgba(59, 130, 246, 0.5); }
+.retentionCell60 { background-color: rgba(59, 130, 246, 0.6); }
+.retentionCell70 { background-color: rgba(59, 130, 246, 0.7); }
+.retentionCell80 { background-color: rgba(59, 130, 246, 0.8); }
+.retentionCell90 { background-color: rgba(59, 130, 246, 0.9); }
+.retentionCell100 { background-color: rgba(59, 130, 246, 1); }

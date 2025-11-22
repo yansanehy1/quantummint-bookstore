@@ -1,0 +1,23 @@
+{
+  "name": "@quantummin/shared",
+  "version": "0.1.0",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./const": "./dist/const.js",
+    "./utils/service-registry-client": "./dist/utils/service-registry-client.js",
+    "./utils/*": "./dist/utils/*.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json"
+  },
+  "dependencies": {
+    "undici": "^6.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

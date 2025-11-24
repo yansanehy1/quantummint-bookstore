@@ -1,4 +1,4 @@
-import { BookOpen, Home, Library, LayoutDashboard, Wallet, BarChart3 } from "lucide-react";
+import { BookOpen, Home, Library, LayoutDashboard, Wallet, BarChart3, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Header() {
@@ -14,11 +14,15 @@ export default function Header() {
             className="flex items-center gap-3 text-white hover:text-amber-100 transition-colors duration-200 group"
             aria-label="Sierra Books Home"
           >
-            <div className="bg-white/20 p-2 rounded-xl group-hover:bg-white/30 transition-all duration-200 group-hover:scale-110">
-              <BookOpen className="w-7 h-7" />
+            <div className="relative w-10 h-10 group-hover:scale-110 transition-transform duration-200">
+              <img
+                src="/images/logo.jpg"
+                alt="QuantumMint Bookstore Logo"
+                className="w-full h-full object-contain rounded-lg shadow-sm"
+              />
             </div>
             <span className="text-2xl font-extrabold tracking-tight hidden sm:inline">
-              Sierra Books
+              QuantumMint
             </span>
           </button>
 
@@ -58,6 +62,13 @@ export default function Header() {
             >
               <BarChart3 className="w-4 h-4" />
               <span className="hidden md:inline">Analytics</span>
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl transition-all duration-200 font-semibold text-sm md:text-base shadow-md border border-indigo-400"
+              onClick={() => setLocation("/ai-assistants")}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden md:inline">AI Hub</span>
             </button>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-white text-amber-600 hover:bg-amber-50 rounded-xl transition-all duration-200 font-bold text-sm md:text-base shadow-md"

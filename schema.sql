@@ -226,4 +226,24 @@ CREATE TABLE `reading_sessions` (
   FOREIGN KEY (`book_id`) REFERENCES `books`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- --------------------------------------------------------
+-- 10. SMS SERVICE
+-- --------------------------------------------------------
+
+CREATE TABLE `sms_messages` (
+  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `recipient_phone` VARCHAR(20) NOT NULL,
+  `content_text` TEXT NOT NULL,
+  `status` ENUM('pending', 'sent', 'delivered', 'failed', 'undelivered') DEFAULT 'pending',
+  `provider` VARCHAR(50) NOT NULL,
+  `provider_message_id` VARCHAR(255),
+  `error_message` TEXT,
+  `metadata` JSON, -- Stores book_id, gift_from_user_id, locale, etc.
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_provider_msg_id` (`provider_message_id`),
+  INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;

@@ -8,7 +8,9 @@
     ".": "./dist/index.js",
     "./const": "./dist/const.js",
     "./utils/service-registry-client": "./dist/utils/service-registry-client.js",
-    "./utils/*": "./dist/utils/*.js"
+    "./utils/*": "./dist/utils/*.js",
+    "./database/drizzle-orm": "./dist/database/drizzle-orm.js",
+    "./_core/errors": "./dist/_core/errors.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -5,7 +5,8 @@
   "main": "dist/webhook-handler.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev:webhook": "ts-node-dev --respawn --transpile-only src/webhook-handler.ts"
+    "dev:webhook": "ts-node-dev --respawn --transpile-only src/webhook-handler.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/webhook-handler.ts"
   },
   "dependencies": {
     "@quantummin/shared": "*",

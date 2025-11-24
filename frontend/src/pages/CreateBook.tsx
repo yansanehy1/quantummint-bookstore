@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, Save, Loader2, BookOpen, Eye, DollarSign, PenTool } from "lucide-react";
+import { CheckCircle, Save, Loader2, BookOpen, Eye, DollarSign, PenTool, Mic } from "lucide-react";
 import { useLocation } from "wouter";
 
 type Level = "JSS" | "SSS" | "beginner" | "intermediate" | "advanced" | "expert";
@@ -35,8 +35,7 @@ const FormField = ({ label, children }: { label: string; children: React.ReactNo
 );
 
 export default function CreateBook() {
-  // Mocking useLocation for environment compatibility
-  const [, setLocation] = useState(() => (path: string) => console.log(`Navigating to ${path}`));
+  const [, setLocation] = useLocation();
 
   const [activeTab, setActiveTab] = useState("details");
   const [isSaving, setIsSaving] = useState(false);
@@ -130,20 +129,24 @@ export default function CreateBook() {
             <BookOpen className="w-8 h-8 text-amber-600" />
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-wide">SIERRA BOOKS <span className="text-amber-500">CREATOR</span></h1>
           </div>
-          
+
           {/* Action Buttons Group */}
           <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
-            {isSaving && <Loader2 className="w-5 h-5 animate-spin text-amber-500" title="Saving..." />}
+            {isSaving && <Loader2 className="w-5 h-5 animate-spin text-amber-500" />}
             {saveSuccess && (
               <span className="text-sm font-semibold text-green-600 flex items-center gap-1 transition duration-300">
                 <CheckCircle className="w-4 h-4" /> Saved
               </span>
             )}
-            
+
             <Button onClick={handleManualSave} variant="outline" className="text-gray-700 hover:bg-amber-50 border-amber-300">
               <Save className="w-4 h-4 mr-2" /> Save Draft
             </Button>
-            
+
+            <Button onClick={() => setLocation("/audiobook-studio")} variant="outline" className="text-indigo-600 hover:bg-indigo-50 border-indigo-200">
+              <Mic className="w-4 h-4 mr-2" /> Audio Studio
+            </Button>
+
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="text-gray-700 hover:bg-amber-50 border-amber-300">
@@ -156,35 +159,35 @@ export default function CreateBook() {
                   <p className="text-sm text-gray-500">{formData.subtitle || "No Subtitle"}</p>
                 </DialogHeader>
                 <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
-                    <div className="flex items-center justify-between text-sm text-gray-600 border-b pb-3">
-                        <p className="flex items-center gap-1"><BookOpen className="w-4 h-4 text-amber-500"/> Category: <span className="font-semibold text-gray-800">{formData.category || "-"}</span></p>
-                        <p className="flex items-center gap-1"><PenTool className="w-4 h-4 text-amber-500"/> Level: <span className="font-semibold text-gray-800">{formData.level}</span></p>
-                        <p className="flex items-center gap-1"><DollarSign className="w-4 h-4 text-amber-500"/> Price: <span className="font-semibold text-gray-800">${formData.priceUSD}</span></p>
+                  <div className="flex items-center justify-between text-sm text-gray-600 border-b pb-3">
+                    <p className="flex items-center gap-1"><BookOpen className="w-4 h-4 text-amber-500" /> Category: <span className="font-semibold text-gray-800">{formData.category || "-"}</span></p>
+                    <p className="flex items-center gap-1"><PenTool className="w-4 h-4 text-amber-500" /> Level: <span className="font-semibold text-gray-800">{formData.level}</span></p>
+                    <p className="flex items-center gap-1"><DollarSign className="w-4 h-4 text-amber-500" /> Price: <span className="font-semibold text-gray-800">${formData.priceUSD}</span></p>
+                  </div>
+
+                  <h4 className="text-xl font-semibold text-gray-700 border-l-4 border-amber-500 pl-3">Description</h4>
+                  <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{formData.description || "No description provided."}</p>
+
+                  {formData.coverUrl && (
+                    <div className="flex justify-center py-4">
+                      <img
+                        src={formData.coverUrl}
+                        alt="Book Cover Preview"
+                        className="w-40 h-auto object-cover rounded-lg shadow-lg"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://placehold.co/400x550/fca311/ffffff?text=Image+Load+Failed';
+                        }}
+                      />
                     </div>
-                    
-                    <h4 className="text-xl font-semibold text-gray-700 border-l-4 border-amber-500 pl-3">Description</h4>
-                    <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{formData.description || "No description provided."}</p>
+                  )}
 
-                    {formData.coverUrl && (
-                        <div className="flex justify-center py-4">
-                            <img 
-                                src={formData.coverUrl} 
-                                alt="Book Cover Preview" 
-                                className="w-40 h-auto object-cover rounded-lg shadow-lg"
-                                onError={(e) => {
-                                  e.currentTarget.onerror = null;
-                                  e.currentTarget.src = 'https://placehold.co/400x550/fca311/ffffff?text=Image+Load+Failed';
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    <h4 className="text-xl font-semibold text-gray-700 border-l-4 border-amber-500 pl-3 pt-4">Content Preview</h4>
-                    <div className="text-gray-900 prose max-w-none whitespace-pre-wrap p-4 bg-gray-50 rounded-lg border border-gray-200 leading-normal">{formData.content || "No content written yet."}</div>
+                  <h4 className="text-xl font-semibold text-gray-700 border-l-4 border-amber-500 pl-3 pt-4">Content Preview</h4>
+                  <div className="text-gray-900 prose max-w-none whitespace-pre-wrap p-4 bg-gray-50 rounded-lg border border-gray-200 leading-normal">{formData.content || "No content written yet."}</div>
                 </div>
               </DialogContent>
             </Dialog>
-            
+
             <Button disabled={publishDisabled} className="bg-amber-600 hover:bg-amber-700 font-bold text-white shadow-md hover:shadow-lg transition duration-200 disabled:bg-gray-400">
               Publish Book
             </Button>
@@ -208,27 +211,27 @@ export default function CreateBook() {
             <TabsContent value="details" className="pt-4 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField label="Title (Mandatory)">
-                  <Input 
-                    value={formData.title} 
-                    onChange={(e) => handleInputChange("title", e.target.value)} 
-                    placeholder="The complete guide to..." 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
+                    placeholder="The complete guide to..."
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <FormField label="Subtitle (Optional)">
-                  <Input 
-                    value={formData.subtitle} 
-                    onChange={(e) => handleInputChange("subtitle", e.target.value)} 
-                    placeholder="A detailed look into the subject." 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.subtitle}
+                    onChange={(e) => handleInputChange("subtitle", e.target.value)}
+                    placeholder="A detailed look into the subject."
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <FormField label="Category (e.g., Science, History, Fiction)">
-                  <Input 
-                    value={formData.category} 
-                    onChange={(e) => handleInputChange("category", e.target.value)} 
-                    placeholder="Mathematics, Literature, Health" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => handleInputChange("category", e.target.value)}
+                    placeholder="Mathematics, Literature, Health"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <FormField label="Target Level">
@@ -248,11 +251,11 @@ export default function CreateBook() {
                 </FormField>
                 <div className="md:col-span-2">
                   <FormField label="Book Description (Required)">
-                    <Textarea 
-                      value={formData.description} 
-                      onChange={(e) => handleInputChange("description", e.target.value)} 
-                      rows={5} 
-                      placeholder="Write a brief, compelling description that will attract readers..." 
+                    <Textarea
+                      value={formData.description}
+                      onChange={(e) => handleInputChange("description", e.target.value)}
+                      rows={5}
+                      placeholder="Write a brief, compelling description that will attract readers..."
                       className="focus:ring-amber-500 focus:border-amber-500"
                     />
                   </FormField>
@@ -263,19 +266,19 @@ export default function CreateBook() {
             {/* Content Tab */}
             <TabsContent value="content" className="pt-4 space-y-6">
               <FormField label="Cover Image URL (Recommended)">
-                <Input 
-                  value={formData.coverUrl} 
-                  onChange={(e) => handleInputChange("coverUrl", e.target.value)} 
-                  placeholder="Paste URL here (e.g., https://image.com/cover.png)" 
-                  className="focus:ring-amber-500 focus:border-amber-500" 
+                <Input
+                  value={formData.coverUrl}
+                  onChange={(e) => handleInputChange("coverUrl", e.target.value)}
+                  placeholder="Paste URL here (e.g., https://image.com/cover.png)"
+                  className="focus:ring-amber-500 focus:border-amber-500"
                 />
               </FormField>
               <FormField label="Main Book Content (Required)">
-                <Textarea 
-                  value={formData.content} 
-                  onChange={(e) => handleInputChange("content", e.target.value)} 
-                  rows={15} 
-                  placeholder="Paste or write your full chapter content here. Use paragraphs and headings for structure." 
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => handleInputChange("content", e.target.value)}
+                  rows={15}
+                  placeholder="Paste or write your full chapter content here. Use paragraphs and headings for structure."
                   className="font-mono text-sm focus:ring-amber-500 focus:border-amber-500"
                 />
               </FormField>
@@ -293,21 +296,21 @@ export default function CreateBook() {
               <p className="text-sm text-gray-600">Note: All prices are subject to platform fees and local tax regulations.</p>
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField label="Price (USD)">
-                  <Input 
-                    type="number" 
-                    value={formData.priceUSD} 
-                    onChange={(e) => handleInputChange("priceUSD", e.target.value)} 
-                    placeholder="e.g., 4.99" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    type="number"
+                    value={formData.priceUSD}
+                    onChange={(e) => handleInputChange("priceUSD", e.target.value)}
+                    placeholder="e.g., 4.99"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <FormField label="Price (SLL - Sierra Leone Leone)">
-                  <Input 
-                    type="number" 
-                    value={formData.priceSLL} 
-                    onChange={(e) => handleInputChange("priceSLL", e.target.value)} 
-                    placeholder="e.g., 150000" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    type="number"
+                    value={formData.priceSLL}
+                    onChange={(e) => handleInputChange("priceSLL", e.target.value)}
+                    placeholder="e.g., 150000"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
               </div>
@@ -318,21 +321,21 @@ export default function CreateBook() {
               <h3 className="text-xl font-semibold text-gray-800 border-l-4 border-amber-500 pl-3">Personal Information</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField label="Author Name (as it should appear)">
-                  <Input 
-                    value={formData.personalInfo.authorName} 
-                    onChange={(e) => handlePersonalInfoChange("authorName", e.target.value)} 
-                    placeholder="Your Full Name" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.personalInfo.authorName}
+                    onChange={(e) => handlePersonalInfoChange("authorName", e.target.value)}
+                    placeholder="Your Full Name"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <div className="md:col-span-2">
                   <FormField label="Author Biography (Tell your readers about yourself)">
-                    <Textarea 
-                      value={formData.personalInfo.bio} 
-                      onChange={(e) => handlePersonalInfoChange("bio", e.target.value)} 
-                      rows={4} 
-                      placeholder="Describe your background, expertise, and motivation for writing this book." 
-                      className="focus:ring-amber-500 focus:border-amber-500" 
+                    <Textarea
+                      value={formData.personalInfo.bio}
+                      onChange={(e) => handlePersonalInfoChange("bio", e.target.value)}
+                      rows={4}
+                      placeholder="Describe your background, expertise, and motivation for writing this book."
+                      className="focus:ring-amber-500 focus:border-amber-500"
                     />
                   </FormField>
                 </div>
@@ -344,19 +347,19 @@ export default function CreateBook() {
               <h3 className="text-xl font-semibold text-gray-800 border-l-4 border-amber-500 pl-3">Business/Publisher Details</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <FormField label="Publisher Name (Optional)">
-                  <Input 
-                    value={formData.businessInfo.publisher} 
-                    onChange={(e) => handleBusinessInfoChange("publisher", e.target.value)} 
-                    placeholder="Your Publishing House" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.businessInfo.publisher}
+                    onChange={(e) => handleBusinessInfoChange("publisher", e.target.value)}
+                    placeholder="Your Publishing House"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
                 <FormField label="Publisher Website/Link">
-                  <Input 
-                    value={formData.businessInfo.website} 
-                    onChange={(e) => handleBusinessInfoChange("website", e.target.value)} 
-                    placeholder="https://yourwebsite.com" 
-                    className="focus:ring-amber-500 focus:border-amber-500" 
+                  <Input
+                    value={formData.businessInfo.website}
+                    onChange={(e) => handleBusinessInfoChange("website", e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    className="focus:ring-amber-500 focus:border-amber-500"
                   />
                 </FormField>
               </div>
@@ -364,7 +367,7 @@ export default function CreateBook() {
           </Tabs>
         </Card>
       </main>
-      
+
       {/* Footer for extra polish */}
       <footer className="w-full py-4 bg-white border-t border-gray-100 mt-10">
         <div className="container max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">

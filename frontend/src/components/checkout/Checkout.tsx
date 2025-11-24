@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, AlertCircle, CheckCircle2, CreditCard, Smartphone, DollarSign } from "lucide-react";
-import { trpc } from "@/lib/trpc";
+// import { trpc } from "@/lib/trpc"; // Commented out - trpc not yet configured
 import { useAuth } from "@/_core/hooks/useAuth";
 
 interface CheckoutStep {
@@ -214,7 +214,7 @@ export default function Checkout() {
         {/* Header */}
         <div className="mb-8">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => setLocation("/library")}
             className="mb-4 text-gray-700 hover:text-orange-600"
             aria-label="Back to Library"
@@ -231,11 +231,10 @@ export default function Checkout() {
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center flex-1">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                    currentStep >= step.id
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${currentStep >= step.id
                       ? "bg-orange-500 text-white"
                       : "bg-gray-200 text-gray-600"
-                  }`}
+                    }`}
                   aria-current={currentStep === step.id ? "step" : undefined}
                   aria-label={`Step ${step.id}: ${step.title} ${step.completed ? "completed" : currentStep === step.id ? "current" : ""}`}
                 >
@@ -243,9 +242,8 @@ export default function Checkout() {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 transition-all ${
-                      currentStep > step.id ? "bg-orange-500" : "bg-gray-200"
-                    }`}
+                    className={`flex-1 h-1 mx-2 transition-all ${currentStep > step.id ? "bg-orange-500" : "bg-gray-200"
+                      }`}
                     aria-hidden="true"
                   />
                 )}
@@ -283,11 +281,10 @@ export default function Checkout() {
                     <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-labelledby="currencySelectionTitle">
                       <button
                         onClick={() => setSelectedCurrency("USD")}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          selectedCurrency === "USD"
+                        className={`p-3 rounded-lg border-2 transition-all ${selectedCurrency === "USD"
                             ? "border-orange-500 bg-orange-50"
                             : "border-gray-200 bg-white hover:border-orange-300"
-                        }`}
+                          }`}
                         role="radio"
                         aria-checked={selectedCurrency === "USD"}
                       >
@@ -297,11 +294,10 @@ export default function Checkout() {
                       </button>
                       <button
                         onClick={() => setSelectedCurrency("SLL")}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          selectedCurrency === "SLL"
+                        className={`p-3 rounded-lg border-2 transition-all ${selectedCurrency === "SLL"
                             ? "border-orange-500 bg-orange-50"
                             : "border-gray-200 bg-white hover:border-orange-300"
-                        }`}
+                          }`}
                         role="radio"
                         aria-checked={selectedCurrency === "SLL"}
                       >
@@ -436,22 +432,20 @@ export default function Checkout() {
                   {/* Card Payment */}
                   <button
                     onClick={() => setSelectedPaymentMethod("card")}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPaymentMethod === "card"
+                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedPaymentMethod === "card"
                         ? "border-orange-500 bg-orange-50"
                         : "border-gray-200 bg-white hover:border-orange-300"
-                    }`}
+                      }`}
                     role="radio"
                     aria-checked={selectedPaymentMethod === "card"}
                     aria-label="Credit or Debit Card payment"
                   >
                     <div className="flex items-center gap-3">
                       <CreditCard
-                        className={`w-5 h-5 ${
-                          selectedPaymentMethod === "card"
+                        className={`w-5 h-5 ${selectedPaymentMethod === "card"
                             ? "text-orange-500"
                             : "text-gray-400"
-                        }`}
+                          }`}
                         aria-hidden="true"
                       />
                       <div>
@@ -464,22 +458,20 @@ export default function Checkout() {
                   {/* Mobile Money - Orange */}
                   <button
                     onClick={() => setSelectedPaymentMethod("orange")}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPaymentMethod === "orange"
+                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedPaymentMethod === "orange"
                         ? "border-orange-500 bg-orange-50"
                         : "border-gray-200 bg-white hover:border-orange-300"
-                    }`}
+                      }`}
                     role="radio"
                     aria-checked={selectedPaymentMethod === "orange"}
                     aria-label="Orange Money mobile payment"
                   >
                     <div className="flex items-center gap-3">
                       <Smartphone
-                        className={`w-5 h-5 ${
-                          selectedPaymentMethod === "orange"
+                        className={`w-5 h-5 ${selectedPaymentMethod === "orange"
                             ? "text-orange-500"
                             : "text-gray-400"
-                        }`}
+                          }`}
                         aria-hidden="true"
                       />
                       <div>
@@ -492,22 +484,20 @@ export default function Checkout() {
                   {/* Mobile Money - Afrimoney */}
                   <button
                     onClick={() => setSelectedPaymentMethod("afrimoney")}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPaymentMethod === "afrimoney"
+                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedPaymentMethod === "afrimoney"
                         ? "border-orange-500 bg-orange-50"
                         : "border-gray-200 bg-white hover:border-orange-300"
-                    }`}
+                      }`}
                     role="radio"
                     aria-checked={selectedPaymentMethod === "afrimoney"}
                     aria-label="Afrimoney mobile payment"
                   >
                     <div className="flex items-center gap-3">
                       <Smartphone
-                        className={`w-5 h-5 ${
-                          selectedPaymentMethod === "afrimoney"
+                        className={`w-5 h-5 ${selectedPaymentMethod === "afrimoney"
                             ? "text-orange-500"
                             : "text-gray-400"
-                        }`}
+                          }`}
                         aria-hidden="true"
                       />
                       <div>
@@ -520,22 +510,20 @@ export default function Checkout() {
                   {/* Mobile Money - Qmoney */}
                   <button
                     onClick={() => setSelectedPaymentMethod("qmoney")}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPaymentMethod === "qmoney"
+                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedPaymentMethod === "qmoney"
                         ? "border-orange-500 bg-orange-50"
                         : "border-gray-200 bg-white hover:border-orange-300"
-                    }`}
+                      }`}
                     role="radio"
                     aria-checked={selectedPaymentMethod === "qmoney"}
                     aria-label="Qmoney mobile payment"
                   >
                     <div className="flex items-center gap-3">
                       <Smartphone
-                        className={`w-5 h-5 ${
-                          selectedPaymentMethod === "qmoney"
+                        className={`w-5 h-5 ${selectedPaymentMethod === "qmoney"
                             ? "text-orange-500"
                             : "text-gray-400"
-                        }`}
+                          }`}
                         aria-hidden="true"
                       />
                       <div>
@@ -556,7 +544,7 @@ export default function Checkout() {
 
             {/* Error Message */}
             {error && (
-              <div 
+              <div
                 className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3"
                 role="alert"
                 aria-live="polite"

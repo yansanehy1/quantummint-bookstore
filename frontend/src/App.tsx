@@ -26,7 +26,8 @@ import AdminBookManagement from "./pages/AdminBookManagement";
 import ReadingAnalytics from "./pages/ReadingAnalytics";
 import AdminWalletManagement from "./pages/AdminWalletManagement";
 import Checkout from "./pages/Checkout";
-import "./styles/bookstore.css";
+import AudiobookStudioPage from './pages/AudiobookStudio';
+import AIAssistantsPage from './pages/AIAssistants';
 
 function Router() {
   return (
@@ -52,6 +53,8 @@ function Router() {
       <Route path={"/reading-analytics"} component={ReadingAnalytics} />
       <Route path={"/admin-wallet-management"} component={AdminWalletManagement} />
       <Route path={"/checkout"} component={Checkout} />
+      <Route path={"/audiobook-studio"} component={AudiobookStudioPage} />
+      <Route path={"/ai-assistants"} component={AIAssistantsPage} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -7,15 +7,15 @@ const useLocation = () => [null, (path: string) => console.log('Navigating to', 
 // --- Mock Components for Single File Requirement (Simplified Shadcn/Tailwind Implementation) ---
 
 // 1. Mock Button
-const Button = ({ children, onClick, variant = "default", size = "default", className = "", disabled = false }) => {
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", disabled = false }: { children: React.ReactNode; onClick?: () => void; variant?: string; size?: string; className?: string; disabled?: boolean }) => {
   let baseClasses = "font-medium transition duration-150 ease-in-out rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center";
-  
+
   if (size === "sm") {
     baseClasses += " px-3 py-1.5 text-sm";
   } else {
     baseClasses += " px-4 py-2 text-base";
   }
-  
+
   switch (variant) {
     case "outline":
       baseClasses += " bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-blue-500";
@@ -27,7 +27,7 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
       baseClasses += " bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500";
       break;
   }
-  
+
   return (
     <button className={`${baseClasses} ${className}`} onClick={onClick} disabled={disabled}>
       {children}
@@ -44,89 +44,88 @@ const Card = ({ children, className = "" }) => (
 
 // 3. Mock Input/Textarea
 const Input = ({ className = "", ...props }) => (
-  <input 
-    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`} 
-    {...props} 
+  <input
+    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`}
+    {...props}
   />
 );
 
 const Textarea = ({ className = "", ...props }) => (
-  <textarea 
-    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`} 
-    {...props} 
+  <textarea
+    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`}
+    {...props}
   />
 );
 
 // 4. Mock Toast/Sonner
 const ToastContainer = ({ toasts }) => (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        {toasts.map((toast) => (
-            <div 
-                key={toast.id} 
-                className={`p-4 rounded-xl shadow-2xl min-w-80 border-l-4 ${
-                    toast.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-                } transition duration-300 ease-in-out`}
-            >
-                {toast.message}
-            </div>
-        ))}
-    </div>
+  <div className="fixed bottom-4 right-4 z-50 space-y-2">
+    {toasts.map((toast) => (
+      <div
+        key={toast.id}
+        className={`p-4 rounded-xl shadow-2xl min-w-80 border-l-4 ${toast.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
+          } transition duration-300 ease-in-out`}
+      >
+        {toast.message}
+      </div>
+    ))}
+  </div>
 );
 
 // 5. Mock Dialog (Simplified Modal)
 const DialogContext = React.createContext({});
 
 const Dialog = ({ children, open, onOpenChange }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    
-    // Controlled state override
-    useEffect(() => {
-        if (open !== undefined) {
-            setIsOpen(open);
-        }
-    }, [open]);
+  const [isOpen, setIsOpen] = useState(false);
 
-    const handleOpenChange = (newOpenState) => {
-        if (onOpenChange) {
-            onOpenChange(newOpenState);
-        } else {
-            setIsOpen(newOpenState);
-        }
-    };
+  // Controlled state override
+  useEffect(() => {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
 
-    return (
-        <DialogContext.Provider value={{ isOpen, handleOpenChange }}>
-            {/* Render Trigger component */}
-            {children.filter(child => child.type === DialogTrigger)}
-            
-            {/* Modal overlay */}
-            {isOpen && (
-                <div 
-                    className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4 transition-opacity duration-300"
-                    onClick={() => handleOpenChange(false)}
-                >
-                    <div 
-                        className="bg-white rounded-xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-100 opacity-100"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
-                    >
-                        {/* Render Content component */}
-                        {children.filter(child => child.type === DialogContent)}
-                    </div>
-                </div>
-            )}
-        </DialogContext.Provider>
-    );
+  const handleOpenChange = (newOpenState) => {
+    if (onOpenChange) {
+      onOpenChange(newOpenState);
+    } else {
+      setIsOpen(newOpenState);
+    }
+  };
+
+  return (
+    <DialogContext.Provider value={{ isOpen, handleOpenChange }}>
+      {/* Render Trigger component */}
+      {children.filter(child => child.type === DialogTrigger)}
+
+      {/* Modal overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4 transition-opacity duration-300"
+          onClick={() => handleOpenChange(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full transform transition-all duration-300 scale-100 opacity-100"
+            onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
+          >
+            {/* Render Content component */}
+            {children.filter(child => child.type === DialogContent)}
+          </div>
+        </div>
+      )}
+    </DialogContext.Provider>
+  );
 };
 
 const DialogTrigger = ({ children, asChild }) => {
-    const { handleOpenChange } = React.useContext(DialogContext);
-    
-    const child = React.Children.only(children);
-    return React.cloneElement(child, { onClick: () => handleOpenChange(true) });
+  const { handleOpenChange } = React.useContext(DialogContext);
+
+  const child = React.Children.only(children);
+  return React.cloneElement(child, { onClick: () => handleOpenChange(true) });
 };
 
 const DialogContent = ({ children, className = "p-6" }) => {
-    return <div className={className}>{children}</div>;
+  return <div className={className}>{children}</div>;
 };
 
 const DialogHeader = ({ children }) => <div className="border-b border-gray-100 p-4"><div className="text-xl font-semibold text-gray-900">{children}</div></div>;
@@ -137,38 +136,37 @@ const DialogTitle = ({ children }) => <h3 className="text-xl font-bold">{childre
 const TabsContext = React.createContext({});
 
 const Tabs = ({ children, defaultValue, className }) => {
-    const [activeTab, setActiveTab] = useState(defaultValue);
-    return (
-        <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-            <div className={className}>{children}</div>
-        </TabsContext.Provider>
-    );
+  const [activeTab, setActiveTab] = useState(defaultValue);
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className={className}>{children}</div>
+    </TabsContext.Provider>
+  );
 };
 
 const TabsList = ({ children, className }) => (
-    <div className={`flex bg-gray-100 p-1 rounded-xl shadow-inner ${className}`}>
-        {children}
-    </div>
+  <div className={`flex bg-gray-100 p-1 rounded-xl shadow-inner ${className}`}>
+    {children}
+  </div>
 );
 
 const TabsTrigger = ({ children, value }) => {
-    const { activeTab, setActiveTab } = React.useContext(TabsContext);
-    const isActive = activeTab === value;
-    return (
-        <button
-            onClick={() => setActiveTab(value)}
-            className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
-                isActive ? 'bg-white text-blue-700 shadow-md' : 'text-gray-600 hover:text-blue-500'
-            }`}
-        >
-            {children}
-        </button>
-    );
+  const { activeTab, setActiveTab } = React.useContext(TabsContext);
+  const isActive = activeTab === value;
+  return (
+    <button
+      onClick={() => setActiveTab(value)}
+      className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${isActive ? 'bg-white text-blue-700 shadow-md' : 'text-gray-600 hover:text-blue-500'
+        }`}
+    >
+      {children}
+    </button>
+  );
 };
 
 const TabsContent = ({ children, value, className }) => {
-    const { activeTab } = React.useContext(TabsContext);
-    return activeTab === value ? <div className={className}>{children}</div> : null;
+  const { activeTab } = React.useContext(TabsContext);
+  return activeTab === value ? <div className={className}>{children}</div> : null;
 };
 // --- END MOCK COMPONENTS ---
 
@@ -187,7 +185,7 @@ interface BookSubmission {
 export default function AdminBookManagement() {
   const [, setLocation] = useLocation();
   const [toasts, setToasts] = useState([]);
-  
+
   // Custom toast implementation using the local state
   const showToast = (message: string, type: 'success' | 'error') => {
     const id = Date.now();
@@ -195,15 +193,15 @@ export default function AdminBookManagement() {
     setToasts((prev) => [...prev, newToast]);
 
     setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
   };
-  
+
   const toast = {
     success: (message: string) => showToast(message, 'success'),
     error: (message: string) => showToast(message, 'error'),
   };
-  
+
   // Mock Data
   const [books, setBooks] = useState<BookSubmission[]>([
     {
@@ -237,16 +235,16 @@ export default function AdminBookManagement() {
       pages: 4,
     },
     {
-        id: 4,
-        title: "West African History",
-        author: "Binta K. Mansaray",
-        seller: "Binta K. Mansaray",
-        category: "History",
-        status: "rejected",
-        submittedDate: "2025-10-29",
-        pages: 7,
-        rejectionReason: "Formatting issues and blurry images in chapters 1 & 3. Please revise and resubmit."
-      },
+      id: 4,
+      title: "West African History",
+      author: "Binta K. Mansaray",
+      seller: "Binta K. Mansaray",
+      category: "History",
+      status: "rejected",
+      submittedDate: "2025-10-29",
+      pages: 7,
+      rejectionReason: "Formatting issues and blurry images in chapters 1 & 3. Please revise and resubmit."
+    },
   ]);
 
   const [selectedBook, setSelectedBook] = useState<BookSubmission | null>(null);
@@ -279,13 +277,13 @@ export default function AdminBookManagement() {
     setRejectionReason("");
     setSelectedBook(null);
   };
-  
+
   const handleOpenRejectDialog = (book: BookSubmission) => {
     setSelectedBook(book);
     setRejectionReason(book.rejectionReason || "");
     setShowRejectDialog(true);
   };
-  
+
   const handleCloseRejectDialog = () => {
     setShowRejectDialog(false);
     setRejectionReason("");
@@ -411,14 +409,14 @@ export default function AdminBookManagement() {
               <CheckCircle className="w-4 h-4 mr-2" />
               Approve
             </Button>
-            
+
             <Button
-                onClick={() => handleOpenRejectDialog(book)}
-                size="sm"
-                className="flex-1 bg-red-600 hover:bg-red-700 transition duration-200"
+              onClick={() => handleOpenRejectDialog(book)}
+              size="sm"
+              className="flex-1 bg-red-600 hover:bg-red-700 transition duration-200"
             >
-                <XCircle className="w-4 h-4 mr-2" />
-                Reject
+              <XCircle className="w-4 h-4 mr-2" />
+              Reject
             </Button>
           </>
         )}
@@ -531,43 +529,43 @@ export default function AdminBookManagement() {
             )}
           </TabsContent>
         </Tabs>
-        
+
         {/* Rejection Dialog (outside BookCard to handle state globally) */}
         {selectedBook && (
-            <Dialog open={showRejectDialog} onOpenChange={handleCloseRejectDialog}>
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Reject Book: {selectedBook.title}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-4">
-                        <p className="text-sm text-gray-600">
-                            Provide a detailed reason for rejecting the book. This feedback will be sent to the seller <strong>({selectedBook.seller})</strong>.
-                        </p>
-                        <Textarea
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            placeholder="Explain the issues (e.g., poor formatting, incomplete content, incorrect category) that need to be addressed..."
-                            rows={5}
-                        />
-                        <div className="flex justify-end gap-3 pt-2">
-                            <Button onClick={handleCloseRejectDialog} variant="outline" className='text-gray-600 hover:bg-gray-100'>
-                                Cancel
-                            </Button>
-                            <Button 
-                                onClick={() => rejectBook(selectedBook.id)} 
-                                className="bg-red-600 hover:bg-red-700"
-                                disabled={!rejectionReason.trim()}
-                            >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Confirm Rejection
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+          <Dialog open={showRejectDialog} onOpenChange={handleCloseRejectDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Reject Book: {selectedBook.title}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <p className="text-sm text-gray-600">
+                  Provide a detailed reason for rejecting the book. This feedback will be sent to the seller <strong>({selectedBook.seller})</strong>.
+                </p>
+                <Textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Explain the issues (e.g., poor formatting, incomplete content, incorrect category) that need to be addressed..."
+                  rows={5}
+                />
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button onClick={handleCloseRejectDialog} variant="outline" className='text-gray-600 hover:bg-gray-100'>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => rejectBook(selectedBook.id)}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={!rejectionReason.trim()}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Confirm Rejection
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
-      
+
       {/* Toast Container */}
       <ToastContainer toasts={toasts} />
     </div>

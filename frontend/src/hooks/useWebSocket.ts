@@ -10,7 +10,7 @@ export function useWebSocket(url: string, options: { onMessage?: (message: WebSo
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const ws = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<any>();
+  const reconnectTimeout = useRef<any>(null);
 
   const connect = () => {
     try {

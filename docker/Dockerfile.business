@@ -1,0 +1,83 @@
+# Multi-stage Dockerfile for Business Logic Services
+# Container 2: Book + Order + Payment + Gift + Seller + Referral Services
+
+# Stage 1: Build all TypeScript services
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files for all services
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY services/book-service/package.json ./services/book-service/
+COPY services/order-service/package.json ./services/order-service/
+COPY services/payment-service/package.json ./services/payment-service/
+COPY services/gift-service/package.json ./services/gift-service/
+COPY services/seller-service/package.json ./services/seller-service/
+COPY services/referral-service/package.json ./services/referral-service/
+
+# Install dependencies at root (includes workspaces)
+RUN npm install
+
+# Copy all source code including shared
+COPY shared ./shared
+COPY services/book-service ./services/book-service
+COPY services/order-service ./services/order-service
+COPY services/payment-service ./services/payment-service
+COPY services/gift-service ./services/gift-service
+COPY services/seller-service ./services/seller-service
+COPY services/referral-service ./services/referral-service
+
+# Build TypeScript for each service
+RUN cd services/book-service && npm run build
+RUN cd services/order-service && npm run build
+RUN cd services/payment-service && npm run build
+RUN cd services/gift-service && npm run build
+RUN cd services/seller-service && npm run build
+RUN cd services/referral-service && npm run build
+
+# Stage 2: Production runtime
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY services/book-service/package.json ./services/book-service/
+COPY services/order-service/package.json ./services/order-service/
+COPY services/payment-service/package.json ./services/payment-service/
+COPY services/gift-service/package.json ./services/gift-service/
+COPY services/seller-service/package.json ./services/seller-service/
+COPY services/referral-service/package.json ./services/referral-service/
+
+RUN npm install --production
+
+# Copy built files from builder stage
+COPY --from=builder /app/shared ./shared
+COPY --from=builder /app/services/book-service/dist ./services/book-service/dist
+COPY --from=builder /app/services/order-service/dist ./services/order-service/dist
+COPY --from=builder /app/services/payment-service/dist ./services/payment-service/dist
+COPY --from=builder /app/services/gift-service/dist ./services/gift-service/dist
+COPY --from=builder /app/services/seller-service/dist ./services/seller-service/dist
+COPY --from=builder /app/services/referral-service/dist ./services/referral-service/dist
+
+# Copy startup script
+COPY docker/start-business.sh ./start-business.sh
+RUN chmod +x ./start-business.sh
+
+# Expose ports
+# 4001: Book Service
+# 4002: Order Service
+# 4003: Payment Service
+# 4004: Gift Service
+# 4005: Seller Service
+# 4006: Referral Service
+EXPOSE 4001 4002 4003 4004 4005 4006
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:4001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start all services
+CMD ["./start-business.sh"]

@@ -1,0 +1,387 @@
+﻿error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/api-gateway/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/config-server/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/pages/[...slug].tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/pages/_app.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/pages/index.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/App.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/_core/components/ProtectedRoute.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/_core/contexts/AuthContext.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/_core/hooks/useAuth.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/AudiobookPlayer.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/AuthorReplyForm.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/BookAccessGate.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ErrorBoundary.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/Gifts.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/Library.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/MathRenderer.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ReadingSessionTracker.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/RealTimeReadingSession.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/RealTimeSessionTracker.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ReviewForm.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ReviewWithReplies.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ReviewsList.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/StarRating.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/admin/AdminBookManagement.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/admin/AdminDashboard.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/admin/AdvancedAnalyticsDashboard.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/admin/BookCreationForm.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/admin/FormDraftExample.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/agents/MapsAgent.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/agents/VisionAgent.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/audiobook/Reader.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/audiobook/Studio.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/auth/Register.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/checkout/Checkout.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/layout/Footer.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/layout/Header.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/navigation/ContentCreatorNav.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/seller/CreateBook.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/seller/SellerOnboarding.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/seller/SellerRegistration.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/seller/SellerRegistrationNotification.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/seller/SellerRequest.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/alert.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/button.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/card.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/dialog.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/form.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/input.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/label.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/select.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/sonner.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/tabs.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/textarea.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/tooltip.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/ui/use-toast.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/user/Referrals.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/components/user/UserProfileSettings.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/contexts/ThemeContext.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/lib/balanceDeductionService.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/lib/balanceService.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/lib/textProcessor.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/lib/ttsService.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/lib/utils.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AIAssistants.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AdminBookManagement.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AdminDashboard.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AdminWalletManagement.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AdvancedSellerRegistration.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AudiobookCreator.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/AudiobookStudio.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/BookDetails.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/BookEditor.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Checkout.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/CreateBook.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Dashboard.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Gifts.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Home.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Library.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/NotFound.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/ReadingAnalytics.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Referrals.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Register.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/SellerDashboard.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/SellerOnboarding.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/SellerRegistration.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/SellerRequest.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/Wallet.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/admin/books/new.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/api/books/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/login.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/pages/seller/books/new.tsx' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/app-config.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/__tests__/debug_import.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/__tests__/import_formula.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/__tests__/matrixOperations.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/__tests__/matrixParsing.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/__tests__/simple.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/text-analysis/formulaDetector.test.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/frontend/src/utils/tts-service.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/runner.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/service-registry/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/admin-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/analytics-service/src/advanced-reporting-engine.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/analytics-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/analytics-service/src/learning-analytics.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/api-service/src/db/schema.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/api-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/audio-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/auth-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/book-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/gift-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/integration-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/moderation-service/src/automated-moderation-engine.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/notification-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/order-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/payment-service/src/webhook-handler.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/referral-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/search-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/seller-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/sms-service/src/app.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/user-service/src/db.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/user-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/services/wallet-service/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/_core/errors.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/const.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/database/drizzle-orm.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/index.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/utils/bank-utils.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'
+error TS6059: File 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/shared/src/utils/reading-session-manager.ts' is not under 'rootDir' 'C:/Users/Barrka/.gemini/antigravity/scratch/quantummint-bookstore/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by default include pattern '**/*'

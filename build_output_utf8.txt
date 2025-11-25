@@ -1,0 +1,22 @@
+﻿
+> quantummin-bookstore@1.0.0 build
+> npm run build:shared && npm run build:services
+
+
+> quantummin-bookstore@1.0.0 build:shared
+> cd shared && npm run build
+
+
+> @quantummin/shared@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> quantummin-bookstore@1.0.0 build:services
+> tsc -p tsconfig.build.json
+
+services/moderation-service/src/automated-moderation-engine.ts(3,9): error TS1109: Expression expected.
+services/moderation-service/src/automated-moderation-engine.ts(4,10): error TS1109: Expression expected.
+services/moderation-service/src/automated-moderation-engine.ts(5,9): error TS1109: Expression expected.
+services/moderation-service/src/automated-moderation-engine.ts(6,15): error TS1109: Expression expected.
+services/moderation-service/src/automated-moderation-engine.ts(7,13): error TS1109: Expression expected.
+services/moderation-service/src/automated-moderation-engine.ts(9,1): error TS1128: Declaration or statement expected.

@@ -6,7 +6,7 @@ const app = express();
 app.use(express.raw({ type: 'application/json' }));
 
 const serviceRegistry = new ServiceRegistryClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2023-10-16' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2024-06-20' });
 
 app.get('/health', (_req, res) => res.json({ status: 'healthy' }));
 

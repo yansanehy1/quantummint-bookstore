@@ -10,6 +10,15 @@
     "lint": "eslint src --ext .ts",
     "test": "jest"
   },
+    {
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+  },
   "dependencies": {
     "@quantummin/shared": "*",
     "axios": "^1.6.1",

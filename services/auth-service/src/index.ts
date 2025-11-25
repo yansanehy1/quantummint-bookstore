@@ -5,6 +5,7 @@ import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
 import { Redis } from 'ioredis';
 import { ServiceRegistryClient } from '@quantummin/shared/utils/service-registry-client';
+import { User } from './types';
 
 const app = express();
 app.use(express.json());
@@ -140,6 +141,10 @@ app.post('/refresh-token', async (req, res) => {
     }
 
     const user = await getUserById(decoded.userId);
+    if (!user) {
+      return res.status(403).json({ error: 'User not found' });
+    }
+
     const { accessToken, refreshToken: newRefreshToken } = await generateTokens(user);
 
     await redis.set(`refresh_token:${user.id}`, newRefreshToken, 'EX', 7 * 24 * 60 * 60);
@@ -232,12 +237,14 @@ async function logSecurityEvent(eventType: string, data: any) {
   }
 }
 
-async function getUserByEmail(_email: string) {
+async function getUserByEmail(_email: string): Promise<User | null> {
+  // TODO: Implement actual database lookup
   return null;
 }
 
-async function getUserById(_id: string) {
-  return null as any;
+async function getUserById(_id: string): Promise<User | null> {
+  // TODO: Implement actual database lookup
+  return null;
 }
 
 const PORT = process.env.PORT || 3001;

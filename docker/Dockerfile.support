@@ -1,0 +1,95 @@
+# Multi-stage Dockerfile for Support Services
+# Container 3: Notification + SMS + Integration + Search + Analytics + Audio + Moderation + Admin Services
+
+# Stage 1: Build all TypeScript services
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files for all services
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY services/notification-service/package.json ./services/notification-service/
+COPY services/sms-service/package.json ./services/sms-service/
+COPY services/integration-service/package.json ./services/integration-service/
+COPY services/search-service/package.json ./services/search-service/
+COPY services/analytics-service/package.json ./services/analytics-service/
+COPY services/audio-service/package.json ./services/audio-service/
+COPY services/moderation-service/package.json ./services/moderation-service/
+COPY services/admin-service/package.json ./services/admin-service/
+
+# Install dependencies at root (includes workspaces)
+RUN npm install
+
+# Copy all source code including shared
+COPY shared ./shared
+COPY services/notification-service ./services/notification-service
+COPY services/sms-service ./services/sms-service
+COPY services/integration-service ./services/integration-service
+COPY services/search-service ./services/search-service
+COPY services/analytics-service ./services/analytics-service
+COPY services/audio-service ./services/audio-service
+COPY services/moderation-service ./services/moderation-service
+COPY services/admin-service ./services/admin-service
+
+# Build TypeScript for each service
+RUN cd services/notification-service && npm run build
+RUN cd services/sms-service && npm run build
+RUN cd services/integration-service && npm run build
+RUN cd services/search-service && npm run build
+RUN cd services/analytics-service && npm run build
+RUN cd services/audio-service && npm run build
+RUN cd services/moderation-service && npm run build
+RUN cd services/admin-service && npm run build
+
+# Stage 2: Production runtime
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY services/notification-service/package.json ./services/notification-service/
+COPY services/sms-service/package.json ./services/sms-service/
+COPY services/integration-service/package.json ./services/integration-service/
+COPY services/search-service/package.json ./services/search-service/
+COPY services/analytics-service/package.json ./services/analytics-service/
+COPY services/audio-service/package.json ./services/audio-service/
+COPY services/moderation-service/package.json ./services/moderation-service/
+COPY services/admin-service/package.json ./services/admin-service/
+
+RUN npm install --production
+
+# Copy built files from builder stage
+COPY --from=builder /app/shared ./shared
+COPY --from=builder /app/services/notification-service/dist ./services/notification-service/dist
+COPY --from=builder /app/services/sms-service/dist ./services/sms-service/dist
+COPY --from=builder /app/services/integration-service/dist ./services/integration-service/dist
+COPY --from=builder /app/services/search-service/dist ./services/search-service/dist
+COPY --from=builder /app/services/analytics-service/dist ./services/analytics-service/dist
+COPY --from=builder /app/services/audio-service/dist ./services/audio-service/dist
+COPY --from=builder /app/services/moderation-service/dist ./services/moderation-service/dist
+COPY --from=builder /app/services/admin-service/dist ./services/admin-service/dist
+
+# Copy startup script
+COPY docker/start-support.sh ./start-support.sh
+RUN chmod +x ./start-support.sh
+
+# Expose ports
+# 5001: Notification Service
+# 5002: SMS Service
+# 5003: Integration Service
+# 5004: Search Service
+# 5005: Analytics Service
+# 5006: Audio Service
+# 5007: Moderation Service
+# 5008: Admin Service
+EXPOSE 5001 5002 5003 5004 5005 5006 5007 5008
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start all services
+CMD ["./start-support.sh"]

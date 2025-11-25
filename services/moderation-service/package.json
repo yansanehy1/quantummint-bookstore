@@ -8,6 +8,15 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "lint": "eslint src --ext .ts"
   },
+    {
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+  },
   "dependencies": {
     "@google-cloud/language": "^6.1.0",
     "@google-cloud/vision": "^4.0.2",

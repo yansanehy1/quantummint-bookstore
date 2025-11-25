@@ -1,0 +1,107 @@
+# Docker Compose for local development and testing
+version: '3.8'
+
+services:
+  # Container 1: Core Services
+  core:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.core
+    ports:
+      - "3000:3000"  # API Gateway
+      - "3001:3001"  # Auth Service
+      - "3002:3002"  # User Service
+      - "3003:3003"  # Wallet Service
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - quantummint-network
+
+  # Container 2: Business Logic Services
+  business:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.business
+    ports:
+      - "4001:4001"  # Book Service
+      - "4002:4002"  # Order Service
+      - "4003:4003"  # Payment Service
+      - "4004:4004"  # Gift Service
+      - "4005:4005"  # Seller Service
+      - "4006:4006"  # Referral Service
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      - mysql
+    networks:
+      - quantummint-network
+
+  # Container 3: Supporting Services
+  support:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.support
+    ports:
+      - "5001:5001"  # Notification Service
+      - "5002:5002"  # SMS Service
+      - "5003:5003"  # Integration Service
+      - "5004:5004"  # Search Service
+      - "5005:5005"  # Analytics Service
+      - "5006:5006"  # Audio Service
+      - "5007:5007"  # Moderation Service
+      - "5008:5008"  # Admin Service
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - quantummint-network
+
+  # MySQL Database (for local testing only)
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=quantummint_bookstore
+      - MYSQL_USER=quantummint
+      - MYSQL_PASSWORD=password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - quantummint-network
+
+  # Redis (for local testing only)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - quantummint-network
+
+networks:
+  quantummint-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:

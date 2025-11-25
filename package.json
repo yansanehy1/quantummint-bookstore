@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "shared",
+    "api-gateway",
     "services/*"
   ],
   "scripts": {
+    "build": "npm run build:shared && npm run build:services",
+    "build:shared": "cd shared && npm run build",
+    "build:services": "tsc -p tsconfig.build.json",
     "dev": "concurrently \"npm:dev:*\"",
     "dev:auth": "cd services/auth-service && npm run dev",
     "dev:api": "cd api-gateway && npm run dev",
@@ -20,10 +25,14 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
     "concurrently": "^8.0.1",
     "jest": "^30.2.0",
-    "ts-jest": "^29.4.5"
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "nerdamer": "^1.1.13"

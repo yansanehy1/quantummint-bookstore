@@ -1,0 +1,71 @@
+# Multi-stage Dockerfile for Core Services
+# Container 1: API Gateway + Auth + User + Wallet Services
+
+# Stage 1: Build all TypeScript services
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files for all services
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY api-gateway/package.json ./api-gateway/
+COPY services/auth-service/package.json ./services/auth-service/
+COPY services/user-service/package.json ./services/user-service/
+COPY services/wallet-service/package.json ./services/wallet-service/
+
+# Install dependencies at root (includes workspaces)
+RUN npm install
+
+# Copy all source code including shared
+COPY shared ./shared
+COPY api-gateway ./api-gateway
+COPY services/auth-service ./services/auth-service
+COPY services/user-service ./services/user-service
+COPY services/wallet-service ./services/wallet-service
+
+# Build TypeScript for each service
+RUN cd api-gateway && npm run build
+RUN cd services/auth-service && npm run build
+RUN cd services/user-service && npm run build
+RUN cd services/wallet-service && npm run build
+
+# Stage 2: Production runtime
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install production dependencies only
+COPY package.json ./
+COPY shared/package.json ./shared/
+COPY api-gateway/package.json ./api-gateway/
+COPY services/auth-service/package.json ./services/auth-service/
+COPY services/user-service/package.json ./services/user-service/
+COPY services/wallet-service/package.json ./services/wallet-service/
+
+RUN npm install --production
+
+# Copy built files from builder stage
+COPY --from=builder /app/shared ./shared
+COPY --from=builder /app/api-gateway/dist ./api-gateway/dist
+COPY --from=builder /app/services/auth-service/dist ./services/auth-service/dist
+COPY --from=builder /app/services/user-service/dist ./services/user-service/dist
+COPY --from=builder /app/services/wallet-service/dist ./services/wallet-service/dist
+
+# Copy startup script
+COPY docker/start-core.sh ./start-core.sh
+RUN chmod +x ./start-core.sh
+
+# Expose ports
+# 3000: API Gateway (main entry point)
+# 3001: Auth Service (internal)
+# 3002: User Service (internal)
+# 3003: Wallet Service (internal)
+EXPOSE 3000 3001 3002 3003
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start all services
+CMD ["./start-core.sh"]

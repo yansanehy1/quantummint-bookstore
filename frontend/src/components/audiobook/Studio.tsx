@@ -8,9 +8,10 @@ import { CURRENT_USER } from '../../constants';
 
 interface StudioProps {
     onPreview: (book: Book) => void;
+    onRequireAuth: () => void;
 }
 
-const Studio: React.FC<StudioProps> = ({ onPreview }) => {
+const Studio: React.FC<StudioProps> = ({ onPreview, onRequireAuth }) => {
     // Multi-page State
     const [pages, setPages] = useState<StudioPage[]>([{ id: 'p1', title: 'Page 1', rawText: '', segments: [] }]);
     const [activePageId, setActivePageId] = useState<string>('p1');
@@ -75,8 +76,12 @@ const Studio: React.FC<StudioProps> = ({ onPreview }) => {
         try {
             const content = await generateEducationalContent(activePage.rawText);
             updateActivePage({ segments: content });
-        } catch (error) {
-            alert("Failed to generate content. Please try again.");
+        } catch (error: any) {
+            if (error.message === "API Key not set") {
+                onRequireAuth();
+            } else {
+                alert("Failed to generate content. Please try again.");
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -99,15 +104,21 @@ const Studio: React.FC<StudioProps> = ({ onPreview }) => {
                         updatedSegments[i].audioUrl = audioUrl;
                         // Force update periodically to show progress
                         updateActivePage({ segments: [...updatedSegments] });
-                    } catch (e) {
+                    } catch (e: any) {
+                        if (e.message === "API Key not set") {
+                            onRequireAuth();
+                            throw e; // Stop generation
+                        }
                         console.error("Audio gen error for segment " + i, e);
                     }
                 }
             }
             updateActivePage({ segments: updatedSegments });
             alert("Audio generation complete!");
-        } catch (e) {
-            alert("Error generating audio.");
+        } catch (e: any) {
+            if (e.message !== "API Key not set") {
+                alert("Error generating audio.");
+            }
         } finally {
             setIsGeneratingAudio(false);
         }

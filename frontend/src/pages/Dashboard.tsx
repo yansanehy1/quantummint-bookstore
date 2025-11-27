@@ -10,7 +10,16 @@ import { BookOpen, Wallet, Users, Gift, TrendingUp, LogOut, BarChart3, Settings 
 // --- Mock Implementations for Canvas/Testing Environment ---
 // NOTE: In a real environment, you would use the imported hooks/components.
 
-const Button = ({ onClick, children, variant = 'default', size = 'default', className = '', type = 'button' }) => {
+interface ButtonProps {
+  onClick?: () => void;
+  children: React.ReactNode;
+  variant?: 'default' | 'outline';
+  size?: 'default' | 'sm';
+  className?: string;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+const Button = ({ onClick, children, variant = 'default', size = 'default', className = '', type = 'button' }: ButtonProps) => {
   const baseClasses = "rounded-xl font-semibold transition-all duration-200 shadow-sm flex items-center justify-center";
   let variantClasses = "";
   if (variant === 'outline') {
@@ -37,7 +46,12 @@ const Button = ({ onClick, children, variant = 'default', size = 'default', clas
   );
 };
 
-const Card = ({ children, className = '' }) => (
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Card = ({ children, className = '' }: CardProps) => (
   <div className={`bg-white p-6 rounded-3xl shadow-lg transition-all duration-300 hover:shadow-xl ${className}`}>
     {children}
   </div>
@@ -63,7 +77,7 @@ const useAuth = () => {
     }
   };
 };
-const useLocation = () => [null, (path) => console.log(`Navigating to: ${path}`)];
+const useLocation = (): [null, (path: string) => void] => [null, (path: string) => console.log(`Navigating to: ${path}`)];
 // --- End Mock Implementations ---
 
 export default function Dashboard() {

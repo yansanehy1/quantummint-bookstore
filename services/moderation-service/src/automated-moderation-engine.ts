@@ -1,5 +1,5 @@
-import GoogleCloudLanguage from '@google-cloud/language';
-import GoogleCloudVision from '@google-cloud/vision';
+import language from '@google-cloud/language';
+import vision from '@google-cloud/vision';
 import { Client } from '@elastic/elasticsearch';
 import { ServiceRegistryClient } from '@quantummin/shared/utils/service-registry-client';
 
@@ -80,8 +80,8 @@ export interface ModerationFeedback {
 }
 
 export class AutomatedModerationEngine {
-  private languageClient: GoogleCloudLanguage;
-  private visionClient: GoogleCloudVision;
+  private languageClient: any;
+  private visionClient: any;
   private esClient: Client;
   private db: any = {};
   private serviceRegistry: ServiceRegistryClient;
@@ -94,8 +94,8 @@ export class AutomatedModerationEngine {
   };
 
   constructor() {
-    this.languageClient = new GoogleCloudLanguage();
-    this.visionClient = new GoogleCloudVision();
+    this.languageClient = new language.LanguageServiceClient();
+    this.visionClient = new vision.ImageAnnotatorClient();
     this.esClient = new Client({ node: process.env.ELASTICSEARCH_URL });
     this.serviceRegistry = new ServiceRegistryClient();
   }

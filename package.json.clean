@@ -1,0 +1,26 @@
+{
+  "name": "quantummint-bookstore",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build:services",
+    "build:services": "npm run build --workspaces --if-present",
+    "dev": "concurrently \"npm run dev --workspace=services/api-service\"",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\""
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.11.5",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.2"
+  }
+}

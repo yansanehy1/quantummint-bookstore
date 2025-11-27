@@ -4,7 +4,17 @@ import { BookOpen, Gift, Send, CheckCircle, Clock, X, Phone } from "lucide-react
 
 // --- Mock Component Definitions (Shadcn/UI Style) ---
 
-const Button = ({ onClick, children, variant = 'default', size = 'default', className = '', type = 'button', disabled = false }) => {
+interface ButtonProps {
+  onClick?: () => void;
+  children: React.ReactNode;
+  variant?: 'default' | 'outline' | 'destructive';
+  size?: 'default' | 'sm' | 'lg';
+  className?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+}
+
+const Button = ({ onClick, children, variant = 'default', size = 'default', className = '', type = 'button', disabled = false }: ButtonProps) => {
   const baseClasses = "rounded-xl font-semibold transition-all duration-200 shadow-sm flex items-center justify-center";
   let variantClasses = "";
   if (variant === 'outline') {
@@ -36,13 +46,27 @@ const Button = ({ onClick, children, variant = 'default', size = 'default', clas
   );
 };
 
-const Card = ({ children, className = '' }) => (
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Card = ({ children, className = '' }: CardProps) => (
   <div className={`bg-white p-6 rounded-3xl shadow-xl transition-all duration-300 ${className}`}>
     {children}
   </div>
 );
 
-const Input = ({ className = '', type = 'text', value, onChange, placeholder, disabled = false }) => (
+interface InputProps {
+  className?: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+const Input = ({ className = '', type = 'text', value, onChange, placeholder, disabled = false }: InputProps) => (
   <input
     type={type}
     className={`flex h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm transition-shadow ${className}`}
@@ -57,7 +81,12 @@ const Input = ({ className = '', type = 'text', value, onChange, placeholder, di
 
 // --- Custom Components ---
 
-const SuccessMessage = ({ message, onClose }) => {
+interface SuccessMessageProps {
+  message: string | null;
+  onClose: () => void;
+}
+
+const SuccessMessage = ({ message, onClose }: SuccessMessageProps) => {
   if (!message) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4">
@@ -82,7 +111,7 @@ export default function Gifts() {
   const [selectedBook, setSelectedBook] = useState("");
   const [recipientPhone, setRecipientPhone] = useState("");
   const [giftNote, setGiftNote] = useState("");
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const mockBooks = [
     { id: 1, title: "Introduction to Physics", price: "$4.99" },
@@ -241,7 +270,7 @@ export default function Gifts() {
                   <label className="block text-lg font-bold text-gray-700 mb-3">1. Select a Book</label>
                   <select
                     value={selectedBook}
-                    onChange={(e) => setSelectedBook(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedBook(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl font-medium text-lg h-12 shadow-sm focus:ring-amber-500 focus:border-amber-500 transition"
                     aria-label="Select a Book"
                   >
@@ -263,7 +292,7 @@ export default function Gifts() {
                       type="tel"
                       placeholder="+232 76 123 456"
                       value={recipientPhone}
-                      onChange={(e) => setRecipientPhone(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRecipientPhone(e.target.value)}
                       className="pl-12 h-14"
                     />
                   </div>
@@ -276,7 +305,7 @@ export default function Gifts() {
                   <textarea
                     placeholder="Add a heartwarming message to your gift... (e.g., Happy Birthday!)"
                     value={giftNote}
-                    onChange={(e) => setGiftNote(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setGiftNote(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl font-medium h-32 shadow-sm focus:ring-amber-500 focus:border-amber-500 transition"
                   />
                 </div>

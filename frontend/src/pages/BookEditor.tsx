@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,9 +104,38 @@ export default function BookEditor() {
   const [isEditingBook, setIsEditingBook] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [exchangeRate, setExchangeRate] = useState<number>(16500);
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
 
-  const handleBookFieldChange = (field: keyof Book, value: any) => {
-    setBook({ ...book, [field]: value });
+  // Fetch live exchange rate on component mount
+  useEffect(() => {
+    const fetchRate = async () => {
+      setIsLoadingRate(true);
+      try {
+        const { getUsdToSllRate } = await import("@/lib/currencyService");
+        const rate = await getUsdToSllRate();
+        setExchangeRate(rate);
+      } catch (error) {
+        console.error("Failed to fetch exchange rate:", error);
+      } finally {
+        setIsLoadingRate(false);
+      }
+    };
+    fetchRate();
+  }, []);
+
+  const handleBookFieldChange = async (field: keyof Book, value: any) => {
+    if (field === "priceUsd") {
+      const usdValue = parseFloat(value) || 0;
+      const sllValue = Math.round(usdValue * exchangeRate);
+      setBook({ ...book, priceUsd: usdValue, priceSll: sllValue });
+    } else if (field === "priceSll") {
+      const sllValue = parseFloat(value) || 0;
+      const usdValue = parseFloat((sllValue / exchangeRate).toFixed(2));
+      setBook({ ...book, priceSll: sllValue, priceUsd: usdValue });
+    } else {
+      setBook({ ...book, [field]: value });
+    }
   };
 
   const handlePageChange = (field: keyof BookPage, value: any) => {
@@ -211,7 +240,7 @@ export default function BookEditor() {
               *Please fix the issues and resubmit the book for approval.*
             </p>
             <Button onClick={republish} className="mt-3 bg-red-600 hover:bg-red-700 text-white shadow-md">
-                Resubmit for Approval
+              Resubmit for Approval
             </Button>
           </div>
         )}
@@ -244,8 +273,8 @@ export default function BookEditor() {
                     alt={`${book.title} Cover`}
                     className="w-48 h-64 object-cover rounded-xl shadow-2xl border-4 border-slate-100 transition-transform hover:scale-[1.02]"
                     onError={(e) => {
-                        (e.target as HTMLImageElement).onerror = null;
-                        (e.target as HTMLImageElement).src = `https://placehold.co/300x400/1e293b/f8fafc?text=Cover+Unavailable`;
+                      (e.target as HTMLImageElement).onerror = null;
+                      (e.target as HTMLImageElement).src = `https://placehold.co/300x400/1e293b/f8fafc?text=Cover+Unavailable`;
                     }}
                   />
                   <div className="mt-4 text-center">
@@ -391,7 +420,7 @@ export default function BookEditor() {
             <Card className="p-6 shadow-xl rounded-xl">
               <h2 className="text-2xl font-bold mb-6 border-b pb-4 text-slate-800">Approval and Distribution</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
+
                 {/* Status Card */}
                 <div className="p-4 rounded-lg border border-slate-300 bg-slate-50 shadow-inner">
                   <h3 className="font-bold text-lg text-slate-700 mb-3">Current Status</h3>
@@ -417,7 +446,7 @@ export default function BookEditor() {
                 {/* Admin Actions */}
                 <div className="p-4 rounded-lg border border-indigo-300 bg-indigo-50 shadow-lg">
                   <h3 className="font-bold text-lg text-indigo-700 mb-4">Book Actions</h3>
-                  
+
                   {book.status === "pending_approval" && (
                     <div className="space-y-3">
                       <p className="text-sm text-indigo-600 font-medium">Book is awaiting administrative review.</p>
@@ -451,15 +480,15 @@ export default function BookEditor() {
                       View Live Preview
                     </Button>
                   )}
-                  
+
                   {/* Option for DRAFT books to submit */}
                   {book.status === "draft" && (
-                      <Button onClick={submitForApproval} className="w-full bg-blue-600 hover:bg-blue-700 shadow-md mt-3">
-                        <Clock className="w-4 h-4 mr-2" />
-                        Submit for Initial Approval
-                      </Button>
+                    <Button onClick={submitForApproval} className="w-full bg-blue-600 hover:bg-blue-700 shadow-md mt-3">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Submit for Initial Approval
+                    </Button>
                   )}
-                  
+
                 </div>
 
               </div>

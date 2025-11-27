@@ -8,15 +8,6 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "start": "node dist/index.js"
   },
-  {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
-  },
   "dependencies": {
     "@quantummin/shared": "*",
     "@elastic/elasticsearch": "^8.10.0",

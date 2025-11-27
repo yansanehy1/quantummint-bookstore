@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,6 +11,8 @@ import {
   TrendingUp,
   Mail,
   Shield,
+  PartyPopper,
+  Sparkles,
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -26,6 +28,8 @@ interface OnboardingTask {
 
 export default function SellerOnboarding() {
   const [, setLocation] = useLocation();
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
   const [tasks, setTasks] = useState<OnboardingTask[]>([
     {
       id: "email_verify",
@@ -79,6 +83,25 @@ export default function SellerOnboarding() {
   const completedCount = tasks.filter((t) => t.status === "completed").length;
   const progressPercentage = (completedCount / tasks.length) * 100;
 
+  // Check if onboarding is complete
+  useEffect(() => {
+    if (completedCount === tasks.length && !isOnboardingComplete) {
+      setIsOnboardingComplete(true);
+    }
+  }, [completedCount, tasks.length, isOnboardingComplete]);
+
+  // Handle countdown and redirect when onboarding is complete
+  useEffect(() => {
+    if (isOnboardingComplete && redirectCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRedirectCountdown(redirectCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (isOnboardingComplete && redirectCountdown === 0) {
+      setLocation("/seller-dashboard");
+    }
+  }, [isOnboardingComplete, redirectCountdown, setLocation]);
+
   const handleTaskAction = (taskId: string, actionUrl?: string) => {
     if (actionUrl) {
       setLocation(actionUrl);
@@ -114,7 +137,7 @@ export default function SellerOnboarding() {
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setLocation("/")}> 
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setLocation("/")}>
             <BookOpen className="w-8 h-8 text-amber-600" />
             <h1 className="text-2xl font-bold text-gray-900">Sierra Books</h1>
           </div>
@@ -124,6 +147,48 @@ export default function SellerOnboarding() {
           </nav>
         </div>
       </header>
+
+      {/* Onboarding Complete Celebration */}
+      {isOnboardingComplete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-in fade-in duration-300">
+          <Card className="max-w-lg mx-4 p-12 text-center relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600"></div>
+
+            {/* Celebration icons */}
+            <div className="flex justify-center gap-4 mb-6">
+              <PartyPopper className="w-16 h-16 text-amber-500 animate-bounce" />
+              <Sparkles className="w-16 h-16 text-green-500 animate-pulse" />
+              <PartyPopper className="w-16 h-16 text-purple-500 animate-bounce" style={{ animationDelay: "0.2s" }} />
+            </div>
+
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              🎉 Congratulations! 🎉
+            </h2>
+            <p className="text-2xl font-semibold text-green-600 mb-6">
+              Onboarding Complete!
+            </p>
+            <p className="text-gray-600 text-lg mb-8">
+              You've successfully completed all onboarding steps. Your seller account is now fully activated and ready to go!
+            </p>
+
+            {/* Countdown */}
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-6 mb-6">
+              <p className="text-gray-700 mb-2">Redirecting to your Seller Dashboard in</p>
+              <p className="text-5xl font-bold text-amber-600 animate-pulse">{redirectCountdown}</p>
+              <p className="text-sm text-gray-600 mt-2">seconds...</p>
+            </div>
+
+            {/* Manual navigation button */}
+            <Button
+              onClick={() => setLocation("/seller-dashboard")}
+              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-3 text-lg font-semibold"
+            >
+              Go to Dashboard Now
+            </Button>
+          </Card>
+        </div>
+      )}
 
       <main className="container max-w-4xl mx-auto px-4 py-12">
         {/* Welcome Section */}

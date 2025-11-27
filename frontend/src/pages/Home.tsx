@@ -1,9 +1,22 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 
+// Type definitions
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  variant?: 'default' | 'warm' | 'outline';
+  size?: 'default' | 'lg';
+}
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
 // --- 1. Custom Button Component (Styled like shadcn/ui but with more warmth)
-const Button = ({ children, onClick, className = '', variant = 'default', size = 'default' }) => {
+const Button: React.FC<ButtonProps> = ({ children, onClick, className = '', variant = 'default', size = 'default' }) => {
   const baseClasses = 'inline-flex items-center justify-center rounded-xl font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500';
   let variantClasses;
 
@@ -34,7 +47,7 @@ const Button = ({ children, onClick, className = '', variant = 'default', size =
 };
 
 // --- 2. Custom Card Component
-const Card = ({ children, className = '' }) => (
+const Card: React.FC<CardProps> = ({ children, className = '' }) => (
   <div className={`bg-white rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 border border-gray-100 ${className}`}>
     {children}
   </div>
@@ -131,7 +144,7 @@ const Footer = () => {
 const App = () => {
   const router = useRouter();
 
-  const handleNavigation = (path) => {
+  const handleNavigation = (path: string) => {
     router.push(path);
   };
 

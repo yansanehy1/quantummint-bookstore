@@ -36,21 +36,22 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
 };
 
 // 2. Mock Card
-const Card = ({ children, className = "" }) => (
+// 2. Mock Card
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-white border border-gray-200 rounded-xl transition duration-300 ${className}`}>
     {children}
   </div>
 );
 
 // 3. Mock Input/Textarea
-const Input = ({ className = "", ...props }) => (
+const Input = ({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`}
     {...props}
   />
 );
 
-const Textarea = ({ className = "", ...props }) => (
+const Textarea = ({ className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
   <textarea
     className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ${className}`}
     {...props}
@@ -58,7 +59,13 @@ const Textarea = ({ className = "", ...props }) => (
 );
 
 // 4. Mock Toast/Sonner
-const ToastContainer = ({ toasts }) => (
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+}
+
+const ToastContainer = ({ toasts }: { toasts: Toast[] }) => (
   <div className="fixed bottom-4 right-4 z-50 space-y-2">
     {toasts.map((toast) => (
       <div
@@ -73,9 +80,20 @@ const ToastContainer = ({ toasts }) => (
 );
 
 // 5. Mock Dialog (Simplified Modal)
-const DialogContext = React.createContext({});
+interface DialogContextType {
+  isOpen: boolean;
+  handleOpenChange: (open: boolean) => void;
+}
 
-const Dialog = ({ children, open, onOpenChange }) => {
+const DialogContext = React.createContext<DialogContextType>({ isOpen: false, handleOpenChange: () => { } });
+
+interface DialogProps {
+  children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const Dialog = ({ children, open, onOpenChange }: DialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Controlled state override
@@ -85,7 +103,7 @@ const Dialog = ({ children, open, onOpenChange }) => {
     }
   }, [open]);
 
-  const handleOpenChange = (newOpenState) => {
+  const handleOpenChange = (newOpenState: boolean) => {
     if (onOpenChange) {
       onOpenChange(newOpenState);
     } else {
@@ -93,10 +111,12 @@ const Dialog = ({ children, open, onOpenChange }) => {
     }
   };
 
+  const childrenArray = React.Children.toArray(children);
+
   return (
     <DialogContext.Provider value={{ isOpen, handleOpenChange }}>
       {/* Render Trigger component */}
-      {children.filter(child => child.type === DialogTrigger)}
+      {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && child.type === DialogTrigger)}
 
       {/* Modal overlay */}
       {isOpen && (
@@ -109,7 +129,7 @@ const Dialog = ({ children, open, onOpenChange }) => {
             onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
           >
             {/* Render Content component */}
-            {children.filter(child => child.type === DialogContent)}
+            {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && child.type === DialogContent)}
           </div>
         </div>
       )}
@@ -117,25 +137,30 @@ const Dialog = ({ children, open, onOpenChange }) => {
   );
 };
 
-const DialogTrigger = ({ children, asChild }) => {
+const DialogTrigger = ({ children, asChild }: { children: React.ReactElement; asChild?: boolean }) => {
   const { handleOpenChange } = React.useContext(DialogContext);
 
   const child = React.Children.only(children);
-  return React.cloneElement(child, { onClick: () => handleOpenChange(true) });
+  return React.cloneElement(child as React.ReactElement<any>, { onClick: () => handleOpenChange(true) });
 };
 
-const DialogContent = ({ children, className = "p-6" }) => {
+const DialogContent = ({ children, className = "p-6" }: { children: React.ReactNode; className?: string }) => {
   return <div className={className}>{children}</div>;
 };
 
-const DialogHeader = ({ children }) => <div className="border-b border-gray-100 p-4"><div className="text-xl font-semibold text-gray-900">{children}</div></div>;
-const DialogTitle = ({ children }) => <h3 className="text-xl font-bold">{children}</h3>;
+const DialogHeader = ({ children }: { children: React.ReactNode }) => <div className="border-b border-gray-100 p-4"><div className="text-xl font-semibold text-gray-900">{children}</div></div>;
+const DialogTitle = ({ children }: { children: React.ReactNode }) => <h3 className="text-xl font-bold">{children}</h3>;
 
 
 // 6. Mock Tabs
-const TabsContext = React.createContext({});
+interface TabsContextType {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
 
-const Tabs = ({ children, defaultValue, className }) => {
+const TabsContext = React.createContext<TabsContextType>({ activeTab: '', setActiveTab: () => { } });
+
+const Tabs = ({ children, defaultValue, className }: { children: React.ReactNode; defaultValue: string; className?: string }) => {
   const [activeTab, setActiveTab] = useState(defaultValue);
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
@@ -144,13 +169,13 @@ const Tabs = ({ children, defaultValue, className }) => {
   );
 };
 
-const TabsList = ({ children, className }) => (
+const TabsList = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <div className={`flex bg-gray-100 p-1 rounded-xl shadow-inner ${className}`}>
     {children}
   </div>
 );
 
-const TabsTrigger = ({ children, value }) => {
+const TabsTrigger = ({ children, value }: { children: React.ReactNode; value: string }) => {
   const { activeTab, setActiveTab } = React.useContext(TabsContext);
   const isActive = activeTab === value;
   return (
@@ -164,7 +189,7 @@ const TabsTrigger = ({ children, value }) => {
   );
 };
 
-const TabsContent = ({ children, value, className }) => {
+const TabsContent = ({ children, value, className }: { children: React.ReactNode; value: string; className?: string }) => {
   const { activeTab } = React.useContext(TabsContext);
   return activeTab === value ? <div className={className}>{children}</div> : null;
 };
@@ -184,7 +209,7 @@ interface BookSubmission {
 
 export default function AdminBookManagement() {
   const [, setLocation] = useLocation();
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Custom toast implementation using the local state
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -543,7 +568,7 @@ export default function AdminBookManagement() {
                 </p>
                 <Textarea
                   value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRejectionReason(e.target.value)}
                   placeholder="Explain the issues (e.g., poor formatting, incomplete content, incorrect category) that need to be addressed..."
                   rows={5}
                 />

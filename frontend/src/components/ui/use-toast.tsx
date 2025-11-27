@@ -23,12 +23,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const toast = React.useCallback(({ duration = 5000, ...props }: Omit<Toast, "id">) => {
     const id = Math.random().toString(36).substring(2, 9)
-    
+
     setToasts((prevToasts) => [...prevToasts, { id, ...props }])
 
     if (duration) {
       setTimeout(() => {
-        setToasts((currentToasts) => 
+        setToasts((currentToasts) =>
           currentToasts.filter((toast) => toast.id !== id)
         )
       }, duration)
@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const dismissToast = React.useCallback((id: string) => {
-    setToasts((currentToasts) => 
+    setToasts((currentToasts) =>
       currentToasts.filter((toast) => toast.id !== id)
     )
   }, [])
@@ -80,7 +80,7 @@ function ToastItem({
   toast: Toast
   onDismiss: (id: string) => void
 }) {
-  const { id, title, description, type = "default" } = toast
+  const { id, title, description, variant = "default" } = toast
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,11 +92,10 @@ function ToastItem({
 
   return (
     <div
-      className={`relative flex flex-col p-4 rounded-lg shadow-lg min-w-[300px] max-w-md ${
-        type === "destructive" 
-          ? "bg-red-100 text-red-900" 
+      className={`relative flex flex-col p-4 rounded-lg shadow-lg min-w-[300px] max-w-md ${variant === "destructive"
+          ? "bg-red-100 text-red-900"
           : "bg-white text-gray-900"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between">
         <h3 className="font-medium">{title}</h3>

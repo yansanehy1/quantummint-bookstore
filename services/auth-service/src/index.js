@@ -1,3 +1,11 @@
+// Add this interface at the top of the file
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  passwordHash: string;
+}
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };

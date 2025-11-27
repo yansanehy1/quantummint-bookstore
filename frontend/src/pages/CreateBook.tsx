@@ -126,7 +126,7 @@ export default function CreateBook() {
       <header className="bg-white shadow-lg sticky top-0 z-50 border-b border-amber-100">
         <div className="container max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setLocation("/")}>
-            <BookOpen className="w-8 h-8 text-amber-600" />
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
             <h1 className="text-2xl font-extrabold text-gray-900 tracking-wide">SIERRA BOOKS <span className="text-amber-500">CREATOR</span></h1>
           </div>
 
@@ -198,13 +198,38 @@ export default function CreateBook() {
       <main className="container max-w-6xl mx-auto px-4 py-10">
         <Card className="p-8 shadow-2xl border border-amber-100/70 bg-white rounded-xl">
           <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
-            {/* Enhanced TabsList */}
-            <TabsList className="bg-gray-100 p-1 rounded-lg mb-6">
-              <TabsTrigger value="details" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white font-semibold transition duration-200 rounded-md">Details</TabsTrigger>
-              <TabsTrigger value="content" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white font-semibold transition duration-200 rounded-md">Content</TabsTrigger>
-              <TabsTrigger value="pricing" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white font-semibold transition duration-200 rounded-md">Pricing</TabsTrigger>
-              <TabsTrigger value="author" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white font-semibold transition duration-200 rounded-md">Author</TabsTrigger>
-              <TabsTrigger value="publisher" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white font-semibold transition duration-200 rounded-md">Publisher</TabsTrigger>
+            {/* Enhanced Horizontal TabsList */}
+            <TabsList className="flex flex-wrap gap-2 bg-gradient-to-r from-gray-100 to-gray-50 p-2 rounded-lg mb-8 shadow-inner border border-gray-200">
+              <TabsTrigger
+                value="details"
+                className="flex-1 min-w-[120px] px-4 py-3 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-200 font-semibold transition-all duration-200 rounded-md shadow-sm"
+              >
+                Details
+              </TabsTrigger>
+              <TabsTrigger
+                value="content"
+                className="flex-1 min-w-[120px] px-4 py-3 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-200 font-semibold transition-all duration-200 rounded-md shadow-sm"
+              >
+                Content
+              </TabsTrigger>
+              <TabsTrigger
+                value="pricing"
+                className="flex-1 min-w-[120px] px-4 py-3 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-200 font-semibold transition-all duration-200 rounded-md shadow-sm"
+              >
+                Pricing
+              </TabsTrigger>
+              <TabsTrigger
+                value="author"
+                className="flex-1 min-w-[120px] px-4 py-3 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-200 font-semibold transition-all duration-200 rounded-md shadow-sm"
+              >
+                Author
+              </TabsTrigger>
+              <TabsTrigger
+                value="publisher"
+                className="flex-1 min-w-[120px] px-4 py-3 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=inactive]:text-gray-700 data-[state=inactive]:hover:bg-gray-200 font-semibold transition-all duration-200 rounded-md shadow-sm"
+              >
+                Publisher
+              </TabsTrigger>
             </TabsList>
 
             {/* Details Tab */}

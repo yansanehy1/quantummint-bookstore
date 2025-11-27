@@ -11,15 +11,6 @@
     "@quantummin/shared": "*",
     "express": "^4.21.2"
   },
-    {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
-  },
   "devDependencies": {
     "@types/express": "^4.17.25",
     "ts-node-dev": "^2.0.0",

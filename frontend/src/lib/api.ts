@@ -7,14 +7,14 @@ export async function apiRequest<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const session = await getSession();
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
 
   if (session?.accessToken) {
-    headers['Authorization'] = `Bearer ${session.accessToken}`;
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${session.accessToken}`;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -42,11 +42,12 @@ export async function uploadFile(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<{ url: string }> {
+  const session = await getSession();
   const formData = new FormData();
   formData.append('file', file);
 
   const xhr = new XMLHttpRequest();
-  
+
   return new Promise((resolve, reject) => {
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -80,12 +81,11 @@ export async function uploadFile(
     };
 
     xhr.open('POST', `${API_BASE_URL}/upload`, true);
-    
-    const session = getSession();
-    if (session) {
-      xhr.setRequestHeader('Authorization', `Bearer ${session.accessToken}`);
+
+    if (session && (session as any).accessToken) {
+      xhr.setRequestHeader('Authorization', `Bearer ${(session as any).accessToken}`);
     }
-    
+
     xhr.send(formData);
   });
 }

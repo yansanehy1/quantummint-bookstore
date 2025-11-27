@@ -16,7 +16,7 @@ export default function Header() {
           >
             <div className="relative w-10 h-10 group-hover:scale-110 transition-transform duration-200">
               <img
-                src="/images/logo.jpg"
+                src="/logo.png"
                 alt="QuantumMint Bookstore Logo"
                 className="w-full h-full object-contain rounded-lg shadow-sm"
               />

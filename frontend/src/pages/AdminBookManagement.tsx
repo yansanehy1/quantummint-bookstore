@@ -116,7 +116,7 @@ const Dialog = ({ children, open, onOpenChange }: DialogProps) => {
   return (
     <DialogContext.Provider value={{ isOpen, handleOpenChange }}>
       {/* Render Trigger component */}
-      {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && child.type === DialogTrigger)}
+      {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && (child as React.ReactElement).type === DialogTrigger)}
 
       {/* Modal overlay */}
       {isOpen && (
@@ -129,7 +129,7 @@ const Dialog = ({ children, open, onOpenChange }: DialogProps) => {
             onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
           >
             {/* Render Content component */}
-            {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && child.type === DialogContent)}
+            {childrenArray.filter((child): child is React.ReactElement => React.isValidElement(child) && (child as React.ReactElement).type === DialogContent)}
           </div>
         </div>
       )}
@@ -140,7 +140,7 @@ const Dialog = ({ children, open, onOpenChange }: DialogProps) => {
 const DialogTrigger = ({ children, asChild }: { children: React.ReactElement; asChild?: boolean }) => {
   const { handleOpenChange } = React.useContext(DialogContext);
 
-  const child = React.Children.only(children);
+  const child = React.Children.only(children) as React.ReactElement;
   return React.cloneElement(child as React.ReactElement<any>, { onClick: () => handleOpenChange(true) });
 };
 
@@ -458,7 +458,7 @@ export default function AdminBookManagement() {
             <h1 className="text-4xl font-extrabold text-blue-900 tracking-tight">Book Submission Review</h1>
             <p className="text-lg text-gray-600 mt-2">Manage and approve educational content submitted by platform sellers.</p>
           </div>
-          <Button variant="outline" onClick={() => setLocation("/admin-dashboard")} className="hidden sm:flex border-blue-400 text-blue-600 hover:bg-blue-50">
+          <Button variant="outline" onClick={() => setLocation && setLocation("/admin-dashboard")} className="hidden sm:flex border-blue-400 text-blue-600 hover:bg-blue-50">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Admin Dashboard
           </Button>

@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../pages/api/auth/[...nextauth]';
+// import { authOptions } from '../../../../pages/api/auth/[...nextauth]';
 import { serviceRegistry } from '@/lib/service-registry';
+
+// Mock authOptions until auth is properly configured
+const authOptions = {};
 
 async function getBookServiceUrl() {
   try {
@@ -45,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       return res.status(response.status).json({ message: data.message || 'Failed to create book' });
     }
@@ -53,8 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(201).json(data);
   } catch (error) {
     console.error('Book creation error:', error);
-    return res.status(500).json({ 
-      message: error instanceof Error ? error.message : 'Internal server error' 
+    return res.status(500).json({
+      message: error instanceof Error ? error.message : 'Internal server error'
     });
   }
 }

@@ -22,15 +22,26 @@ interface Transaction {
   adminName: string;
 }
 
+interface CustomCardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
 // Helper component for the Card structure (to replace Shadcn Card)
-const CustomCard = ({ children, className = "" }) => (
+const CustomCard = ({ children, className = "" }: CustomCardProps) => (
   <div className={`rounded-xl shadow-lg bg-white overflow-hidden transition-all duration-300 ${className}`}>
     {children}
   </div>
 );
 
+interface CustomButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}
+
 // Helper component for the Button structure (to replace Shadcn Button)
-const CustomButton = ({ children, onClick, className = "" }) => (
+const CustomButton = ({ children, onClick, className = "" }: CustomButtonProps) => (
   <button
     onClick={onClick}
     className={`flex items-center justify-center rounded-lg px-4 py-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 ${className}`}
@@ -56,14 +67,14 @@ const mockTransactions: Transaction[] = [
 
 // Custom alert/modal function replacement
 const showMessage = (message: string) => {
-    // In a real application, this would show a Toast or custom Modal.
-    console.log(`Notification: ${message}`);
-    // A simple functional modal structure for demonstration:
-    const notificationContainer = document.getElementById('notification-container');
-    if (notificationContainer) {
-        notificationContainer.innerHTML = `<div class="fixed top-4 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-2xl z-50 text-sm animate-fade-in-down">${message}</div>`;
-        setTimeout(() => notificationContainer.innerHTML = '', 3000);
-    }
+  // In a real application, this would show a Toast or custom Modal.
+  console.log(`Notification: ${message}`);
+  // A simple functional modal structure for demonstration:
+  const notificationContainer = document.getElementById('notification-container');
+  if (notificationContainer) {
+    notificationContainer.innerHTML = `<div class="fixed top-4 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-2xl z-50 text-sm animate-fade-in-down">${message}</div>`;
+    setTimeout(() => notificationContainer.innerHTML = '', 3000);
+  }
 };
 
 export default function App() {
@@ -75,7 +86,7 @@ export default function App() {
 
   const [transactionForm, setTransactionForm] = useState({ type: "credit" as "credit" | "debit", currency: "USD" as "USD" | "SLL", amount: "", reason: "" });
   const [giftForm, setGiftForm] = useState({ bookId: "", bookTitle: "", recipientType: "individual" as "individual" | "all", selectedUserId: "", message: "" });
-  
+
   // Hardcoded example books for the gift section
   const availableBooks = [
     { id: "b1", title: "Language Arts - JSS 1" },
@@ -94,37 +105,37 @@ export default function App() {
     }
     const amount = parseFloat(transactionForm.amount);
     if (isNaN(amount) || amount <= 0) {
-        showMessage("Error: Please enter a valid, positive amount.");
-        return;
+      showMessage("Error: Please enter a valid, positive amount.");
+      return;
     }
 
     let insufficientFunds = false;
     let newUsdBalance = selectedUser.usdBalance;
     let newSllBalance = selectedUser.sllBalance;
-    
+
     // Check for insufficient funds on debit & calculate new balances
     if (transactionForm.currency === "USD") {
-        newUsdBalance = transactionForm.type === "credit" ? selectedUser.usdBalance + amount : selectedUser.usdBalance - amount;
-        if (newUsdBalance < 0) {
-            insufficientFunds = true;
-            showMessage(`Error: Insufficient USD funds for ${selectedUser.name}. Current balance: $${selectedUser.usdBalance.toFixed(2)}.`);
-        }
+      newUsdBalance = transactionForm.type === "credit" ? selectedUser.usdBalance + amount : selectedUser.usdBalance - amount;
+      if (newUsdBalance < 0) {
+        insufficientFunds = true;
+        showMessage(`Error: Insufficient USD funds for ${selectedUser.name}. Current balance: $${selectedUser.usdBalance.toFixed(2)}.`);
+      }
     } else {
-        newSllBalance = transactionForm.type === "credit" ? selectedUser.sllBalance + amount : selectedUser.sllBalance - amount;
-        if (newSllBalance < 0) {
-            insufficientFunds = true;
-            showMessage(`Error: Insufficient SLL funds for ${selectedUser.name}. Current balance: Le ${selectedUser.sllBalance.toLocaleString()}.`);
-        }
+      newSllBalance = transactionForm.type === "credit" ? selectedUser.sllBalance + amount : selectedUser.sllBalance - amount;
+      if (newSllBalance < 0) {
+        insufficientFunds = true;
+        showMessage(`Error: Insufficient SLL funds for ${selectedUser.name}. Current balance: Le ${selectedUser.sllBalance.toLocaleString()}.`);
+      }
     }
-    
+
     if (insufficientFunds) return;
 
     const updatedUsers = users.map((user) => {
       if (user.id === selectedUser.id) {
-        return { 
-            ...user, 
-            usdBalance: newUsdBalance,
-            sllBalance: newSllBalance
+        return {
+          ...user,
+          usdBalance: newUsdBalance,
+          sllBalance: newSllBalance
         };
       }
       return user;
@@ -148,13 +159,13 @@ export default function App() {
       showMessage("Error: Please select a book to gift.");
       return;
     }
-    
+
     // Find the book ID based on the title (using the mock list)
     const book = availableBooks.find(b => b.title === giftForm.bookTitle);
 
-    const recipients = giftForm.recipientType === "individual" 
-        ? [users.find(u => u.id === giftForm.selectedUserId)?.name || "Unknown User"] 
-        : [`All ${users.length} Users`];
+    const recipients = giftForm.recipientType === "individual"
+      ? [users.find(u => u.id === giftForm.selectedUserId)?.name || "Unknown User"]
+      : [`All ${users.length} Users`];
 
     showMessage(`Success: Gift "${giftForm.bookTitle}" sent to ${recipients.join(', ')}! (Book ID: ${book?.id || 'N/A'})`);
     setGiftForm({ bookId: "", bookTitle: "", recipientType: "individual", selectedUserId: "", message: "" });
@@ -165,7 +176,7 @@ export default function App() {
 
   // --- RENDERING HELPERS ---
 
-  const renderDashboardCard = (title: string, value: string, icon: React.FC<any>, gradientClass: string) => (
+  const renderDashboardCard = (title: string, value: string, Icon: React.FC<any>, gradientClass: string) => (
     <div className={`p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] ${gradientClass} text-white border-0`}>
       <div className="flex items-start justify-between">
         <div>
@@ -173,18 +184,18 @@ export default function App() {
           <p className="text-4xl font-extrabold mt-2 tracking-tight">{value}</p>
         </div>
         <div className="p-3 bg-white/10 rounded-full">
-          {icon({ className: "w-8 h-8 opacity-80" })}
+          <Icon className="w-8 h-8 opacity-80" />
         </div>
       </div>
     </div>
   );
 
   const renderTabButton = (tabName: "credit-debit" | "gift" | "history", label: string, Icon: React.FC<any>) => (
-    <button 
-      onClick={() => setActiveTab(tabName)} 
+    <button
+      onClick={() => setActiveTab(tabName)}
       className={`flex items-center px-4 md:px-6 py-3 font-medium transition-all duration-300 border-b-4 
-        ${activeTab === tabName 
-          ? "border-indigo-600 text-indigo-700 bg-indigo-50 shadow-inner rounded-t-lg" 
+        ${activeTab === tabName
+          ? "border-indigo-600 text-indigo-700 bg-indigo-50 shadow-inner rounded-t-lg"
           : "border-transparent text-gray-500 hover:text-indigo-600 hover:border-gray-300"
         }
       `}
@@ -196,9 +207,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 font-inter">
-        {/* Container for custom toast/modal messages */}
-        <div id="notification-container"></div>
-        
+      {/* Container for custom toast/modal messages */}
+      <div id="notification-container"></div>
+
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <header className="pb-4">
@@ -230,23 +241,23 @@ export default function App() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Select Recipient</h3>
                 <div className="mb-4 relative">
                   <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search by name or email..." 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)} 
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" 
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map((user) => (
-                      <div 
-                        key={user.id} 
-                        onClick={() => setSelectedUser(user)} 
+                      <div
+                        key={user.id}
+                        onClick={() => setSelectedUser(user)}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition duration-300 flex justify-between items-center 
-                          ${selectedUser?.id === user.id 
-                            ? "border-indigo-500 bg-indigo-50 shadow-md ring-2 ring-indigo-500" 
+                          ${selectedUser?.id === user.id
+                            ? "border-indigo-500 bg-indigo-50 shadow-md ring-2 ring-indigo-500"
                             : "border-gray-200 hover:border-gray-400 hover:bg-gray-50"
                           }`}
                       >
@@ -277,10 +288,10 @@ export default function App() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">{selectedUser ? `Transact for ${selectedUser.name.split(' ')[0]}` : "Select User to Begin"}</h3>
 
                 {!selectedUser && (
-                    <div className="text-center py-12 text-gray-500 italic">
-                        <Users className="w-10 h-10 mx-auto mb-3" />
-                        Please select a user from the list on the left to process a wallet transaction.
-                    </div>
+                  <div className="text-center py-12 text-gray-500 italic">
+                    <Users className="w-10 h-10 mx-auto mb-3" />
+                    Please select a user from the list on the left to process a wallet transaction.
+                  </div>
                 )}
 
                 {selectedUser && (
@@ -289,15 +300,15 @@ export default function App() {
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Transaction Type</label>
                       <div className="flex gap-4 p-1 bg-gray-100 rounded-xl shadow-inner">
-                        <CustomButton 
-                          onClick={() => setTransactionForm({ ...transactionForm, type: "credit" })} 
+                        <CustomButton
+                          onClick={() => setTransactionForm({ ...transactionForm, type: "credit" })}
                           className={`flex-1 ${transactionForm.type === "credit" ? "bg-green-600 text-white shadow-lg ring-green-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Credit
                         </CustomButton>
-                        <CustomButton 
-                          onClick={() => setTransactionForm({ ...transactionForm, type: "debit" })} 
+                        <CustomButton
+                          onClick={() => setTransactionForm({ ...transactionForm, type: "debit" })}
                           className={`flex-1 ${transactionForm.type === "debit" ? "bg-red-600 text-white shadow-lg ring-red-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
                         >
                           <Minus className="w-4 h-4 mr-2" />
@@ -309,9 +320,9 @@ export default function App() {
                     {/* Currency Select */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
-                      <select 
-                        value={transactionForm.currency} 
-                        onChange={(e) => setTransactionForm({ ...transactionForm, currency: e.target.value as "USD" | "SLL" })} 
+                      <select
+                        value={transactionForm.currency}
+                        onChange={(e) => setTransactionForm({ ...transactionForm, currency: e.target.value as "USD" | "SLL" })}
                         className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                       >
                         <option value="USD">USD ($) - Current: ${selectedUser.usdBalance.toFixed(2)}</option>
@@ -322,39 +333,39 @@ export default function App() {
                     {/* Amount Input */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
-                      <input 
-                        type="number" 
-                        step="0.01" 
-                        value={transactionForm.amount} 
-                        onChange={(e) => setTransactionForm({ ...transactionForm, amount: e.target.value })} 
-                        placeholder="0.00" 
-                        className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm text-lg font-bold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" 
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={transactionForm.amount}
+                        onChange={(e) => setTransactionForm({ ...transactionForm, amount: e.target.value })}
+                        placeholder="0.00"
+                        className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm text-lg font-bold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                       />
                     </div>
 
                     {/* Reason Textarea */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Reason</label>
-                      <textarea 
-                        value={transactionForm.reason} 
-                        onChange={(e) => setTransactionForm({ ...transactionForm, reason: e.target.value })} 
-                        placeholder="Enter reason for transaction (e.g., 'Compensation', 'Adjustment', 'Penalty')..." 
-                        rows={3} 
-                        className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" 
+                      <textarea
+                        value={transactionForm.reason}
+                        onChange={(e) => setTransactionForm({ ...transactionForm, reason: e.target.value })}
+                        placeholder="Enter reason for transaction (e.g., 'Compensation', 'Adjustment', 'Penalty')..."
+                        rows={3}
+                        className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                       />
                     </div>
 
                     {/* Submit Button */}
-                    <CustomButton 
-                        onClick={handleCreditDebit} 
-                        className={`w-full text-white font-bold text-lg py-3 shadow-xl 
-                            ${transactionForm.type === "credit" 
-                                ? "bg-green-600 hover:bg-green-700 ring-green-300" 
-                                : "bg-red-600 hover:bg-red-700 ring-red-300"
-                            }`
-                        }
+                    <CustomButton
+                      onClick={handleCreditDebit}
+                      className={`w-full text-white font-bold text-lg py-3 shadow-xl 
+                            ${transactionForm.type === "credit"
+                          ? "bg-green-600 hover:bg-green-700 ring-green-300"
+                          : "bg-red-600 hover:bg-red-700 ring-red-300"
+                        }`
+                      }
                     >
-                        {transactionForm.type === "credit" ? "Credit" : "Debit"} Wallet
+                      {transactionForm.type === "credit" ? "Credit" : "Debit"} Wallet
                     </CustomButton>
                   </div>
                 )}
@@ -375,17 +386,17 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Send To</label>
                     <div className="flex gap-4 p-1 bg-gray-100 rounded-xl shadow-inner">
-                      <CustomButton 
-                          onClick={() => setGiftForm({ ...giftForm, recipientType: "individual", selectedUserId: "" })} 
-                          className={`flex-1 py-3 ${giftForm.recipientType === "individual" ? "bg-indigo-600 text-white shadow-lg ring-indigo-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
+                      <CustomButton
+                        onClick={() => setGiftForm({ ...giftForm, recipientType: "individual", selectedUserId: "" })}
+                        className={`flex-1 py-3 ${giftForm.recipientType === "individual" ? "bg-indigo-600 text-white shadow-lg ring-indigo-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
                       >
-                          Individual User
+                        Individual User
                       </CustomButton>
-                      <CustomButton 
-                          onClick={() => setGiftForm({ ...giftForm, recipientType: "all", selectedUserId: "" })} 
-                          className={`flex-1 py-3 ${giftForm.recipientType === "all" ? "bg-indigo-600 text-white shadow-lg ring-indigo-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
+                      <CustomButton
+                        onClick={() => setGiftForm({ ...giftForm, recipientType: "all", selectedUserId: "" })}
+                        className={`flex-1 py-3 ${giftForm.recipientType === "all" ? "bg-indigo-600 text-white shadow-lg ring-indigo-500" : "bg-transparent text-gray-700 hover:bg-white"}`}
                       >
-                          All Users ({users.length})
+                        All Users ({users.length})
                       </CustomButton>
                     </div>
                   </div>
@@ -394,9 +405,9 @@ export default function App() {
                   {giftForm.recipientType === "individual" && (
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Select User</label>
-                      <select 
-                        value={giftForm.selectedUserId} 
-                        onChange={(e) => setGiftForm({ ...giftForm, selectedUserId: e.target.value })} 
+                      <select
+                        value={giftForm.selectedUserId}
+                        onChange={(e) => setGiftForm({ ...giftForm, selectedUserId: e.target.value })}
                         className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                       >
                         <option value="">Choose a user...</option>
@@ -410,48 +421,48 @@ export default function App() {
                   {/* Book Selection */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Select Book</label>
-                    <input 
-                      type="text" 
-                      placeholder="Filter book titles..." 
-                      value={giftForm.bookTitle} 
-                      onChange={(e) => setGiftForm({ ...giftForm, bookTitle: e.target.value })} 
-                      className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition mb-3" 
+                    <input
+                      type="text"
+                      placeholder="Filter book titles..."
+                      value={giftForm.bookTitle}
+                      onChange={(e) => setGiftForm({ ...giftForm, bookTitle: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition mb-3"
                     />
                     <div className="space-y-2 max-h-40 overflow-y-auto border p-2 rounded-xl bg-gray-50">
                       {availableBooks
-                          .filter(book => book.title.toLowerCase().includes(giftForm.bookTitle.toLowerCase()))
-                          .map((book) => (
-                          <button 
-                              key={book.id} 
-                              onClick={() => setGiftForm({ ...giftForm, bookTitle: book.title, bookId: book.id })} 
-                              className={`w-full text-left p-3 rounded-lg transition duration-200 text-sm border-2 
-                                ${giftForm.bookTitle === book.title 
-                                  ? "bg-purple-100 border-purple-500 text-purple-900 font-semibold" 
-                                  : "bg-white border-gray-200 hover:bg-gray-100"
-                                }`}
+                        .filter(book => book.title.toLowerCase().includes(giftForm.bookTitle.toLowerCase()))
+                        .map((book) => (
+                          <button
+                            key={book.id}
+                            onClick={() => setGiftForm({ ...giftForm, bookTitle: book.title, bookId: book.id })}
+                            className={`w-full text-left p-3 rounded-lg transition duration-200 text-sm border-2 
+                                ${giftForm.bookTitle === book.title
+                                ? "bg-purple-100 border-purple-500 text-purple-900 font-semibold"
+                                : "bg-white border-gray-200 hover:bg-gray-100"
+                              }`}
                           >
-                              {book.title}
+                            {book.title}
                           </button>
-                      ))}
+                        ))}
                     </div>
                   </div>
 
                   {/* Gift Message */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Gift Message (Optional)</label>
-                    <textarea 
-                      value={giftForm.message} 
-                      onChange={(e) => setGiftForm({ ...giftForm, message: e.target.value })} 
-                      placeholder="Add a personal message for the recipient(s)..." 
-                      rows={3} 
-                      className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" 
+                    <textarea
+                      value={giftForm.message}
+                      onChange={(e) => setGiftForm({ ...giftForm, message: e.target.value })}
+                      placeholder="Add a personal message for the recipient(s)..."
+                      rows={3}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                     />
                   </div>
 
                   {/* Send Gift Button */}
-                  <CustomButton 
-                      onClick={handleGift} 
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg py-3 shadow-xl ring-purple-300"
+                  <CustomButton
+                    onClick={handleGift}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg py-3 shadow-xl ring-purple-300"
                   >
                     <Send className="w-5 h-5 mr-3" />
                     Send Gift
@@ -519,9 +530,9 @@ export default function App() {
                       </tr>
                     ))}
                     {transactions.length === 0 && (
-                        <tr>
-                            <td colSpan={6} className="text-center py-8 text-gray-500 italic">No transactions recorded yet.</td>
-                        </tr>
+                      <tr>
+                        <td colSpan={6} className="text-center py-8 text-gray-500 italic">No transactions recorded yet.</td>
+                      </tr>
                     )}
                   </tbody>
                 </table>

@@ -17,7 +17,15 @@ import {
 } from "lucide-react";
 
 // --- START: Local UI Component Definitions (Simulating shadcn/ui) ---
-const Button = ({ children, className = "", variant = "default", onClick }) => {
+interface ButtonProps {
+  children: React.ReactNode;
+  className?: string;
+  variant?: "default" | "outline" | "destructive" | "subtle";
+  onClick?: () => void;
+  title?: string;
+}
+
+const Button = ({ children, className = "", variant = "default", onClick, title }: ButtonProps) => {
   let baseClasses = "font-semibold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-md";
   let variantClasses = "";
 
@@ -38,13 +46,18 @@ const Button = ({ children, className = "", variant = "default", onClick }) => {
   }
 
   return (
-    <button className={`${baseClasses} ${variantClasses} ${className}`} onClick={onClick}>
+    <button className={`${baseClasses} ${variantClasses} ${className}`} onClick={onClick} title={title}>
       {children}
     </button>
   );
 };
 
-const Card = ({ children, className = "" }) => (
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Card = ({ children, className = "" }: CardProps) => (
   <div className={`bg-white rounded-xl shadow-lg border border-gray-100 ${className}`}>
     {children}
   </div>
@@ -185,8 +198,16 @@ export default function App() {
     }
   };
 
+  interface StatCardProps {
+    title: string;
+    value: number | string;
+    icon: React.ReactNode;
+    iconColor: string;
+    valueColor: string;
+  }
+
   // Statistics Card Component
-  const StatCard = ({ title, value, icon, iconColor, valueColor }) => (
+  const StatCard = ({ title, value, icon, iconColor, valueColor }: StatCardProps) => (
     <Card className="p-6 flex items-center justify-between transition-all duration-300 transform hover:scale-[1.01] hover:shadow-xl shadow-lg">
       <div className="flex-1">
         <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
@@ -208,7 +229,7 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
       `}</style>
-      
+
       {/* Header */}
       <header className="bg-white shadow-lg sticky top-0 z-50 border-b border-amber-500/30">
         <div className="container max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -246,11 +267,10 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as "overview" | "requests" | "sellers")}
-              className={`px-4 py-3 font-bold text-lg transition-all duration-300 ${
-                activeTab === tab.id
-                  ? "text-amber-600 border-b-4 border-amber-600 bg-amber-50/50 rounded-t-lg"
-                  : "text-gray-500 hover:text-gray-800 hover:border-b-4 hover:border-gray-200"
-              }`}
+              className={`px-4 py-3 font-bold text-lg transition-all duration-300 ${activeTab === tab.id
+                ? "text-amber-600 border-b-4 border-amber-600 bg-amber-50/50 rounded-t-lg"
+                : "text-gray-500 hover:text-gray-800 hover:border-b-4 hover:border-gray-200"
+                }`}
             >
               {tab.label}
             </button>
@@ -372,19 +392,19 @@ export default function App() {
                         <p className="text-md font-medium text-gray-600">{request.email}</p>
                         <p className="text-sm text-gray-500 mt-1">Submitted on: <span className="font-medium">{request.submittedDate}</span></p>
                       </div>
-                      
+
                       {request.status === "pending" && (
                         <div className="flex gap-3 w-full md:w-auto md:min-w-[200px] flex-shrink-0">
-                          <Button 
-                            onClick={() => handleApprove(request.id)} 
+                          <Button
+                            onClick={() => handleApprove(request.id)}
                             className="w-full bg-green-600 hover:bg-green-700 shadow-lg shadow-green-200/50"
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
                             Approve
                           </Button>
-                          <Button 
-                            onClick={() => handleReject(request.id)} 
-                            variant="destructive" 
+                          <Button
+                            onClick={() => handleReject(request.id)}
+                            variant="destructive"
                             className="w-full bg-red-50 text-red-600 border border-red-300 hover:bg-red-100 shadow-lg shadow-red-200/50"
                           >
                             <XCircle className="w-4 h-4 mr-2" />
@@ -394,13 +414,13 @@ export default function App() {
                       )}
 
                       {request.status === "approved" && activeTab === "sellers" && (
-                         <Button 
-                            onClick={() => setLocation(`/seller-profile/${request.id}`)} 
-                            variant="subtle"
-                            className="w-full md:w-auto bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-                          >
-                            View Profile
-                          </Button>
+                        <Button
+                          onClick={() => setLocation(`/seller-profile/${request.id}`)}
+                          variant="subtle"
+                          className="w-full md:w-auto bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
+                        >
+                          View Profile
+                        </Button>
                       )}
                     </div>
 
@@ -414,7 +434,7 @@ export default function App() {
                         <p className="text-lg font-medium text-gray-800">{request.experience}</p>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <p className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Motivation/Pitch</p>
                       <p className="text-sm italic text-gray-700 p-3 bg-gray-50 rounded-lg border border-gray-100">

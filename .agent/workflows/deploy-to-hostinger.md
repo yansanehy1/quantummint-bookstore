@@ -53,37 +53,53 @@ rm -rf *
 
 ### 4. Deploy the Built Files
 
-You have two options:
+**CRITICAL:** The contents of `frontend/out` must be in the ROOT of `public_html`, NOT in a subfolder!
 
-**Option A - Manual Upload (Recommended for first deployment):**
-1. Log into Hostinger control panel
-2. Go to File Manager
-3. Navigate to `public_html`
-4. Upload ALL contents from your local `frontend/out` folder
-5. Make sure files are in `public_html` directly, NOT in a subfolder
+**Step-by-Step Deployment:**
 
-**Option B - Git Integration:**
-1. Create a deployment script that copies `out` folder contents to root
-2. Add a `.htaccess` file for proper routing
-3. Push to GitHub
-4. Hostinger will sync the changes
+1. **Log into Hostinger:**
+   - Go to Hostinger control panel
+   - Navigate to File Manager
+   - Go to `public_html` directory
 
-### 5. Add .htaccess for Client-Side Routing
+2. **Clear Everything First:**
+   - Delete ALL existing files in `public_html` (including any `frontend` folder, old `index.html`, `index.php`, WordPress files, etc.)
+   - Make sure `public_html` is completely empty
 
-Create a `.htaccess` file in `public_html` with this content:
+3. **Upload the Built Files:**
+   - On your local computer, navigate to `frontend/out` folder
+   - Select ALL files and folders inside `frontend/out` (you should see files like `index.html`, `_next` folder, etc.)
+   - Upload these files directly to `public_html` (not into a subfolder!)
+   - After upload, verify that `public_html/index.html` exists (NOT `public_html/frontend/out/index.html`)
 
-```apache
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
+4. **Upload .htaccess File:**
+   - Upload the `.htaccess` file from your project root to `public_html`
+   - This file enables proper client-side routing
+
+**Your final structure on Hostinger should look like:**
+```
+public_html/
+  ├── index.html          ← Main entry point
+  ├── .htaccess           ← URL routing
+  ├── _next/              ← Next.js assets
+  │   ├── static/
+  │   └── ...
+  ├── 404.html
+  └── other HTML files...
 ```
 
-This ensures that client-side routing works properly.
+**What NOT to do:**
+❌ Don't have `public_html/frontend/out/index.html`
+❌ Don't have redirect files (`index.php` or `index.html` that redirect)
+❌ Don't put files in a subfolder
+
+### 5. Verify File Structure on Hostinger
+
+After uploading, check that:
+- ✅ `public_html/index.html` exists (the one from `frontend/out`)
+- ✅ `public_html/_next/` directory exists
+- ✅ `public_html/.htaccess` exists
+- ✅ No `frontend` or `out` folders in `public_html`
 
 ### 6. Verify Deployment
 

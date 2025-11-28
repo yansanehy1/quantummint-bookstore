@@ -1,0 +1,9 @@
+{
+  "name": "QuantumMint Bookstore",
+  "description": "An immersive educational bookstore featuring media-synchronized audiobooks and an AI-powered creator studio.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}

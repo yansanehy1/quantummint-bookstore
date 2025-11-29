@@ -136,7 +136,7 @@ const Reader: React.FC = () => {
   const currentSegment = book.content[currentIndex];
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col md:flex-row h-screen w-screen overflow-hidden">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col md:flex-row h-dvh w-screen overflow-hidden">
       {/* Close button */}
       <div className="absolute top-4 left-4 z-50">
         <button onClick={onClose} className="bg-white/80 backdrop-blur p-2 rounded-full shadow-md hover:bg-slate-100 transition-transform hover:scale-110">
@@ -172,7 +172,7 @@ const Reader: React.FC = () => {
       {/* RIGHT PANEL: Immersive Stage */}
       <div className="flex-1 h-1/2 md:h-full bg-slate-900 text-white flex flex-col relative overflow-hidden">
         {/* Visual Content */}
-        <div className="flex-1 flex items-center justify-center p-8 relative">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-8 relative overflow-y-auto">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 z-0"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-quantum-500/10 rounded-full blur-3xl animate-pulse"></div>
 
@@ -184,7 +184,7 @@ const Reader: React.FC = () => {
                 <img
                   src={currentSegment.visualContent}
                   alt={currentSegment.visualDescription}
-                  className="rounded-lg shadow-2xl border-4 border-slate-700/50 mx-auto max-h-[50vh] object-cover"
+                  className="rounded-lg shadow-2xl border-4 border-slate-700/50 mx-auto max-h-[40vh] object-cover"
                 />
                 <p className="text-slate-400 text-sm font-medium tracking-wide bg-slate-800/50 inline-block px-4 py-1 rounded-full backdrop-blur-sm">
                   {currentSegment.visualDescription}
@@ -216,7 +216,7 @@ const Reader: React.FC = () => {
         </div>
 
         {/* Player Controls */}
-        <div className="h-24 bg-slate-800 border-t border-slate-700 flex items-center px-8 justify-between relative z-20">
+        <div className="h-24 bg-slate-800 border-t border-slate-700 flex items-center px-8 justify-between relative z-20 flex-shrink-0">
           <div className="flex flex-col w-1/3">
             <span className="text-xs text-slate-400 uppercase tracking-wider font-bold">Now Playing</span>
             <span className="text-white font-medium truncate block">{currentSegment?.visualDescription || "Audiobook Segment"}</span>

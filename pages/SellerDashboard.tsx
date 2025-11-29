@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import {
@@ -16,6 +17,7 @@ import {
 
 export default function SellerDashboard() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [location, setLocation] = useState("/");
     const [activeTab, setActiveTab] = useState("books");
 
@@ -24,39 +26,18 @@ export default function SellerDashboard() {
     }, []);
 
     const mockBooks = [
-        {
-            id: 1,
-            title: "Introduction to Physics",
-            category: "Science",
-            price: "$4.99",
-            sales: 45,
-            earnings: "$180.45",
-            rating: 4.5,
-            status: "published",
-            createdDate: "2024-01-10",
-        },
-        {
-            id: 2,
-            title: "Advanced Mathematics",
-            category: "Mathematics",
-            price: "$5.99",
-            sales: 28,
-            earnings: "$125.30",
-            rating: 4.8,
-            status: "published",
-            createdDate: "2024-01-15",
-        },
-        {
-            id: 3,
-            title: "Web Development Basics",
-            category: "Technology",
-            price: "$6.99",
-            sales: 0,
-            earnings: "$0.00",
-            rating: 0,
-            status: "draft",
-            createdDate: "2024-01-18",
-        },
+        { id: 1, title: "Introduction to Physics", category: "Science", price: "$4.99", sales: 45, earnings: "$180.45", rating: 4.5, status: "published", createdDate: "2024-01-10" },
+        { id: 2, title: "Advanced Mathematics", category: "Mathematics", price: "$5.99", sales: 28, earnings: "$125.30", rating: 4.8, status: "published", createdDate: "2024-01-15" },
+        { id: 3, title: "Web Development Basics", category: "Technology", price: "$6.99", sales: 15, earnings: "$85.00", rating: 4.2, status: "published", createdDate: "2024-01-18" },
+        { id: 4, title: "Quantum Mechanics", category: "Science", price: "$9.99", sales: 12, earnings: "$110.00", rating: 4.9, status: "published", createdDate: "2024-01-20" },
+        { id: 5, title: "Organic Chemistry", category: "Science", price: "$7.99", sales: 30, earnings: "$210.50", rating: 4.6, status: "published", createdDate: "2024-01-22" },
+        { id: 6, title: "World History", category: "History", price: "$5.50", sales: 20, earnings: "$95.00", rating: 4.4, status: "published", createdDate: "2024-01-25" },
+        { id: 7, title: "Macroeconomics", category: "Economics", price: "$8.99", sales: 18, earnings: "$145.00", rating: 4.7, status: "published", createdDate: "2024-01-28" },
+        { id: 8, title: "Psychology 101", category: "Psychology", price: "$4.50", sales: 50, earnings: "$200.00", rating: 4.5, status: "published", createdDate: "2024-02-01" },
+        { id: 9, title: "Art History", category: "Art", price: "$6.50", sales: 10, earnings: "$55.00", rating: 4.3, status: "published", createdDate: "2024-02-05" },
+        { id: 10, title: "Computer Science", category: "Technology", price: "$10.99", sales: 25, earnings: "$250.00", rating: 4.8, status: "published", createdDate: "2024-02-10" },
+        { id: 11, title: "Data Structures", category: "Technology", price: "$8.50", sales: 0, earnings: "$0.00", rating: 0, status: "draft", createdDate: "2024-02-15" },
+        { id: 12, title: "Algorithms", category: "Technology", price: "$9.50", sales: 0, earnings: "$0.00", rating: 0, status: "draft", createdDate: "2024-02-18" },
     ];
 
     const mockEarnings = [
@@ -66,10 +47,10 @@ export default function SellerDashboard() {
         { date: "2024-01-17", amount: "$0.00", source: "No sales" },
     ];
 
-    const totalEarnings = "$305.75";
-    const totalSales = 73;
+    const totalEarnings = "$125.50";
+    const totalSales = 253;
     const averageRating = 4.65;
-    const totalBooks = 3;
+    const totalBooks = 12;
 
     const handleDeleteBook = (id: number) => {
         if (confirm("Are you sure you want to delete this book?")) {
@@ -128,7 +109,7 @@ export default function SellerDashboard() {
                     <div className="flex justify-between items-start mb-8">
                         <div>
                             <h1 className="text-4xl font-bold text-gray-900 mb-2">Seller Dashboard</h1>
-                            <p className="text-xl text-gray-600">Manage your books, track sales, and monitor earnings.</p>
+                            <p className="text-xl text-gray-600">Welcome back, {user?.name || 'Alex Johnson'}. Manage your books and earnings.</p>
                         </div>
                         <Button onClick={() => navigate('/studio')} className="bg-green-600 hover:bg-green-700">
                             <Plus className="w-5 h-5 mr-2" />
@@ -409,8 +390,8 @@ export default function SellerDashboard() {
                     </div>
                     <nav className="flex gap-4 items-center">
                         <button
-                            onClick={() => setLocation("/")}
-                            className={`font-medium ${location === "/" || location === "/dashboard" ? "text-amber-600" : "text-gray-700 hover:text-amber-600"}`}
+                            onClick={() => navigate('/')}
+                            className={`font-medium ${location === "/" ? "text-amber-600" : "text-gray-700 hover:text-amber-600"}`}
                         >
                             Home
                         </button>

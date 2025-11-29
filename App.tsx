@@ -60,7 +60,7 @@ const AppContent: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="flex h-dvh bg-slate-50 font-sans text-slate-900">
       <Sidebar />
 
       {/* Mobile Header */}

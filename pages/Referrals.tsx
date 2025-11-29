@@ -23,6 +23,29 @@ export default function Referrals() {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleEmailShare = () => {
+        const subject = encodeURIComponent('Join QuantumMint Bookstore!');
+        const body = encodeURIComponent(
+            `I've been using QuantumMint Bookstore for educational content and thought you might like it too!\n\n` +
+            `Sign up using my referral link and we both get 2 hours of free reading/listening time:\n${referralLink}\n\n` +
+            `QuantumMint offers books for JSS, SSS, College, University, and Adult Education levels.`
+        );
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    };
+
+    const handleTwitterShare = () => {
+        const text = encodeURIComponent(
+            `Join me on QuantumMint Bookstore! Get access to educational content across all levels. Sign up with my link and we both get 2 hours free! 📚`
+        );
+        const url = encodeURIComponent(referralLink);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=550,height=420');
+    };
+
+    const handleFacebookShare = () => {
+        const url = encodeURIComponent(referralLink);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=550,height=420');
+    };
+
     const mockReferrals = [
         { id: 1, user: "Alice Smith", date: "2024-03-15", status: "Active", earned: "$5.00" },
         { id: 2, user: "Bob Johnson", date: "2024-03-12", status: "Pending", earned: "$0.00" },
@@ -103,13 +126,22 @@ export default function Referrals() {
                         </div>
 
                         <div className="grid sm:grid-cols-3 gap-4">
-                            <button className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium">
+                            <button
+                                onClick={handleEmailShare}
+                                className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium"
+                            >
                                 <Share2 className="w-4 h-4" /> Share via Email
                             </button>
-                            <button className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium">
+                            <button
+                                onClick={handleTwitterShare}
+                                className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium"
+                            >
                                 <Share2 className="w-4 h-4" /> Share on Twitter
                             </button>
-                            <button className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium">
+                            <button
+                                onClick={handleFacebookShare}
+                                className="flex items-center justify-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-slate-700 font-medium"
+                            >
                                 <Share2 className="w-4 h-4" /> Share on Facebook
                             </button>
                         </div>

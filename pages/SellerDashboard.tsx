@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigation } from "../contexts/NavigationContext";
+import { useNavigate } from 'react-router-dom';
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import {
@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export default function SellerDashboard() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
     const [location, setLocation] = useState("/");
     const [activeTab, setActiveTab] = useState("books");
 
@@ -130,7 +130,7 @@ export default function SellerDashboard() {
                             <h1 className="text-4xl font-bold text-gray-900 mb-2">Seller Dashboard</h1>
                             <p className="text-xl text-gray-600">Manage your books, track sales, and monitor earnings.</p>
                         </div>
-                        <Button onClick={() => setView('STUDIO')} className="bg-green-600 hover:bg-green-700">
+                        <Button onClick={() => navigate('/studio')} className="bg-green-600 hover:bg-green-700">
                             <Plus className="w-5 h-5 mr-2" />
                             Create New Book
                         </Button>

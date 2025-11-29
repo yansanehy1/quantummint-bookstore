@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Share2, Copy, Users, Gift, TrendingUp, DollarSign } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
 export default function Referrals() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Referrals - Quantummint Bookstore';
@@ -34,9 +34,9 @@ export default function Referrals() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">Referral Program</h1>
-                    <p className="text-slate-600">Invite friends and earn rewards when they join and purchase.</p>
+                    <p className="text-slate-600">Invite friends and earn 2 hours of reading/listening time when they join and make their first purchase.</p>
                 </div>
-                <Button onClick={() => setView('WALLET')} variant="outline">
+                <Button onClick={() => navigate('/wallet')} variant="outline">
                     View Earnings in Wallet
                 </Button>
             </div>
@@ -161,7 +161,7 @@ export default function Referrals() {
                             </li>
                             <li className="flex gap-3">
                                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold shrink-0">3</div>
-                                <p className="text-indigo-100 text-sm">You earn $5.00 for every qualified referral!</p>
+                                <p className="text-indigo-100 text-sm">You earn 2 hours of reading/listening time for every qualified referral!</p>
                             </li>
                         </ul>
                     </Card>

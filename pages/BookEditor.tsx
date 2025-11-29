@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import {
     Edit2, Save, Plus, Trash2, BookOpen, Clock, DollarSign, Eye, X
 } from 'lucide-react';
@@ -28,7 +28,7 @@ interface Book {
 }
 
 const BookEditor: React.FC = () => {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'details' | 'pages' | 'approval'>('details');
     const [isEditingBook, setIsEditingBook] = useState(false);
     const [editingPage, setEditingPage] = useState<Page | null>(null);
@@ -158,7 +158,7 @@ const BookEditor: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         <StatusBadge status={book.status} />
-                        <button onClick={() => setView('SELLER_DASHBOARD')}
+                        <button onClick={() => navigate('/seller/dashboard')}
                             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                             Back to Dashboard
                         </button>

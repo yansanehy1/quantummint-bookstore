@@ -11,7 +11,7 @@ import {
     ClipboardCheck,
     Loader2
 } from "lucide-react";
-import { useNavigation } from "../contexts/NavigationContext";
+import { useNavigate } from "react-router-dom";
 
 const Input = ({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
     <input
@@ -59,7 +59,7 @@ const FileInput = ({ label, onChange, fileName }: { label: string; onChange: (fi
 );
 
 export default function SellerRegistration() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState("personal");
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -150,7 +150,7 @@ export default function SellerRegistration() {
         setSubmitting(true);
         try {
             await new Promise((r) => setTimeout(r, 700));
-            setView('SELLER_DASHBOARD');
+            navigate('/seller/dashboard');
         } catch (e) {
             setSubmitting(false);
         }
@@ -193,7 +193,7 @@ export default function SellerRegistration() {
             {/* Header */}
             <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-md">
                 <div className="container max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-2 cursor-pointer transition transform hover:scale-[1.02]" onClick={() => setView('MARKETPLACE')}>
+                    <div className="flex items-center gap-2 cursor-pointer transition transform hover:scale-[1.02]" onClick={() => navigate('/')}>
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 object-contain" />
                         <h1 className="text-xl font-bold text-gray-900">Sierra Books Seller Portal</h1>
                     </div>

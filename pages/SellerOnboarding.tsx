@@ -12,10 +12,10 @@ import {
     Zap,
     TrendingUp
 } from 'lucide-react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function SellerOnboarding() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Seller Onboarding - Quantummint Bookstore';
@@ -72,7 +72,7 @@ export default function SellerOnboarding() {
         if (actionUrl) {
             // If it's a known view, navigate to it
             if (actionUrl === 'STUDIO') {
-                setView('STUDIO');
+                navigate('/studio');
                 return;
             }
             // For now, just mark as complete for demo purposes if it's not a navigation
@@ -113,13 +113,13 @@ export default function SellerOnboarding() {
             {/* Header */}
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('MARKETPLACE')}>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 object-contain" />
                         <h1 className="text-2xl font-bold text-gray-900">Sierra Books</h1>
                     </div>
                     <nav className="flex gap-4 items-center">
-                        <button onClick={() => setView('MARKETPLACE')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
-                        <button onClick={() => setView('SELLER_DASHBOARD')} className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</button>
+                        <button onClick={() => navigate('/')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
+                        <button onClick={() => navigate('/seller/dashboard')} className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</button>
                     </nav>
                 </div>
             </header>
@@ -234,8 +234,8 @@ export default function SellerOnboarding() {
 
                 {/* Action Buttons */}
                 <section className="flex gap-4 justify-center mb-12">
-                    <Button onClick={() => setView('SELLER_DASHBOARD')} className="bg-amber-600 hover:bg-amber-700 px-8">Go to Seller Dashboard</Button>
-                    <Button onClick={() => setView('STUDIO')} variant="outline" className="px-8">Create Your First Book</Button>
+                    <Button onClick={() => navigate('/seller/dashboard')} className="bg-amber-600 hover:bg-amber-700 px-8">Go to Seller Dashboard</Button>
+                    <Button onClick={() => navigate('/studio')} variant="outline" className="px-8">Create Your First Book</Button>
                 </section>
 
                 {/* FAQ Section */}

@@ -14,7 +14,8 @@ const AboutUs: React.FC = () => {
                     <h2>Our Mission</h2>
                     <p>
                         QuantumMint Bookstore is revolutionizing education in Sierra Leone by providing accessible,
-                        affordable digital educational content for JSS (Junior Secondary School) and SSS (Senior Secondary School) students.
+                        affordable digital educational content across all levels of education - from JSS (Junior Secondary School)
+                        and SSS (Senior Secondary School) to College, University, and Adult Education.
                     </p>
                     <p>
                         We believe every student deserves quality educational materials, regardless of their location or economic background.
@@ -26,7 +27,7 @@ const AboutUs: React.FC = () => {
                     <div className="features-grid">
                         <div className="feature-card">
                             <h3>📚 Digital Marketplace</h3>
-                            <p>Extensive library of curriculum-aligned books covering all academic subjects for JSS and SSS levels.</p>
+                            <p>Extensive library of curriculum-aligned books covering all academic subjects across JSS, SSS, College, University, and Adult Education levels.</p>
                         </div>
 
                         <div className="feature-card">
@@ -51,7 +52,7 @@ const AboutUs: React.FC = () => {
 
                         <div className="feature-card">
                             <h3>👥 Referral Program</h3>
-                            <p>Earn rewards by referring friends and helping expand access to education.</p>
+                            <p>Earn 2 hours of reading/listening time by referring friends and helping expand access to education.</p>
                         </div>
                     </div>
                 </section>

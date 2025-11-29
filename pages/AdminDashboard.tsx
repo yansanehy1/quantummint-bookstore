@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
     BookOpen,
@@ -26,7 +26,7 @@ interface SellerRequest {
 }
 
 export default function AdminDashboard() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Admin Dashboard - Quantummint Bookstore';
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
                         <h1 className="text-2xl font-extrabold text-gray-900">Admin Dashboard</h1>
                     </div>
                     <nav className="flex gap-6 items-center">
-                        <button onClick={() => setView('MARKETPLACE')} className="text-gray-700 hover:text-amber-600 font-medium">
+                        <button onClick={() => navigate('/')} className="text-gray-700 hover:text-amber-600 font-medium">
                             Home
                         </button>
                     </nav>
@@ -162,11 +162,11 @@ export default function AdminDashboard() {
                 {activeTab === 'overview' && (
                     <>
                         <div className="mb-8 flex flex-col sm:flex-row gap-4">
-                            <Button onClick={() => setView('ADMIN_BOOK_MANAGEMENT')} className="bg-blue-600 hover:bg-blue-700">
+                            <Button onClick={() => navigate('/admin/books')} className="bg-blue-600 hover:bg-blue-700">
                                 <BookOpen className="w-5 h-5 mr-2" />
                                 Manage Books & Content
                             </Button>
-                            <Button onClick={() => setView('ADMIN_WALLET_MANAGEMENT')} className="bg-purple-600 hover:bg-purple-700">
+                            <Button onClick={() => navigate('/admin/wallet')} className="bg-purple-600 hover:bg-purple-700">
                                 <WalletIcon className="w-5 h-5 mr-2" />
                                 Financial Management
                             </Button>

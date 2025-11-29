@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book } from '../types';
-import { MOCK_BOOKS } from '../constants';
 import Button from '../components/ui/Button';
 import { BookOpen, ShoppingCart, Loader2, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../contexts/StoreContext';
 
 interface MarketplaceProps {
   onSelectBook: (book: Book) => void;
@@ -13,7 +13,8 @@ interface MarketplaceProps {
 
 const Marketplace: React.FC<MarketplaceProps> = ({ onSelectBook }) => {
   const { user } = useAuth();
-  const { setLocation } = useNavigation();
+  const navigate = useNavigate();
+  const { books, addToCart } = useStore();
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'JSS1' | 'JSS2' | 'JSS3'>('all');
 
@@ -26,8 +27,14 @@ const Marketplace: React.FC<MarketplaceProps> = ({ onSelectBook }) => {
       alert("Please login to purchase books.");
       return;
     }
-    // Redirect to checkout
-    setLocation('/checkout');
+    addToCart(book);
+    navigate('/checkout');
+  };
+
+  const handleRead = (book: Book) => {
+    // In a real app, we'd check if the user owns the book
+    // For now, we'll just navigate to the reader
+    navigate(`/read/${book.id}`);
   };
 
   return (
@@ -47,7 +54,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ onSelectBook }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_BOOKS.map((book) => (
+        {books.map((book) => (
           <div key={book.id} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
             <div className="h-48 w-full bg-slate-200 relative group">
               <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -70,7 +77,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ onSelectBook }) => {
                   >
                     <ShoppingCart className="w-4 h-4 mr-1" /> Buy
                   </Button>
-                  <Button variant="primary" size="sm" onClick={() => onSelectBook(book)}>
+                  <Button variant="primary" size="sm" onClick={() => handleRead(book)}>
                     <BookOpen className="w-4 h-4 mr-1" /> Read
                   </Button>
                 </div>

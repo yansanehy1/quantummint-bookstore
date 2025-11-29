@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import { Home, AlertTriangle } from 'lucide-react';
 
 export default function NotFound() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = '404 Not Found - Quantummint Bookstore';
@@ -19,7 +19,7 @@ export default function NotFound() {
             <p className="text-lg text-slate-600 mb-8 max-w-md">
                 Sorry, we couldn't find the page you're looking for. It might have been moved or doesn't exist.
             </p>
-            <Button onClick={() => setView('MARKETPLACE')} className="flex items-center gap-2">
+            <Button onClick={() => navigate('/')} className="flex items-center gap-2">
                 <Home className="w-4 h-4" />
                 Return Home
             </Button>

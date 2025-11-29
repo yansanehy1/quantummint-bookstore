@@ -8,7 +8,7 @@ import {
   ArrowUp,
   History
 } from "lucide-react";
-import { useNavigation } from "../contexts/NavigationContext";
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 
 // Simple Input Component
@@ -20,7 +20,7 @@ const Input = ({ className = "", ...props }: React.InputHTMLAttributes<HTMLInput
 );
 
 export default function Wallet() {
-  const { setView } = useNavigation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("balance");
   const [depositAmount, setDepositAmount] = useState("");
@@ -44,14 +44,14 @@ export default function Wallet() {
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView("MARKETPLACE")}>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/marketplace')}>
             <BookOpen className="w-8 h-8 text-amber-600" />
             <h1 className="text-2xl font-bold text-gray-900">Sierra Books</h1>
           </div>
           <nav className="flex gap-4 items-center">
-            <button onClick={() => setView("MARKETPLACE")} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
-            <button onClick={() => setView("LIBRARY")} className="text-gray-700 hover:text-amber-600 font-medium">Library</button>
-            <button onClick={() => setView("SELLER_DASHBOARD")} className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</button>
+            <button onClick={() => navigate('/marketplace')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
+            <button onClick={() => navigate('/library')} className="text-gray-700 hover:text-amber-600 font-medium">Library</button>
+            <button onClick={() => navigate('/seller/dashboard')} className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</button>
           </nav>
         </div>
       </header>
@@ -245,10 +245,10 @@ export default function Wallet() {
                         <td className="px-6 py-4 text-sm">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${tx.type === "deposit"
-                                ? "bg-green-100 text-green-800"
-                                : tx.type === "purchase"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-purple-100 text-purple-800"
+                              ? "bg-green-100 text-green-800"
+                              : tx.type === "purchase"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-purple-100 text-purple-800"
                               }`}
                           >
                             {tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}

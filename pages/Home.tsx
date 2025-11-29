@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 
 const Button = ({
     children,
@@ -44,14 +44,14 @@ const Card = ({ children, className = '' }: { children: React.ReactNode; classNa
 );
 
 const Home: React.FC = () => {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'QuantumMint - Educational Audiobooks Platform';
     }, []);
 
-    const handleNavigation = (view: any) => {
-        setView(view);
+    const handleNavigation = (path: string) => {
+        navigate(path);
     };
 
     return (
@@ -59,7 +59,7 @@ const Home: React.FC = () => {
             {/* Header/Navbar */}
             <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNavigation('HOME')}>
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNavigation('/')}>
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 rounded-lg object-contain" />
                         <div className="text-2xl font-bold">
                             <span className="text-amber-600">Quantummint Bookstore</span>{' '}
@@ -67,17 +67,17 @@ const Home: React.FC = () => {
                         </div>
                     </div>
                     <nav className="hidden md:flex space-x-6">
-                        <button onClick={() => handleNavigation('LIBRARY')} className="text-gray-600 hover:text-amber-600 font-medium transition">
+                        <button onClick={() => handleNavigation('/library')} className="text-gray-600 hover:text-amber-600 font-medium transition">
                             Library
                         </button>
-                        <button onClick={() => handleNavigation('STUDIO')} className="text-gray-600 hover:text-amber-600 font-medium transition">
+                        <button onClick={() => handleNavigation('/studio')} className="text-gray-600 hover:text-amber-600 font-medium transition">
                             Creator
                         </button>
-                        <button onClick={() => handleNavigation('READING_ANALYTICS')} className="text-gray-600 hover:text-amber-600 font-medium transition">
+                        <button onClick={() => handleNavigation('/analytics')} className="text-gray-600 hover:text-amber-600 font-medium transition">
                             Analytics
                         </button>
                     </nav>
-                    <Button size="default" variant="default" onClick={() => handleNavigation('LOGIN')}>
+                    <Button size="default" variant="default" onClick={() => handleNavigation('/login')}>
                         Sign In
                     </Button>
                 </div>
@@ -97,10 +97,10 @@ const Home: React.FC = () => {
                     </p>
 
                     <div className="flex gap-4 justify-center flex-wrap">
-                        <Button variant="warm" size="lg" onClick={() => handleNavigation('STUDIO')}>
+                        <Button variant="warm" size="lg" onClick={() => handleNavigation('/studio')}>
                             Start Creating Audiobooks
                         </Button>
-                        <Button size="lg" variant="warm" className="px-8 py-4 text-lg font-bold" onClick={() => handleNavigation('LIBRARY')}>
+                        <Button size="lg" variant="warm" className="px-8 py-4 text-lg font-bold" onClick={() => handleNavigation('/library')}>
                             Browse Library
                         </Button>
                     </div>
@@ -123,10 +123,10 @@ const Home: React.FC = () => {
                             Explore a growing library of quality educational content with integrated audio narration and personalized reading analytics to track your progress and retention.
                         </p>
                         <div className="flex gap-4">
-                            <Button variant="default" size="default" onClick={() => handleNavigation('MARKETPLACE')} className="w-full">
+                            <Button variant="default" size="default" onClick={() => handleNavigation('/marketplace')} className="w-full">
                                 Start Learning
                             </Button>
-                            <Button variant="outline" onClick={() => handleNavigation('READING_ANALYTICS')}>
+                            <Button variant="outline" onClick={() => handleNavigation('/analytics')}>
                                 Check Your Progress
                             </Button>
                         </div>
@@ -141,7 +141,7 @@ const Home: React.FC = () => {
                         <p className="text-gray-600 mb-6">
                             Continue reading your last book or quickly find new resources to aid your studies. Your progress is saved automatically.
                         </p>
-                        <Button variant="default" className="w-full" onClick={() => handleNavigation('LIBRARY')}>
+                        <Button variant="default" className="w-full" onClick={() => handleNavigation('/library')}>
                             Go to Your Library
                         </Button>
                     </Card>
@@ -193,7 +193,7 @@ const Home: React.FC = () => {
                             <div className="text-4xl mb-4">👥</div>
                             <h3 className="text-xl font-bold text-slate-800 mb-3">Referral Rewards</h3>
                             <p className="text-gray-600">
-                                Earn rewards by referring friends and helping expand access to education.
+                                Earn 2 hours of reading/listening time by referring friends who sign up and purchase books, helping expand access to education.
                             </p>
                         </Card>
 
@@ -217,10 +217,10 @@ const Home: React.FC = () => {
                             Join thousands of students and educators already using QuantumMint to enhance their educational journey.
                         </p>
                         <div className="flex gap-4 justify-center flex-wrap">
-                            <Button variant="warm" size="lg" onClick={() => handleNavigation('REGISTER')}>
+                            <Button variant="warm" size="lg" onClick={() => handleNavigation('/register')}>
                                 Get Started Free
                             </Button>
-                            <Button variant="outline" size="lg" onClick={() => handleNavigation('ABOUT')}>
+                            <Button variant="outline" size="lg" onClick={() => handleNavigation('/about')}>
                                 Learn More
                             </Button>
                         </div>
@@ -241,26 +241,26 @@ const Home: React.FC = () => {
                         <div>
                             <h4 className="font-semibold mb-4">Platform</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><button onClick={() => handleNavigation('MARKETPLACE')} className="text-slate-400 hover:text-amber-400">Marketplace</button></li>
-                                <li><button onClick={() => handleNavigation('LIBRARY')} className="text-slate-400 hover:text-amber-400">Library</button></li>
-                                <li><button onClick={() => handleNavigation('STUDIO')} className="text-slate-400 hover:text-amber-400">Creator Studio</button></li>
-                                <li><button onClick={() => handleNavigation('READING_ANALYTICS')} className="text-slate-400 hover:text-amber-400">Analytics</button></li>
+                                <li><button onClick={() => handleNavigation('/marketplace')} className="text-slate-400 hover:text-amber-400">Marketplace</button></li>
+                                <li><button onClick={() => handleNavigation('/library')} className="text-slate-400 hover:text-amber-400">Library</button></li>
+                                <li><button onClick={() => handleNavigation('/studio')} className="text-slate-400 hover:text-amber-400">Creator Studio</button></li>
+                                <li><button onClick={() => handleNavigation('/analytics')} className="text-slate-400 hover:text-amber-400">Analytics</button></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">Resources</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><button onClick={() => handleNavigation('ABOUT')} className="text-slate-400 hover:text-amber-400">About Us</button></li>
-                                <li><button onClick={() => handleNavigation('FAQ')} className="text-slate-400 hover:text-amber-400">FAQ</button></li>
-                                <li><button onClick={() => handleNavigation('SUPPORT')} className="text-slate-400 hover:text-amber-400">Support</button></li>
-                                <li><button onClick={() => handleNavigation('CONTACT')} className="text-slate-400 hover:text-amber-400">Contact</button></li>
+                                <li><button onClick={() => handleNavigation('/about')} className="text-slate-400 hover:text-amber-400">About Us</button></li>
+                                <li><button onClick={() => handleNavigation('/faq')} className="text-slate-400 hover:text-amber-400">FAQ</button></li>
+                                <li><button onClick={() => handleNavigation('/support')} className="text-slate-400 hover:text-amber-400">Support</button></li>
+                                <li><button onClick={() => handleNavigation('/contact')} className="text-slate-400 hover:text-amber-400">Contact</button></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">Legal</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><button onClick={() => handleNavigation('PRIVACY')} className="text-slate-400 hover:text-amber-400">Privacy Policy</button></li>
-                                <li><button onClick={() => handleNavigation('TERMS')} className="text-slate-400 hover:text-amber-400">Terms of Service</button></li>
+                                <li><button onClick={() => handleNavigation('/privacy')} className="text-slate-400 hover:text-amber-400">Privacy Policy</button></li>
+                                <li><button onClick={() => handleNavigation('/terms')} className="text-slate-400 hover:text-amber-400">Terms of Service</button></li>
                             </ul>
                         </div>
                     </div>

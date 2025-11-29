@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "../contexts/NavigationContext";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowLeft, AlertCircle, CheckCircle2, CreditCard, Smartphone, DollarSign, Loader2 } from "lucide-react";
 
@@ -47,7 +47,7 @@ export default function Checkout() {
   const Card = MockCard;
   const Input = MockInput;
 
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -204,8 +204,8 @@ export default function Checkout() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <Button onClick={() => setLocation("/dashboard")} className="flex-1 text-lg py-3 bg-orange-600 hover:bg-orange-700">Go to Dashboard</Button>
-              <Button onClick={() => setLocation("/library")} variant="outline" className="flex-1 text-lg py-3 border-gray-300 text-gray-700 hover:bg-gray-100">Continue Shopping</Button>
+              <Button onClick={() => navigate("/seller/dashboard")} className="flex-1 text-lg py-3 bg-orange-600 hover:bg-orange-700">Go to Dashboard</Button>
+              <Button onClick={() => navigate("/library")} variant="outline" className="flex-1 text-lg py-3 border-gray-300 text-gray-700 hover:bg-gray-100">Continue Shopping</Button>
             </div>
           </Card>
         </div>
@@ -218,7 +218,7 @@ export default function Checkout() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button variant="ghost" onClick={() => setLocation("/library")} className="mb-4 text-gray-600 hover:text-orange-600 p-2">
+          <Button variant="ghost" onClick={() => navigate("/library")} className="mb-4 text-gray-600 hover:text-orange-600 p-2">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Library
           </Button>

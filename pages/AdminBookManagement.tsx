@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import {
     CheckCircle,
     Clock,
@@ -23,7 +23,7 @@ interface Book {
 }
 
 export default function AdminBookManagement() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Book Management - Quantummint Bookstore';
@@ -125,7 +125,7 @@ export default function AdminBookManagement() {
                         <h1 className="text-4xl font-extrabold text-blue-900">Book Submission Review</h1>
                         <p className="text-lg text-gray-600 mt-2">Manage educational content submissions.</p>
                     </div>
-                    <Button variant="outline" onClick={() => setView('ADMIN_DASHBOARD')}>
+                    <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Admin Dashboard
                     </Button>

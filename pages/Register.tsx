@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Lock, ArrowRight, BookOpen } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
 export default function Register() {
-    const { setView } = useNavigation();
+    const navigate = useNavigate();
     const { login } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
@@ -30,14 +30,14 @@ export default function Register() {
             setIsLoading(false);
             // Auto login after registration
             login(formData.email, formData.password);
-            setView('MARKETPLACE');
+            navigate('/');
         }, 1500);
     };
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="flex justify-center cursor-pointer" onClick={() => setView('MARKETPLACE')}>
+                <div className="flex justify-center cursor-pointer" onClick={() => navigate('/')}>
                     <img src="/logo.png" alt="QuantumMint Logo" className="w-20 h-20 object-contain" />
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
@@ -45,7 +45,7 @@ export default function Register() {
                 </h2>
                 <p className="mt-2 text-center text-sm text-slate-600">
                     Or{' '}
-                    <button onClick={() => setView('LOGIN')} className="font-medium text-quantum-600 hover:text-quantum-500">
+                    <button onClick={() => navigate('/login')} className="font-medium text-quantum-600 hover:text-quantum-500">
                         sign in to your existing account
                     </button>
                 </p>

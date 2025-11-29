@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
 import {
     Users,
     TrendingUp,
@@ -46,7 +45,6 @@ const mockTransactions: Transaction[] = [
 ];
 
 export default function AdminWalletManagement() {
-    const { setView } = useNavigation();
 
     useEffect(() => {
         document.title = 'Wallet Management - Quantummint Bookstore';

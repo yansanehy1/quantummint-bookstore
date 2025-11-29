@@ -8,6 +8,7 @@ interface AuthContextType {
   purchaseBook: (price: number) => Promise<boolean>;
   isAuthenticated: boolean;
   isLoading: boolean;
+  updateProfile: (updates: Partial<User>) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const newUser: User = {
       id: `user-${Date.now()}`,
       name: email.split('@')[0] || 'User',
@@ -38,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       balance: role === 'educator' ? 150.00 : 50.00, // Educators get more starting balance for demo
       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
     };
-    
+
     setUser(newUser);
     localStorage.setItem('qm_user', JSON.stringify(newUser));
     setIsLoading(false);
@@ -56,20 +57,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulate transaction
     const newBalance = Number((user.balance - price).toFixed(2));
     const updatedUser = { ...user, balance: newBalance };
-    
+
+    setUser(updatedUser);
+    localStorage.setItem('qm_user', JSON.stringify(updatedUser));
+    return true;
+  };
+
+  const updateProfile = async (updates: Partial<User>): Promise<boolean> => {
+    if (!user) return false;
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const updatedUser = { ...user, ...updates };
     setUser(updatedUser);
     localStorage.setItem('qm_user', JSON.stringify(updatedUser));
     return true;
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      login,
+      logout,
       purchaseBook,
+      updateProfile,
       isAuthenticated: !!user,
-      isLoading 
+      isLoading
     }}>
       {children}
     </AuthContext.Provider>

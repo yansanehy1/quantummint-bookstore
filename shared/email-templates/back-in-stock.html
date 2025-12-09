@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        /* Minimal inline CSS */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #1a237e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .book-highlight {
+            border: 2px solid #ffd700;
+            padding: 20px;
+            margin: 20px 0;
+            background: #fffde7;
+        }
+
+        .button {
+            background: #1a237e;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Sierra Books Alert</h1>
+    </div>
+
+    <div style="padding: 20px;">
+        <h2>Good News, {{customer_name}}!</h2>
+        <p>"{{book_title}}" is back in stock!</p>
+
+        <div class="book-highlight">
+            <img src="{{book_image}}" alt="{{book_title}}" style="max-width: 150px; float: left; margin-right: 20px;">
+            <h3>{{book_title}}</h3>
+            <p><strong>Author:</strong> {{book_author}}</p>
+            <p><strong>Price:</strong> <span style="color: #d32f2f; font-weight: bold;">{{book_price}}</span></p>
+            <p><strong>Stock:</strong> Only {{stock_quantity}} copies remaining</p>
+            <div style="clear: both;"></div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://quantum.quantummint.net/product/{{book_id}}" class="button">Get Your Copy Now</a>
+        </div>
+
+        <p><em>This is an automated alert based on your wishlist. <a
+                    href="https://quantum.quantummint.net/wishlist">Manage alerts</a></em></p>
+    </div>
+
+    <div class="footer">
+        <p>Sierra Books | <a href="https://quantum.quantummint.net">Visit Store</a></p>
+        <p><a href="{{unsubscribe_url}}">Unsubscribe from back-in-stock alerts</a></p>
+    </div>
+</body>
+
+</html>

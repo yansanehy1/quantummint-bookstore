@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumMint Video Upload</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .upload-container {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            width: 400px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .drop-zone {
+            border: 2px dashed #333;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .drop-zone:hover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #00ff88;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="upload-container">
+        <h2>Upload Video</h2>
+        <div class="drop-zone" id="dropZone">
+            <p>Drag & Drop video file here</p>
+            <p style="font-size: 12px; color: #666">or click to browse</p>
+            <input type="file" id="fileInput" accept="video/*" style="display: none">
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const status = document.getElementById('status');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#00ff88';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#333';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#333';
+            const files = e.dataTransfer.files;
+            if (files.length) handleFile(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        async function handleFile(file) {
+            status.textContent = 'Initializing upload...';
+            progressBar.style.display = 'block';
+
+            try {
+                // 1. Initialize Upload
+                const initRes = await fetch('/api/upload/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: file.name,
+                        size: file.size,
+                        mimeType: file.type,
+                        userId: 'test-user', // Mock user
+                        totalChunks: Math.ceil(file.size / (5 * 1024 * 1024))
+                    })
+                });
+
+                const { uploadId, chunkSize } = await initRes.json();
+
+                // 2. Upload Chunks
+                const totalChunks = Math.ceil(file.size / chunkSize);
+
+                for (let i = 0; i < totalChunks; i++) {
+                    const start = i * chunkSize;
+                    const end = Math.min(start + chunkSize, file.size);
+                    const chunk = file.slice(start, end);
+
+                    const formData = new FormData();
+                    formData.append('chunk', chunk);
+                    formData.append('index', i);
+
+                    await fetch(`/api/upload/chunk/${uploadId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const percent = ((i + 1) / totalChunks) * 100;
+                    progressFill.style.width = percent + '%';
+                    status.textContent = `Uploading: ${Math.round(percent)}%`;
+                }
+
+                status.textContent = 'Upload complete! Processing started...';
+                status.style.color = '#00ff88';
+
+            } catch (error) {
+                console.error(error);
+                status.textContent = 'Upload failed: ' + error.message;
+                status.style.color = '#ff4444';
+            }
+        }
+    </script>
+
+</body>
+
+</html>

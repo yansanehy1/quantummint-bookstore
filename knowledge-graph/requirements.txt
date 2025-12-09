@@ -1,0 +1,4 @@
+# knowledge-graph/requirements.txt
+neo4j==5.12.0
+networkx==3.1
+flask==2.3.2

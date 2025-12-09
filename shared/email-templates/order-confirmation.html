@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Sierra Books</title>
+    <style>
+        /* Inline CSS for email compatibility */
+        body { margin: 0; padding: 0; font-family: 'Georgia', serif; background-color: #f8f5f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; }
+        .header { background: #2c5530; color: white; padding: 30px; text-align: center; }
+        .header img { max-width: 200px; height: auto; }
+        .content { padding: 30px; color: #333; }
+        .order-details { background: #f9f7f3; border-left: 4px solid #d4af37; padding: 20px; margin: 20px 0; }
+        .book-item { display: flex; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .book-cover { width: 80px; margin-right: 15px; }
+        .book-info { flex: 1; }
+        .button { background: #2c5530; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; }
+        .footer { background: #f5f1e8; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; }
+            .book-item { flex-direction: column; }
+            .book-cover { width: 100%; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="https://quantum.quantummint.net/logo.png" alt="Sierra Books">
+            <h1>Order Confirmed!</h1>
+            <p>Thank you for your purchase</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <p>Hello {{customer_name}},</p>
+            <p>Your order <strong>#{{order_number}}</strong> has been successfully placed and is being processed.</p>
+            
+            <!-- Order Summary -->
+            <div class="order-details">
+                <h3>Order Summary</h3>
+                <p><strong>Order Date:</strong> {{order_date}}</p>
+                <p><strong>Order Total:</strong> {{order_total}}</p>
+                <p><strong>Shipping Method:</strong> {{shipping_method}}</p>
+                <p><strong>Estimated Delivery:</strong> {{delivery_date}}</p>
+            </div>
+            
+            <!-- Order Items -->
+            <h3>Your Books</h3>
+            {{#each order_items}}
+            <div class="book-item">
+                <img src="{{image_url}}" alt="{{title}}" class="book-cover">
+                <div class="book-info">
+                    <h4>{{title}}</h4>
+                    <p>by {{author}}</p>
+                    <p>Quantity: {{quantity}} × {{price}}</p>
+                    <p><strong>Subtotal: {{subtotal}}</strong></p>
+                </div>
+            </div>
+            {{/each}}
+            
+            <!-- Action Buttons -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://quantum.quantummint.net/track/{{order_id}}" class="button">Track Your Order</a>
+                <a href="https://quantum.quantummint.net/account/orders" style="margin-left: 10px;" class="button">View All Orders</a>
+            </div>
+            
+            <!-- Shipping Info -->
+            <div style="background: #f0f7f0; padding: 15px; border-radius: 5px;">
+                <h4>Shipping Address</h4>
+                <p>{{shipping_address}}</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Sierra Books | QuantumMint Bookstore</p>
+            <p>123 Library Lane, Bookville, CA 90210</p>
+            <p>
+                <a href="https://quantum.quantummint.net">Our Bookstore</a> | 
+                <a href="https://quantum.quantummint.net/contact">Contact Us</a> | 
+                <a href="https://quantum.quantummint.net/unsubscribe">Unsubscribe</a>
+            </p>
+            <p>&copy; {{current_year}} Sierra Books. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

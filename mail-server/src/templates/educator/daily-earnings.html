@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .royalty-card {
+            background: linear-gradient(135deg, #fffaf0 0%, #fed7aa 100%);
+            border: 2px solid #f97316;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px;
+        }
+
+        .royalty-breakdown {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Royalty Earnings Update</h1>
+            <p>QuantumMint Creator Portal</p>
+        </div>
+
+        <div style="padding: 30px;">
+            <p>Hi <strong>{{creator_name}}</strong>,</p>
+            <p>Your audiobooks have earned new royalties on QuantumMint.</p>
+
+            <div class="royalty-card">
+                <h2 style="margin-top: 0;">💰 Earnings Period: {{period_start}} to {{period_end}}</h2>
+
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <p style="color: #6b7280; margin: 0;">Total Listening Time</p>
+                        <h3 style="color: #7c3aed; margin: 5px 0;">{{total_hours}} hours</h3>
+                    </div>
+                    <div class="stat-box">
+                        <p style="color: #6b7280; margin: 0;">Unique Listeners</p>
+                        <h3 style="color: #7c3aed; margin: 5px 0;">{{unique_listeners}}</h3>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 25px 0;">
+                    <p style="color: #6b7280; margin: 0;">Gross Royalties</p>
+                    <h1 style="color: #7c3aed; margin: 10px 0; font-size: 36px;">{{gross_royalties}}</h1>
+                </div>
+
+                <div class="royalty-breakdown">
+                    <h4 style="margin: 0 0 15px 0;">📊 Royalty Breakdown</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 10px 0;">
+                                Platform Fee ({{platform_fee_percentage}}%)<br>
+                                <small style="color: #6b7280;">Hosting, distribution, marketing</small>
+                            </td>
+                            <td style="text-align: right; font-weight: bold;">-{{platform_fee}}</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 10px 0;">
+                                Processing Fee<br>
+                                <small style="color: #6b7280;">Payment gateway charges</small>
+                            </td>
+                            <td style="text-align: right;">-{{processing_fee}}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 15px 0; font-size: 18px;"><strong>Net Payout</strong></td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981; font-size: 20px;">
+                                {{net_payout}}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <p><strong>🎯 Performance Highlights:</strong></p>
+                    <ul style="margin: 10px 0;">
+                        <li>Top audiobook: "<strong>{{top_title}}</strong>" ({{top_hours}} hours)</li>
+                        <li>Peak listening day: {{peak_day}} ({{peak_hours}} hours)</li>
+                        <li>Completion rate: {{completion_rate}}%</li>
+                    </ul>
+                </div>
+
+                <div
+                    style="background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>⚠️ Payout Information:</strong></p>
+                    <p style="margin: 5px 0 0 0;">Minimum withdrawal: {{minimum_payout}} | Available balance:
+                        {{available_balance}} | Payouts processed every Tuesday</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://quantum.quantummint.net/creator/dashboard"
+                    style="background: #7c3aed; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                    View Detailed Analytics
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 0; font-size: 14px;">QuantumMint Creator Portal</p>
+            <p style="margin: 10px 0; font-size: 12px; color: #cbd5e0;">
+                <a href="https://quantum.quantummint.net/creator" style="color: #cbd5e0;">Dashboard</a> |
+                <a href="https://quantum.quantummint.net/creator/earnings" style="color: #cbd5e0;">Earnings</a> |
+                <a href="https://quantum.quantummint.net/creator/support" style="color: #cbd5e0;">Support</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

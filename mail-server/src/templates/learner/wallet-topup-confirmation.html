@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .wallet-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px;
+        }
+
+        .minutes-badge {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .button {
+            background: #667eea;
+            color: white;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .listening-rate {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎧 Wallet Recharged!</h1>
+            <p>You're ready for more listening time</p>
+        </div>
+
+        <div style="padding: 30px;">
+            <p>Hi <strong>{{listener_name}}</strong>,</p>
+            <p>Your QuantumMint wallet has been successfully recharged with listening credits.</p>
+
+            <div class="wallet-card">
+                <h3 style="margin-top: 0;">💰 Transaction Details</h3>
+                <div class="stats-grid">
+                    <div>
+                        <p style="color: #6b7280; margin: 0;">Amount Added</p>
+                        <h2 style="color: #667eea; margin: 5px 0;">{{amount}} {{currency}}</h2>
+                    </div>
+                    <div>
+                        <p style="color: #6b7280; margin: 0;">New Balance</p>
+                        <h2 style="color: #10b981; margin: 5px 0;">{{new_balance}}</h2>
+                    </div>
+                </div>
+                <p><strong>Transaction ID:</strong> {{transaction_id}}</p>
+                <p><strong>Payment Method:</strong> {{payment_method}}</p>
+            </div>
+
+            <div class="listening-rate">
+                <h4>🎯 Listening Value</h4>
+                <p><strong>Audio Rate:</strong> {{audio_rate}} per minute</p>
+                <p><strong>You can listen for:</strong></p>
+                <div class="minutes-badge">{{estimated_minutes}} minutes</div>
+                <p style="margin-top: 10px;">That's approximately <strong>{{estimated_audiobooks}}</strong> average
+                    audiobooks!</p>
+            </div>
+
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="https://quantum.quantummint.net/library" class="button">Browse Audiobooks</a>
+                <a href="https://quantum.quantummint.net/wallet" class="button"
+                    style="margin-left: 15px; background: #f0f4ff; color: #667eea;">View Wallet</a>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 25px;">
+                <h4>💡 Pro Tip</h4>
+                <p>Enable <strong>Auto-Recharge</strong> to never run out of listening time. We'll automatically add
+                    {{auto_recharge_amount}} when your balance falls below {{auto_recharge_threshold}}.</p>
+                <a href="https://quantum.quantummint.net/wallet/auto-recharge">Set up Auto-Recharge →</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 0; font-size: 14px;">QuantumMint Audiobook Platform</p>
+            <p style="margin: 10px 0; font-size: 12px; color: #cbd5e0;">
+                <a href="https://quantum.quantummint.net" style="color: #cbd5e0; margin: 0 10px;">Home</a> •
+                <a href="https://quantum.quantummint.net/support" style="color: #cbd5e0; margin: 0 10px;">Support</a> •
+                <a href="https://quantum.quantummint.net/unsubscribe"
+                    style="color: #cbd5e0; margin: 0 10px;">Preferences</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

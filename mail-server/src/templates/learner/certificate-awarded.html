@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f4f8;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+        }
+
+        .certificate-preview {
+            margin: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 2.5em;">🏆</h1>
+            <h1 style="margin: 10px 0;">Congratulations!</h1>
+            <p style="font-size: 1.2em; opacity: 0.9;">You've Earned a Certificate</p>
+        </div>
+
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 1.1em;">Hi <strong>{{user_name}}</strong>,</p>
+            <p>Congratulations on completing <strong>{{video_title}}</strong>! Your dedication to learning has earned
+                you an official QuantumMint certificate.</p>
+
+            <div class="certificate-preview">
+                <h2 style="color: #7c3aed; margin-top: 0;">Certificate of Completion</h2>
+                <p style="font-size: 1.1em;"><strong>{{user_name}}</strong></p>
+                <p>has successfully completed</p>
+                <h3 style="color: #2d3748;">{{video_title}}</h3>
+                <p>Instructed by <strong>{{creator_name}}</strong></p>
+                <p style="margin-top: 20px; color: #718096;">Certificate ID: <strong>{{certificate_id}}</strong></p>
+                <p style="color: #718096;">Issue Date: {{issue_date}}</p>
+            </div>
+
+            <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h3 style="margin-top: 0;">📊 Your Achievement</h3>
+                <p>• Completion: {{completion_percentage}}%</p>
+                {{#if quiz_score}}
+                <p>• Quiz Score: {{quiz_score}}%</p>
+                {{/if}}
+                {{#if exercises_completed}}
+                <p>• Exercises Completed: {{exercises_completed}}</p>
+                {{/if}}
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{certificate_url}}"
+                    style="background: #7c3aed; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin: 10px;">
+                    Download Certificate
+                </a>
+                <a href="{{verification_url}}"
+                    style="background: #edf2f7; color: #2d3748; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; margin: 10px;">
+                    Verify Certificate
+                </a>
+            </div>
+
+            <div
+                style="background: #e6fffa; border-left: 4px solid #38b2ac; padding: 20px; border-radius: 0 8px 8px 0; margin: 25px 0;">
+                <h3 style="margin-top: 0; color: #234e52;">📢 Share Your Achievement</h3>
+                <p>Add this certificate to your professional profile:</p>
+                <div style="margin: 15px 0;">
+                    <a href="{{social_share_urls.linkedin}}" style="margin: 5px 10px; color: #0077b5;">LinkedIn</a>
+                    <a href="{{social_share_urls.twitter}}" style="margin: 5px 10px; color: #1da1f2;">Twitter</a>
+                    <a href="{{social_share_urls.facebook}}" style="margin: 5px 10px; color: #4267B2;">Facebook</a>
+                </div>
+            </div>
+
+            <div style="background: #fff5f5; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h3 style="margin-top: 0; color: #c53030;">🎯 Keep Learning</h3>
+                <p>Continue your learning journey with these recommended courses:</p>
+                <a href="https://quantum.quantummint.net/learning-paths"
+                    style="color: #e53e3e; font-weight: 500;">Explore Learning Paths →</a>
+            </div>
+        </div>
+
+        <div style="background: #2d3748; color: white; padding: 25px; text-align: center;">
+            <p style="margin: 0;">QuantumMint Learning Platform</p>
+            <p style="margin: 10px 0; font-size: 0.9em; color: #cbd5e0;">Verify this certificate at <a
+                    href="{{verification_url}}" style="color: #90cdf4;">{{verification_url}}</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

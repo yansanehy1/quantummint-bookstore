@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8fafc;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .button {
+            background: #4299e1;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .certificate-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .interactive-highlight {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0;">🎬 Video Session Complete!</h1>
+            <p style="opacity: 0.9; margin: 10px 0;">Here's your learning summary</p>
+        </div>
+
+        <div style="padding: 30px;">
+            <h2 style="margin-top: 0; color: #2d3748;">{{video_title}}</h2>
+            <p style="color: #4a5568;">by {{creator_name}} • {{category}}</p>
+
+            <div
+                style="display: flex; align-items: center; margin: 20px 0; padding: 20px; background: #f7fafc; border-radius: 8px;">
+                <img src="{{thumbnail_url}}" alt="{{video_title}}"
+                    style="width: 120px; height: 68px; object-fit: cover; border-radius: 6px; margin-right: 20px;">
+                <div style="flex: 1;">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Time Watched</div>
+                            <div class="stat-value">{{minutes_watched}}<span style="font-size: 0.7em;">min</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Cost</div>
+                            <div class="stat-value">{{amount_deducted}}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Completion</div>
+                            <div class="stat-value">{{completion_percentage}}%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Quality</div>
+                            <div class="stat-value">{{average_quality}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Elements -->
+            {{#if interactive_elements_completed}}
+            <div class="interactive-highlight">
+                <h3 style="margin-top: 0; color: #d97706;">✅ Interactive Elements Completed</h3>
+                <p>You completed {{interactive_elements_completed}} interactive elements and earned
+                    <strong>{{total_points}} points</strong>!</p>
+            </div>
+            {{/if}}
+
+            <!-- Certificate -->
+            {{#if certificate_eligible}}
+            <div class="certificate-badge">
+                <h3 style="margin-top: 0;">🏆 Certificate Unlocked!</h3>
+                <p style="margin: 10px 0;">You've completed enough to earn a certificate.</p>
+                <a href="https://quantum.quantummint.net/certificates/{{video_id}}/claim"
+                    style="background: white; color: #d53f8c; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold; margin-top: 10px;">
+                    Claim Your Certificate
+                </a>
+            </div>
+            {{/if}}
+
+            <!-- Wallet Update -->
+            <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h3 style="margin-top: 0;">💰 Wallet Update</h3>
+                <p><strong>New Balance:</strong> <span
+                        style="color: #38a169; font-size: 1.3em;">{{remaining_balance}}</span></p>
+                <p><strong>Estimated Video Time:</strong> {{estimated_minutes_remaining}} minutes</p>
+                <a href="https://quantum.quantummint.net/wallet/topup" class="button"
+                    style="display: inline-block; margin-top: 10px;">Add More Credits</a>
+            </div>
+
+            <!-- Continue Learning -->
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="https://quantum.quantummint.net/video/{{video_id}}/continue" class="button"
+                    style="margin: 5px;">Continue Watching</a>
+                <a href="https://quantum.quantummint.net/video/{{video_id}}/related" class="button"
+                    style="margin: 5px; background: #edf2f7; color: #2d3748;">Similar Videos</a>
+            </div>
+        </div>
+
+        <div
+            style="background: #2d3748; color: white; padding: 25px; text-align: center; border-radius: 20px 20px 0 0;">
+            <p style="margin: 0; font-size: 0.9em;">QuantumMint Video Learning Platform</p>
+            <p style="margin: 10px 0; font-size: 0.8em; color: #cbd5e0;">
+                <a href="https://quantum.quantummint.net" style="color: #cbd5e0;">Home</a> •
+                <a href="https://quantum.quantummint.net/browse/video" style="color: #cbd5e0;">Video Library</a> •
+                <a href="https://quantum.quantummint.net/support" style="color: #cbd5e0;">Support</a>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

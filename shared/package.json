@@ -1,0 +1,15 @@
+{
+    "name": "@quantummint/shared",
+    "version": "1.0.0",
+    "description": "Shared utilities for QuantumMint services",
+    "main": "index.js",
+    "dependencies": {
+        "uuid": "^13.0.0"
+    },
+    "keywords": [
+        "quantummint",
+        "shared"
+    ],
+    "author": "QuantumMint Team",
+    "license": "MIT"
+}

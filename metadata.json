@@ -1,5 +1,15 @@
 {
+<<<<<<< HEAD
   "name": "QuantumMint Bookstore156",
   "description": "An immersive educational platform featuring synchronized audiobooks with dynamic visuals, formulas, and interactive learning steps.",
   "requestFramePermissions": []
+=======
+  "name": "QuantumMint Bookstore",
+  "description": "An immersive educational bookstore featuring media-synchronized audiobooks and an AI-powered creator studio.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
 }

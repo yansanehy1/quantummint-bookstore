@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Formula detector for LaTeX expressions
 export interface Formula {
     content: string;
@@ -38,3 +39,14 @@ export function detectFormulas(text: string): Formula[] {
 export function extractFormulas(text: string): Formula[] {
     return detectFormulas(text);
 }
+=======
+export const detectFormulas = (text: string) => {
+    const formulas = [];
+    const inlineRegex = /\$([^$]+)\$/g;
+    let match;
+    while ((match = inlineRegex.exec(text)) !== null) {
+        formulas.push({ content: match[1], type: 'inline', index: match.index });
+    }
+    return formulas;
+};
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233

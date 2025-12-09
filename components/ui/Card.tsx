@@ -2,6 +2,7 @@ import React from 'react';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+<<<<<<< HEAD
   className?: string;
 }
 
@@ -30,3 +31,19 @@ export const CardContent: React.FC<{ children: React.ReactNode; className?: stri
 );
 
 
+=======
+}
+
+const Card: React.FC<CardProps> = ({ children, className = '', ...props }) => {
+  return (
+    <div 
+      className={`bg-white rounded-xl shadow-sm border border-slate-100 ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+export default Card;
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233

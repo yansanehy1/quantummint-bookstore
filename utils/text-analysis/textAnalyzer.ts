@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Formula } from './formulaDetector';
 
 export interface AnalysisResults {
@@ -11,6 +12,13 @@ export interface GrammarIssue {
     start: number;
     end: number;
     suggestion?: string;
+=======
+export interface GrammarIssue {
+    message: string;
+    suggestion?: string;
+    start: number;
+    end: number;
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
 }
 
 export interface MathIssue {
@@ -18,7 +26,11 @@ export interface MathIssue {
     result: {
         isValid: boolean;
         verification?: string;
+<<<<<<< HEAD
         solution?: any;
+=======
+        solution?: string;
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
         error?: string;
     };
 }
@@ -26,6 +38,7 @@ export interface MathIssue {
 export interface ScientificIssue {
     type: string;
     message: string;
+<<<<<<< HEAD
     severity: 'low' | 'medium' | 'high';
     start: number;
     end: number;
@@ -36,11 +49,28 @@ export interface ScientificIssue {
 export async function analyzeText(text: string): Promise<AnalysisResults> {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+=======
+    suggestion?: string;
+    severity: 'high' | 'medium' | 'low';
+    start: number;
+    end: number;
+}
+
+export interface AnalysisResult {
+    grammarIssues: GrammarIssue[];
+    mathIssues: MathIssue[];
+    scientificIssues: ScientificIssue[];
+}
+
+export const analyzeText = async (text: string): Promise<AnalysisResult> => {
+    // Mock implementation
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
     return {
         grammarIssues: [],
         mathIssues: [],
         scientificIssues: []
     };
+<<<<<<< HEAD
 }
 
 // Process text with SSML markup for formulas
@@ -69,3 +99,10 @@ function formulaToSpeech(formula: string): string {
         .replace(/\}/g, '')
         .replace(/\^/g, ' to the power of ');
 }
+=======
+};
+
+export const processTextWithSSML = (text: string, formulas: any[]): string => {
+    return text; // Mock implementation
+};
+>>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233

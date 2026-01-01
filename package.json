@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "name": "quantummint-bookstore156",
-=======
   "name": "quantummint-bookstore",
->>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,41 +10,26 @@
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
-<<<<<<< HEAD
-    "clsx": "^2.1.0",
+    "axios": "^1.13.2",
+    "clsx": "^2.1.1",
     "katex": "^0.16.25",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-katex": "^3.1.0",
-    "recharts": "^3.5.1",
-    "sonner": "^1.4.0",
-    "tailwind-merge": "^2.2.0",
-    "uuid": "^13.0.0",
-    "wouter": "^3.0.0"
-=======
-    "axios": "^1.13.2",
-    "clsx": "^2.1.1",
-    "katex": "^0.16.25",
-    "lucide-react": "^0.554.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-katex": "^3.1.0",
     "react-router-dom": "^7.9.6",
     "recharts": "^3.5.1",
-    "tailwind-merge": "^3.4.0"
->>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
+    "sonner": "^1.4.0",
+    "tailwind-merge": "^3.4.0",
+    "uuid": "^13.0.0",
+    "wouter": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
-<<<<<<< HEAD
     "vite": "^6.2.0",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-window": "^7.4.0"
-=======
-    "vite": "^6.2.0"
->>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
   }
 }

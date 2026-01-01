@@ -11,12 +11,9 @@
     ],
     "skipLibCheck": true,
     "types": [
-<<<<<<< HEAD
-      "node"
-=======
       "node",
       "vite/client"
->>>>>>> eee79d7da06a64aee98daa05ffcfbc5ba43db233
+
     ],
     "moduleResolution": "bundler",
     "isolatedModules": true,

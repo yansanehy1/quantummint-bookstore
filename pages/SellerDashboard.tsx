@@ -87,20 +87,6 @@ export default function SellerDashboard() {
             );
         }
 
-        if (location === "/wallet") {
-            return (
-                <div className="container max-w-6xl mx-auto px-4 py-12">
-                    <Button onClick={() => setLocation("/")} variant="outline" className="mb-6">
-                        ← Back to Dashboard
-                    </Button>
-                    <Card className="p-8">
-                        <h1 className="text-2xl font-bold mb-4">Seller Wallet</h1>
-                        <p className="text-gray-600">Wallet details placeholder...</p>
-                    </Card>
-                </div>
-            )
-        }
-
         // Default Dashboard View
         return (
             <main className="container max-w-6xl mx-auto px-4 py-12">
@@ -117,14 +103,13 @@ export default function SellerDashboard() {
                         </Button>
                     </div>
                 </section>
-
                 {/* Stats Section */}
                 <section className="grid md:grid-cols-4 gap-6 mb-12">
                     <Card className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-gray-600 text-sm mb-1">Total Earnings</p>
-                                <p className="text-3xl font-bold text-gray-900">{totalEarnings}</p>
+                                <p className="text-3xl font-bold text-gray-900">${user?.balance?.toFixed(2) || "0.00"}</p>
                             </div>
                             <DollarSign className="w-12 h-12 text-green-600 opacity-20" />
                         </div>
@@ -280,8 +265,8 @@ export default function SellerDashboard() {
                         <div className="grid md:grid-cols-3 gap-6 mb-8">
                             <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50">
                                 <p className="text-gray-600 text-sm mb-2">Total Earnings</p>
-                                <p className="text-4xl font-bold text-green-600 mb-4">{totalEarnings}</p>
-                                <Button className="w-full bg-green-600 hover:bg-green-700">
+                                <p className="text-4xl font-bold text-green-600 mb-4">${user?.balance?.toFixed(2) || "0.00"}</p>
+                                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => navigate('/wallet')}>
                                     <Download className="w-4 h-4 mr-2" />
                                     Request Cashout
                                 </Button>
@@ -402,7 +387,7 @@ export default function SellerDashboard() {
                             Dashboard
                         </button>
                         <button
-                            onClick={() => setLocation("/wallet")}
+                            onClick={() => navigate("/wallet")}
                             className={`font-medium ${location === "/wallet" ? "text-amber-600" : "text-gray-700 hover:text-amber-600"}`}
                         >
                             Wallet

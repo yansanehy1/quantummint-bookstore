@@ -26,7 +26,7 @@ const AboutUs: React.FC = () => {
                     <h2>What We Offer</h2>
                     <div className="features-grid">
                         <div className="feature-card">
-                            <h3>📚 Digital Marketplace</h3>
+                            <h3>📚 Digital Library</h3>
                             <p>Extensive library of curriculum-aligned books covering all academic subjects across JSS, SSS, College, University, and Adult Education levels.</p>
                         </div>
 

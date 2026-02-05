@@ -10,12 +10,12 @@ export const CURRENT_USER: User = {
 };
 
 export const AVAILABLE_ACCENTS = [
-  'West African (Sierra Leone)', 
-  'West African (Nigeria)', 
-  'East African (Kenya)', 
-  'South African', 
-  'American (General)', 
-  'British (RP)', 
+  'West African (Sierra Leone)',
+  'West African (Nigeria)',
+  'East African (Kenya)',
+  'South African',
+  'American (General)',
+  'British (RP)',
   'Indian (General)',
   'European (French-English)',
   'European (German-English)'
@@ -62,6 +62,46 @@ export const PREMADE_VOICES: VoiceProfile[] = [
 ];
 
 export const MOCK_BOOKS: Book[] = [
+  {
+    id: 'b1',
+    title: "Language Arts - JSS 1, Term 1",
+    author: "Sierra Books Admin",
+    coverUrl: "icon:book-open",
+    description: "Comprehensive language arts curriculum for JSS 1 students.",
+    price: 4.99,
+    category: "Language Arts",
+    content: []
+  },
+  {
+    id: 'b2',
+    title: "Introduction to Physics",
+    author: "Dr. Ahmed Hassan",
+    coverUrl: "icon:library",
+    description: "Fundamental concepts of motion, energy, and matter.",
+    price: 4.99,
+    category: "Science",
+    content: []
+  },
+  {
+    id: 'b3',
+    title: "Advanced Mathematics",
+    author: "Prof. Fatima Jalloh",
+    coverUrl: "icon:ruler",
+    description: "Higher level mathematics including calculus and trigonometry.",
+    price: 5.99,
+    category: "Mathematics",
+    content: []
+  },
+  {
+    id: 'b4',
+    title: "Sierra Leone History",
+    author: "Dr. Koroma",
+    coverUrl: "icon:book-open",
+    description: "A journey through the rich history of Sierra Leone.",
+    price: 3.99,
+    category: "History",
+    content: []
+  },
   {
     id: '1',
     title: "Introduction to Quantum Physics",
@@ -120,17 +160,5 @@ export const MOCK_BOOKS: Book[] = [
         visualDescription: "Chemical formula for Methane"
       }
     ]
-  },
-  {
-    id: '3',
-    title: "The History of Sierra Leone",
-    author: "Aminata Kamara",
-    coverUrl: "https://picsum.photos/seed/sierra/300/450",
-    description: "An immersive journey through the rich history and culture of Sierra Leone.",
-    price: 9.99,
-    category: "History",
-    voiceProfileId: 'voice-kore',
-    content: []
   }
-
 ];

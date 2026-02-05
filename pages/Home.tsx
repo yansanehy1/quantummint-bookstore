@@ -123,7 +123,7 @@ const Home: React.FC = () => {
                             Explore a growing library of quality educational content with integrated audio narration and personalized reading analytics to track your progress and retention.
                         </p>
                         <div className="flex gap-4">
-                            <Button variant="default" size="default" onClick={() => handleNavigation('/marketplace')} className="w-full">
+                            <Button variant="default" size="default" onClick={() => handleNavigation('/library')} className="w-full">
                                 Start Learning
                             </Button>
                             <Button variant="outline" onClick={() => handleNavigation('/analytics')}>
@@ -241,7 +241,6 @@ const Home: React.FC = () => {
                         <div>
                             <h4 className="font-semibold mb-4">Platform</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><button onClick={() => handleNavigation('/marketplace')} className="text-slate-400 hover:text-amber-400">Marketplace</button></li>
                                 <li><button onClick={() => handleNavigation('/library')} className="text-slate-400 hover:text-amber-400">Library</button></li>
                                 <li><button onClick={() => handleNavigation('/studio')} className="text-slate-400 hover:text-amber-400">Creator Studio</button></li>
                                 <li><button onClick={() => handleNavigation('/analytics')} className="text-slate-400 hover:text-amber-400">Analytics</button></li>

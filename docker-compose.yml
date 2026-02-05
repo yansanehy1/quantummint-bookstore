@@ -166,6 +166,22 @@ services:
     ports:
       - "5004:5004"
 
+  tts-microservice:
+    build:
+      context: ./tts-microservice
+      dockerfile: Dockerfile
+    container_name: siera-tts
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=5005
+    networks:
+      - siera-network
+    depends_on:
+      - redis
+    ports:
+      - "5005:5005"
+
   concept-visualizer:
     build:
       context: ./concept-visualizer

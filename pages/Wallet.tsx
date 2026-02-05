@@ -44,14 +44,26 @@ export default function Wallet() {
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center cursor-pointer" onClick={() => navigate('/marketplace')}>
-            <BookOpen className="w-8 h-8 text-amber-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Sierra Books</h1>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/library')}>
+            <div className="w-8 h-8 bg-quantum-600 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-white font-bold text-lg">Q</span>
+            </div>
+            <span className="text-xl font-bold text-slate-900">QuantumMint</span>
           </div>
-          <nav className="flex gap-4 items-center">
-            <button onClick={() => navigate('/marketplace')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
-            <button onClick={() => navigate('/library')} className="text-gray-700 hover:text-amber-600 font-medium">Library</button>
-            <button onClick={() => navigate('/seller/dashboard')} className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</button>
+          <nav className="flex space-x-6">
+            <button onClick={() => navigate('/')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
+            <button onClick={() => navigate('/library')} className="text-gray-700 hover:text-amber-400 font-medium">Library</button>
+            <button
+              onClick={() => {
+                if (!user) navigate('/login');
+                else if (user.role === 'admin') navigate('/admin');
+                else if (user.role === 'educator') navigate('/seller/dashboard');
+                else navigate('/reading-analytics');
+              }}
+              className="text-gray-700 hover:text-amber-600 font-medium"
+            >
+              Dashboard
+            </button>
           </nav>
         </div>
       </header>

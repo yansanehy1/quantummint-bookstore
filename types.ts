@@ -43,7 +43,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'learner' | 'educator';
+  role: 'learner' | 'educator' | 'admin';
   balance: number;
   avatarUrl?: string;
 }

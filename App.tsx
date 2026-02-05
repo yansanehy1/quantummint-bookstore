@@ -3,9 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { StoreProvider } from './contexts/StoreContext';
 import Sidebar from './components/layout/Sidebar';
+import { User } from './types';
 
 // Pages
-import Marketplace from './pages/Marketplace';
+// Pages
+import Library from './pages/Library';
 import Studio from './pages/Studio';
 import Reader from './pages/Reader';
 import Login from './pages/Login';
@@ -37,7 +39,7 @@ import Home from './pages/Home';
 
 import { ShoppingBag, Map, Wallet as WalletIcon, LogOut, BookOpen } from 'lucide-react';
 
-const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
+const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: User['role'][] }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
@@ -67,10 +69,10 @@ const AppContent: React.FC = () => {
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center justify-between px-4">
         <span className="font-bold text-lg text-slate-800">QuantumMint</span>
         <div className="flex gap-4">
-          <a href="/marketplace" className="text-slate-500"><ShoppingBag /></a>
-          <a href="/maps" className="text-slate-500"><Map /></a>
-          <a href="/wallet" className="text-slate-500"><WalletIcon /></a>
-          <button onClick={logout} className="text-slate-500"><LogOut /></button>
+          <a href="/library" aria-label="Library" className="text-slate-500"><BookOpen /></a>
+          <a href="/maps" aria-label="Maps" className="text-slate-500"><Map /></a>
+          <a href="/wallet" aria-label="Wallet" className="text-slate-500"><WalletIcon /></a>
+          <button onClick={logout} aria-label="Logout" className="text-slate-500"><LogOut /></button>
         </div>
       </div>
 
@@ -80,20 +82,8 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/marketplace" element={<Marketplace onSelectBook={() => { }} />} />
-
-          <Route path="/library" element={
-            <ProtectedRoute>
-              <div className="p-10 text-center text-slate-500 flex flex-col items-center justify-center h-full">
-                <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                  <BookOpen className="w-10 h-10 text-slate-300" />
-                </div>
-                <h2 className="text-xl font-medium text-slate-800">Your library is empty</h2>
-                <p className="text-slate-500 mt-2">Purchased books will appear here.</p>
-                <a href="/marketplace" className="mt-4 text-quantum-600 hover:underline">Browse Store</a>
-              </div>
-            </ProtectedRoute>
-          } />
+          <Route path="/marketplace" element={<Library />} />
+          <Route path="/library" element={<Library />} />
 
           <Route path="/analytics" element={<ProtectedRoute><ReadingAnalytics /></ProtectedRoute>} />
           <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />

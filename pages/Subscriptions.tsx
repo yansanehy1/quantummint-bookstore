@@ -17,6 +17,7 @@ interface Plan {
     max_concurrent_streams: number;
     max_quality: string;
     max_downloads: number;
+    allowed_product_types?: string[];
     features: string[];
     is_featured: boolean;
 }
@@ -32,7 +33,8 @@ export const Subscriptions: React.FC = () => {
 
     const fetchPlans = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_SUBSCRIPTION_SERVICE_URL || 'http://localhost:4100'}/api/plans`);
+            const baseUrl = import.meta.env.VITE_SUBSCRIPTION_SERVICE_URL || 'http://localhost:4100';
+            const response = await fetch(`${baseUrl}/api/plans`);
             const data = await response.json();
             if (data.success) {
                 setPlans(data.data);

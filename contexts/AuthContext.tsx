@@ -3,7 +3,7 @@ import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, role: 'learner' | 'educator') => Promise<void>;
+  login: (email: string, role: 'learner' | 'educator' | 'admin') => Promise<void>;
   logout: () => void;
   purchaseBook: (price: number) => Promise<boolean>;
   isAuthenticated: boolean;
@@ -21,12 +21,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check local storage for persisted session
     const storedUser = localStorage.getItem('qm_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('qm_user');
+        setUser(null);
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, role: 'learner' | 'educator') => {
+  const login = async (email: string, role: 'learner' | 'educator' | 'admin') => {
     setIsLoading(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));

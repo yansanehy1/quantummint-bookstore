@@ -330,7 +330,7 @@ export default function SellerDashboard() {
                                             <p className="text-gray-600">28 sales</p>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
-                                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: "38%" }}></div>
+                                            <div className="bg-blue-600 h-2 rounded-full w-[38%]"></div>
                                         </div>
                                     </div>
                                 </div>

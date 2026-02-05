@@ -6,7 +6,7 @@ let currentUser: User | null = {
     name: 'Demo User',
     role: 'LEARNER' as any,
     avatarUrl: 'https://ui-avatars.com/api/?name=Demo+User',
-    email: 'demo@sierrabooks.com',
+    email: 'demo@quantummint.net',
     walletBalance: {
         usd: 50.00,
         sll: 825000
@@ -91,7 +91,7 @@ export function deleteUser(userId: string) {
 
 // Mock system settings
 const systemSettings: AppSystemSettings = {
-    siteName: 'Sierra Books',
+    siteName: 'QuantumMint Bookstore',
     maintenanceMode: false,
     allowRegistrations: true,
     withdrawalFeePercent: 5,

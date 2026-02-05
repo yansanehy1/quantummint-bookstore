@@ -1,12 +1,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SyncPoint, SegmentType, GroundingChunk } from "../types";
 
-export const generateEducationalContent = async (rawText: string): Promise<SyncPoint[]> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key is missing.");
+const getGeminiApiKey = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API key is missing. Set VITE_GEMINI_API_KEY in your environment.");
   }
+  return apiKey;
+};
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+export const generateEducationalContent = async (rawText: string): Promise<SyncPoint[]> => {
+  const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
   const prompt = `
     You are an expert educational content designer.
@@ -77,8 +81,7 @@ export const generateEducationalContent = async (rawText: string): Promise<SyncP
 };
 
 export const generateAudio = async (text: string, voiceName: string = 'Kore', speed: 'slow' | 'normal' | 'fast' = 'normal'): Promise<string> => {
-  if (!process.env.API_KEY) throw new Error("API Key missing");
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
   let speedPrompt = "";
   if (speed === 'fast') speedPrompt = "Speak at a fast, energetic pace. ";
@@ -153,7 +156,7 @@ export interface MapsResponse {
 }
 
 export const queryMapsAgent = async (query: string, userLat?: number, userLng?: number): Promise<MapsResponse> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
   
   const toolConfig = (userLat && userLng) ? {
     retrievalConfig: {
@@ -180,7 +183,7 @@ export const queryMapsAgent = async (query: string, userLat?: number, userLng?: 
 };
 
 export const analyzeImage = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",

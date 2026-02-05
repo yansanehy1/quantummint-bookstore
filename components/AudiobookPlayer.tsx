@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Settings } from "lucide-react";
-import { ProcessedSentence } from "../services/textProcessor";
-import * as ttsService from "../services/ttsService";
+import { ProcessedSentence } from "../types/api";
+import * as ttsService from "../web-frontend/src/services/ttsService";
+import { FormulaPane } from "./panes/FormulaPane";
 
 // Helper for TTS options
 interface TTSOptions {
@@ -17,26 +18,26 @@ interface TTSOptions {
 
 // Mock TTS functionality for demo if real TTS service is backend-only or limited
 const mockTTS = {
-    stop: () => window.speechSynthesis?.cancel(),
-    pause: () => window.speechSynthesis?.pause(),
-    resume: () => window.speechSynthesis?.resume(),
-    speak: (text: string, options: TTSOptions, onEnd: () => void, onStart: () => void) => {
-        if (!window.speechSynthesis) return;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = options.rate;
-        utterance.pitch = options.pitch;
-        utterance.volume = options.volume;
-        if (options.voice) {
-            const voices = window.speechSynthesis.getVoices();
-            const voice = voices.find(v => v.name === options.voice);
-            if (voice) utterance.voice = voice;
-        }
-        utterance.onend = onEnd;
-        utterance.onstart = onStart;
-        window.speechSynthesis.speak(utterance);
-    },
-    getAvailableVoices: () => window.speechSynthesis?.getVoices() || [],
-    isAvailable: () => !!window.speechSynthesis
+  stop: () => window.speechSynthesis?.cancel(),
+  pause: () => window.speechSynthesis?.pause(),
+  resume: () => window.speechSynthesis?.resume(),
+  speak: (text: string, options: TTSOptions, onEnd: () => void, onStart: () => void) => {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = options.rate;
+    utterance.pitch = options.pitch;
+    utterance.volume = options.volume;
+    if (options.voice) {
+      const voices = window.speechSynthesis.getVoices();
+      const voice = voices.find(v => v.name === options.voice);
+      if (voice) utterance.voice = voice;
+    }
+    utterance.onend = onEnd;
+    utterance.onstart = onStart;
+    window.speechSynthesis.speak(utterance);
+  },
+  getAvailableVoices: () => window.speechSynthesis?.getVoices() || [],
+  isAvailable: () => !!window.speechSynthesis
 };
 
 interface AudiobookPlayerProps {
@@ -56,19 +57,22 @@ export default function AudiobookPlayer({ sentences, bookTitle, onSentenceChange
   const audioRef = useRef<HTMLAudioElement>(null);
   const playbackIntervalRef = useRef<number | undefined>(undefined);
 
+  const [activeFormula, setActiveFormula] = useState<{ content: string, type: 'inline' | 'block' | 'chemistry' } | null>(null);
+  const [segments, setSegments] = useState<any[]>([]);
+
   const currentSentence = sentences[currentSentenceIndex];
   const progress = sentences.length > 0 ? ((currentSentenceIndex + 1) / sentences.length) * 100 : 0;
 
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
-      const loadVoices = () => {
-          const voices = mockTTS.getAvailableVoices();
-          setAvailableVoices(voices);
-      };
-      loadVoices();
-      window.speechSynthesis?.addEventListener('voiceschanged', loadVoices);
-      return () => window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
+    const loadVoices = () => {
+      const voices = mockTTS.getAvailableVoices();
+      setAvailableVoices(voices);
+    };
+    loadVoices();
+    window.speechSynthesis?.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
   }, []);
 
   useEffect(() => {
@@ -85,46 +89,82 @@ export default function AudiobookPlayer({ sentences, bookTitle, onSentenceChange
     } else {
       // Check if paused or stopped
       if (window.speechSynthesis.paused) {
-          mockTTS.resume();
-          setIsPlaying(true);
+        mockTTS.resume();
+        setIsPlaying(true);
       } else {
-          playSentence(currentSentenceIndex);
+        playSentence(currentSentenceIndex);
       }
     }
   };
 
-  const playSentence = (index: number) => {
+  const playSentence = async (index: number) => {
     if (index < 0 || index >= sentences.length) return;
 
     setCurrentSentenceIndex(index);
     onSentenceChange?.(index);
 
     const sentence = sentences[index];
-    const ttsOptions: TTSOptions = {
-      rate: playbackRate,
-      pitch,
-      volume,
-      voice: selectedVoice || undefined,
-      lang: "en-US",
-    };
 
-    // Use mockTTS for browser-based speech synthesis as fallback/demo
-    // Ideally, this would call the backend TTS service if generating audio files
-    mockTTS.stop(); // Stop previous
-    mockTTS.speak(
-      sentence.speechText,
-      ttsOptions,
-      () => {
+    // Process text to get STEM segments and SSML
+    try {
+      const { segments, ssml } = await ttsService.processText(sentence.text);
+      setSegments(segments);
+
+      // Use the native SpeechSynthesis but try to sync with segments
+      // In a full implementation, we'd use the synthesizeSpeech audio URL
+      // but for demo/visual sync, SpeechSynthesisUtterance events are better
+
+      const utterance = new SpeechSynthesisUtterance(sentence.text);
+      utterance.rate = playbackRate;
+      utterance.pitch = pitch;
+      utterance.volume = volume;
+
+      if (selectedVoice) {
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find(v => v.name === selectedVoice);
+        if (voice) utterance.voice = voice;
+      }
+
+      utterance.onboundary = (event) => {
+        const charIndex = event.charIndex;
+        // Find if this charIndex falls within a STEM segment
+        const activeSeg = segments.find(s =>
+          s.type !== 'text' &&
+          charIndex >= s.start &&
+          charIndex <= s.end
+        );
+
+        if (activeSeg) {
+          setActiveFormula({
+            content: activeSeg.content,
+            type: activeSeg.type === 'math' ? 'block' : 'chemistry'
+          });
+        } else {
+          setActiveFormula(null);
+        }
+      };
+
+      utterance.onend = () => {
+        setActiveFormula(null);
         if (index + 1 < sentences.length) {
           playSentence(index + 1);
         } else {
           setIsPlaying(false);
         }
-      },
-      () => {
+      };
+
+      utterance.onstart = () => {
         setIsPlaying(true);
-      }
-    );
+      };
+
+      mockTTS.stop();
+      window.speechSynthesis.speak(utterance);
+
+    } catch (error) {
+      console.error("TTS Process failed", error);
+      // Fallback to simple speech if microservice is down
+      mockTTS.speak(sentence.text, { rate: playbackRate, pitch, volume, lang: 'en-US' }, () => { }, () => { });
+    }
   };
 
   const handlePrevious = () => {
@@ -161,7 +201,7 @@ export default function AudiobookPlayer({ sentences, bookTitle, onSentenceChange
           <p className="text-slate-700 text-lg leading-relaxed">{currentSentence?.text}</p>
           {currentSentence?.containsFormula && (
             <p className="text-sm text-blue-600 mt-3 font-medium bg-blue-50 p-2 rounded">
-                📐 Contains formula: {currentSentence.formulas.map((f: { spoken: string }) => f.spoken).join(", ")}
+              📐 Contains formula: {currentSentence.formulas.map((f: { spoken: string }) => f.spoken).join(", ")}
             </p>
           )}
         </div>
@@ -258,6 +298,11 @@ export default function AudiobookPlayer({ sentences, bookTitle, onSentenceChange
         </div>
       </div>
 
+      <FormulaPane
+        formula={activeFormula?.content || null}
+        type={activeFormula?.type || 'block'}
+        isVisible={!!activeFormula}
+      />
       <audio ref={audioRef} className="hidden" />
     </div>
   );

@@ -43,10 +43,10 @@ const Reader: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-slate-800">Book not found</h2>
           <button
-            onClick={() => navigate('/marketplace')}
+            onClick={() => navigate('/library')}
             className="mt-4 px-4 py-2 bg-quantum-600 text-white rounded-lg"
           >
-            Return to Marketplace
+            Return to Library
           </button>
         </div>
       </div>
@@ -139,7 +139,11 @@ const Reader: React.FC = () => {
     <div className="fixed inset-0 bg-white z-50 flex flex-col md:flex-row h-dvh w-screen overflow-hidden">
       {/* Close button */}
       <div className="absolute top-4 left-4 z-50">
-        <button onClick={onClose} className="bg-white/80 backdrop-blur p-2 rounded-full shadow-md hover:bg-slate-100 transition-transform hover:scale-110">
+        <button
+          onClick={onClose}
+          className="bg-white/80 backdrop-blur p-2 rounded-full shadow-md hover:bg-slate-100 transition-transform hover:scale-110"
+          aria-label="Close reader"
+        >
           <X className="w-6 h-6 text-slate-800" />
         </button>
       </div>
@@ -223,18 +227,27 @@ const Reader: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-6 justify-center w-1/3">
-            <button onClick={() => handleSkip('prev')} className="text-slate-400 hover:text-white transition-colors">
+            <button
+              onClick={() => handleSkip('prev')}
+              className="text-slate-400 hover:text-white transition-colors"
+              aria-label="Previous segment"
+            >
               <SkipBack className="w-6 h-6" />
             </button>
 
             <button
               onClick={togglePlay}
               className="w-14 h-14 bg-quantum-500 hover:bg-quantum-400 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-quantum-500/25 transition-all transform hover:scale-105"
+              aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current pl-1" />}
             </button>
 
-            <button onClick={() => handleSkip('next')} className="text-slate-400 hover:text-white transition-colors">
+            <button
+              onClick={() => handleSkip('next')}
+              className="text-slate-400 hover:text-white transition-colors"
+              aria-label="Next segment"
+            >
               <SkipForward className="w-6 h-6" />
             </button>
           </div>

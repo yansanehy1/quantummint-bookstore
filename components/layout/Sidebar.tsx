@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
     LayoutGrid, ShoppingBag, Mic2, BarChart2, Wallet as WalletIcon,
     Users, Map, ScanEye, LayoutDashboard, UserPlus, UserCircle,
-    Shield, LogOut
+    Shield, LogOut, BookOpen
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -20,8 +20,7 @@ const Sidebar: React.FC = () => {
 
                 <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
                     <NavItem to="/" icon={<LayoutGrid />} label="Home" />
-                    <NavItem to="/marketplace" icon={<ShoppingBag />} label="Marketplace" />
-                    <NavItem to="/library" icon={<LayoutGrid />} label="My Library" />
+                    <NavItem to="/library" icon={<BookOpen />} label="Library" />
                     <NavItem to="/analytics" icon={<BarChart2 />} label="Reading Analytics" />
                     <NavItem to="/wallet" icon={<WalletIcon />} label="Wallet" />
                     <NavItem to="/referrals" icon={<Users />} label="Referrals" />

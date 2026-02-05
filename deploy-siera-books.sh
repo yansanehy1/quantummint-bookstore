@@ -7,8 +7,8 @@ echo "📚 QuantumMint Bookstore - Siera Books Deployment"
 echo "================================================"
 
 # Configuration
-DOMAIN="sierabooks.com"
-EMAIL="admin@sierabooks.com"
+DOMAIN="quantummint.net"
+EMAIL="admin@quantummint.net"
 INSTANCE_TYPE="g4dn.4xlarge"  # 4 GPU instance
 REGION="us-east-1"
 STORAGE_SIZE="1TB"
@@ -55,7 +55,7 @@ create_structure() {
     print_step "Creating directory structure..."
     
     mkdir -p siera-books/{services,models,data,config,logs,uploads}
-    mkdir -p siera-books/services/{api-gateway,auth-service,payment-service,video-api,video-processor,streaming-server,audiobook-api,tts-engine,formula-engine,concept-visualizer,knowledge-graph,ebook-converter,bookstore-api,web-frontend,admin-dashboard,analytics-engine}
+    mkdir -p siera-books/services/{api-gateway,auth-service,payment-service,video-api,video-processor,streaming-server,audiobook-api,tts-engine,formula-engine,concept-visualizer,knowledge-graph,ebook-converter,bookstore-api,web-frontend,admin-dashboard,analytics-engine,tts-microservice}
     mkdir -p siera-books/models/{tts,visualization,math,linguistic,kg}
     mkdir -p siera-books/data/{postgres,redis,neo4j,elasticsearch}
     mkdir -p siera-books/uploads/{videos,audiobooks,ebooks}
@@ -172,16 +172,27 @@ download_models() {
 create_docker_compose() {
     print_step "Creating Docker Compose configuration..."
     
-    # Copy the docker-compose.yml from earlier section
-    # cp docker-compose.yml siera-books/docker-compose.yml
+    cp docker-compose.yml siera-books/docker-compose.yml
     
     # Create nginx configuration
     mkdir -p siera-books/config/nginx
-    # cat > siera-books/config/nginx/siera.conf << 'EOF'
-# Nginx configuration from earlier section
-# EOF
+    cp nginx/siera.conf siera-books/config/nginx/siera.conf
     
-    echo "✅ Docker configuration created"
+    # Copy all services
+    echo "Copying service source code..."
+    for service in api-gateway auth-service video-api video-processor streaming-server content-api formula-engine concept-visualizer knowledge-graph admin-dashboard analytics-engine tts-microservice web-frontend; do
+        if [ -d "$service" ]; then
+            cp -r "$service" siera-books/services/
+        fi
+    done
+
+    # Copy shared files
+    if [ -d "shared" ]; then cp -r shared siera-books/; fi
+    if [ -d "types" ]; then cp -r types siera-books/; fi
+    if [ -d "utils" ]; then cp -r utils siera-books/; fi
+    if [ -d "components" ]; then cp -r components siera-books/; fi
+
+    echo "✅ Docker configuration and service code copied"
 }
 
 # Create initialization scripts

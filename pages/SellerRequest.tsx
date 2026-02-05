@@ -32,7 +32,7 @@ export default function SellerRequest() {
                         Thank you for your interest in becoming a seller. Our team will review your application and get back to you within 24-48 hours.
                     </p>
                     <Button onClick={() => navigate('/')} className="w-full">
-                        Return to Marketplace
+                        Return to Home
                     </Button>
                 </Card>
             </div>

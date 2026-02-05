@@ -1,31 +1,33 @@
-
 import React from 'react';
-import { Formula } from '../ui/Formula';
+import { Card } from '../ui/Card';
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
 
-interface Props {
-  latex: string;
+interface FormulaPaneProps {
+  formula: string | null;
+  type: 'inline' | 'block' | 'chemistry';
+  isVisible: boolean;
 }
 
-export function FormulaPane({ latex }: Props) {
-  if (!latex) {
-    return (
-      <div className="h-full flex items-center justify-center p-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-        <p className="text-slate-400 font-medium">Formulas will appear here when introduced in the audio.</p>
-      </div>
-    );
-  }
+export const FormulaPane: React.FC<FormulaPaneProps> = ({ formula, type, isVisible }) => {
+  if (!isVisible || !formula) return null;
 
   return (
-    <div className="prose max-w-none bg-white p-8 rounded-xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="text-center">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-4 block">Current Concept</span>
-        <div className="text-3xl text-slate-800 py-4 overflow-x-auto">
-          <Formula latex={latex} block />
+    <div className="fixed bottom-32 right-8 w-80 transform transition-all duration-500 ease-in-out">
+      <Card className="p-6 bg-white/90 backdrop-blur-md border-2 border-blue-500 shadow-2xl animate-in slide-in-from-right-8">
+        <div className="flex flex-col items-center gap-4">
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+            Detected {type === 'chemistry' ? 'Chemical Formula' : 'Mathematical Expression'}
+          </span>
+          <div className="text-2xl text-slate-900 py-4">
+            {type === 'chemistry' ? (
+              <span className="font-mono">{formula}</span>
+            ) : (
+              <BlockMath math={formula} />
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
-}
-
-
-
+};

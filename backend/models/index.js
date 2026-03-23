@@ -29,16 +29,16 @@ module.exports = (sequelize) => {
     Purchase.belongsTo(Book);
 
     // User <-> Transaction
-    User.hasMany(Transaction);
-    Transaction.belongsTo(User);
+    User.hasMany(Transaction, { foreignKey: 'userId' });
+    Transaction.belongsTo(User, { foreignKey: 'userId' });
 
     // User <-> Seller
-    User.hasOne(Seller);
-    Seller.belongsTo(User);
+    User.hasOne(Seller, { foreignKey: 'userId' });
+    Seller.belongsTo(User, { foreignKey: 'userId' });
 
     // User <-> Book (Seller's books)
-    Seller.hasMany(Book);
-    Book.belongsTo(Seller);
+    Seller.hasMany(Book, { foreignKey: 'sellerId' });
+    Book.belongsTo(Seller, { foreignKey: 'sellerId' });
 
     // User <-> Referral (Referrer)
     User.hasMany(Referral, { as: 'ReferralsSent', foreignKey: 'referrerId' });

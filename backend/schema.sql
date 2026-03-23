@@ -1,5 +1,9 @@
 -- QuantumMint Bookstore Database Schema
 
+-- Create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS quantummint_db;
+USE quantummint_db;
+
 -- Users Table
 CREATE TABLE IF NOT EXISTS Users (
     id CHAR(36) PRIMARY KEY,
@@ -13,7 +17,6 @@ CREATE TABLE IF NOT EXISTS Users (
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 -- Sellers Table
 CREATE TABLE IF NOT EXISTS Sellers (
     id CHAR(36) PRIMARY KEY,
@@ -26,7 +29,6 @@ CREATE TABLE IF NOT EXISTS Sellers (
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
 );
-
 -- Books Table
 CREATE TABLE IF NOT EXISTS Books (
     id CHAR(36) PRIMARY KEY,
@@ -39,12 +41,19 @@ CREATE TABLE IF NOT EXISTS Books (
     coverUrl VARCHAR(255),
     fileUrl VARCHAR(255) NOT NULL,
     category VARCHAR(255),
-    educationLevel ENUM('JSS', 'SSS', 'College', 'University', 'Adult Education', 'General') DEFAULT 'General',
+    educationLevel ENUM(
+        'JSS',
+        'SSS',
+        'College',
+        'University',
+        'Adult Education',
+        'General'
+    ) DEFAULT 'General',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (sellerId) REFERENCES Sellers(id) ON DELETE SET NULL
+    FOREIGN KEY (sellerId) REFERENCES Sellers(id) ON DELETE
+    SET NULL
 );
-
 -- Purchases Table
 CREATE TABLE IF NOT EXISTS Purchases (
     id CHAR(36) PRIMARY KEY,
@@ -58,20 +67,54 @@ CREATE TABLE IF NOT EXISTS Purchases (
     FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books(id) ON DELETE CASCADE
 );
-
 -- Transactions Table
 CREATE TABLE IF NOT EXISTS Transactions (
     id CHAR(36) PRIMARY KEY,
     userId CHAR(36) NOT NULL,
-    type ENUM('deposit', 'purchase', 'withdrawal', 'referral_bonus', 'gift') NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
+    type ENUM(
+        'deposit',
+        'purchase',
+        'withdrawal',
+        'referral_bonus',
+        'gift'
+    ) NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL,
+    currency ENUM('SLL', 'USD') DEFAULT 'SLL',
+    paymentMethod ENUM('orange_money', 'afrimoney', 'qmoney', 'stripe'),
+    platformFee DECIMAL(10, 4) DEFAULT 0.0000,
+    externalRef VARCHAR(255),
+    phoneNumber VARCHAR(20),
     description VARCHAR(255),
-    status ENUM('completed', 'pending', 'failed') DEFAULT 'completed',
+    status ENUM('completed', 'pending', 'failed', 'processing') DEFAULT 'pending',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
 );
-
+-- Wallets Table (dual-currency balance per user)
+CREATE TABLE IF NOT EXISTS Wallets (
+    id CHAR(36) PRIMARY KEY,
+    userId CHAR(36) NOT NULL UNIQUE,
+    balanceSLL DECIMAL(15, 2) DEFAULT 0.00,
+    balanceUSD DECIMAL(10, 4) DEFAULT 0.0000,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+);
+-- PaymentMethods Table (saved methods per user)
+CREATE TABLE IF NOT EXISTS PaymentMethods (
+    id CHAR(36) PRIMARY KEY,
+    userId CHAR(36) NOT NULL,
+    type ENUM('orange_money', 'afrimoney', 'qmoney', 'stripe') NOT NULL,
+    phoneNumber VARCHAR(20),
+    stripeAccountId VARCHAR(100),
+    stripeConnectedAt DATETIME,
+    isDefault BOOLEAN DEFAULT FALSE,
+    isActive BOOLEAN DEFAULT TRUE,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_method (userId, type)
+);
 -- Referrals Table
 CREATE TABLE IF NOT EXISTS Referrals (
     id CHAR(36) PRIMARY KEY,
@@ -84,5 +127,6 @@ CREATE TABLE IF NOT EXISTS Referrals (
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (referrerId) REFERENCES Users(id) ON DELETE CASCADE,
-    FOREIGN KEY (referredId) REFERENCES Users(id) ON DELETE SET NULL
+    FOREIGN KEY (referredId) REFERENCES Users(id) ON DELETE
+    SET NULL
 );

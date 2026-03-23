@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumMint Video Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --text: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .player-container {
+            position: relative;
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 16/9;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-container:hover .controls {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.2s;
+        }
+
+        .progress-bar:hover .progress-fill::after {
+            transform: scale(1);
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 1;
+        }
+
+        .time {
+            font-size: 14px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .quality-selector {
+            position: relative;
+        }
+
+        .quality-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--surface);
+            padding: 5px 0;
+            border-radius: 4px;
+            display: none;
+            min-width: 100px;
+        }
+
+        .quality-selector:hover .quality-menu {
+            display: block;
+        }
+
+        .quality-option {
+            padding: 5px 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .quality-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .quality-option.active {
+            color: var(--primary);
+        }
+
+        .stats-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+        }
+
+        /* Interactive Overlay */
+        .interactive-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px;
+            /* Leave space for controls */
+            pointer-events: none;
+        }
+
+        .quiz-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            pointer-events: auto;
+            text-align: center;
+            display: none;
+        }
+
+        .quiz-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="player-container" id="playerContainer">
+        <video id="video" playsinline></video>
+
+        <div class="interactive-layer" id="interactiveLayer">
+            <div class="quiz-overlay" id="quizOverlay">
+                <h3>Quick Check</h3>
+                <p>What is the main concept discussed?</p>
+                <button class="quiz-btn" onclick="answerQuiz(1)">Option A</button>
+                <button class="quiz-btn" onclick="answerQuiz(2)">Option B</button>
+            </div>
+        </div>
+
+        <div class="stats-overlay" id="statsOverlay"></div>
+
+        <div class="controls">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="buttons">
+                <button id="playBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                </button>
+
+                <div class="time">
+                    <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                </div>
+
+                <div class="spacer"></div>
+
+                <div class="cost-display" id="costDisplay"
+                    style="margin-right: 15px; font-size: 14px; color: var(--primary);">
+                    $0.00
+                </div>
+
+                <div class="quality-selector">
+                    <button>Quality</button>
+                    <div class="quality-menu" id="qualityMenu">
+                        <div class="quality-option active" data-level="-1">Auto</div>
+                    </div>
+                </div>
+
+                <button id="statsBtn">Stats</button>
+
+                <button id="fullscreenBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const qualityMenu = document.getElementById('qualityMenu');
+        const statsOverlay = document.getElementById('statsOverlay');
+        const costDisplay = document.getElementById('costDisplay');
+
+        let hls;
+        let totalCost = 0;
+        const costPerMinute = 0.05; // $0.05 per minute
+
+        // Initialize Player
+        function initPlayer(src) {
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
+
+                hls.loadSource(src);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    updateQualityLevels(data.levels);
+                    video.play().catch(() => {
+                        // Autoplay blocked, show play button
+                    });
+                });
+
+                hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+                    updateActiveQuality(data.level);
+                });
+
+                // Stats monitoring
+                setInterval(updateStats, 1000);
+
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = src;
+                video.addEventListener('loadedmetadata', () => {
+                    video.play();
+                });
+            }
+        }
+
+        // Controls
+        playBtn.addEventListener('click', togglePlay);
+        video.addEventListener('click', togglePlay);
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+            } else {
+                video.pause();
+                playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+            }
+        }
+
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(video.currentTime);
+            durationEl.textContent = formatTime(video.duration);
+
+            // Update cost
+            totalCost = (video.currentTime / 60) * costPerMinute;
+            costDisplay.textContent = '$' + totalCost.toFixed(2);
+
+            // Check for interactive events (mock)
+            if (Math.floor(video.currentTime) === 10 && !window.quizShown) {
+                showQuiz();
+                window.quizShown = true;
+            }
+        });
+
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        });
+
+        // Quality Selection
+        function updateQualityLevels(levels) {
+            qualityMenu.innerHTML = '<div class="quality-option active" onclick="setQuality(-1)">Auto</div>';
+            levels.forEach((level, index) => {
+                const div = document.createElement('div');
+                div.className = 'quality-option';
+                div.textContent = `${level.height}p`;
+                div.onclick = () => setQuality(index);
+                qualityMenu.appendChild(div);
+            });
+        }
+
+        window.setQuality = (levelIndex) => {
+            hls.currentLevel = levelIndex;
+            document.querySelectorAll('.quality-option').forEach(el => el.classList.remove('active'));
+            // Visual update happens on LEVEL_SWITCHED
+        };
+
+        function updateActiveQuality(levelIndex) {
+            const options = document.querySelectorAll('.quality-option');
+            options.forEach(el => el.classList.remove('active'));
+            // +1 because of Auto option at index 0
+            if (options[levelIndex + 1]) options[levelIndex + 1].classList.add('active');
+        }
+
+        // Stats
+        document.getElementById('statsBtn').addEventListener('click', () => {
+            statsOverlay.style.display = statsOverlay.style.display === 'none' ? 'block' : 'none';
+        });
+
+        function updateStats() {
+            if (statsOverlay.style.display === 'none') return;
+
+            const loadLevel = hls.loadLevel;
+            const level = hls.levels[loadLevel];
+
+            statsOverlay.innerHTML = `
+            Buffer: ${video.buffered.length ? (video.buffered.end(video.buffered.length - 1) - video.currentTime).toFixed(2) : 0}s<br>
+            Bandwidth: ${(hls.bandwidthEstimate / 1000000).toFixed(2)} Mbps<br>
+            Resolution: ${level ? level.width + 'x' + level.height : 'Auto'}<br>
+            Dropped Frames: ${video.webkitDroppedFrameCount || 0}
+        `;
+        }
+
+        // Fullscreen
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.getElementById('playerContainer').requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Interactive Elements
+        function showQuiz() {
+            video.pause();
+            document.getElementById('quizOverlay').style.display = 'block';
+        }
+
+        window.answerQuiz = (option) => {
+            document.getElementById('quizOverlay').style.display = 'none';
+            video.play();
+            // Send result to server
+            console.log('Quiz answered:', option);
+        };
+
+        function formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Start with a demo stream or wait for input
+        // For demo purposes, we'll try to load a local stream if available
+        // initPlayer('/stream/demo/master.m3u8');
+
+        // Expose init for external use
+        window.loadVideo = initPlayer;
+    </script>
+
+</body>
+
+</html>

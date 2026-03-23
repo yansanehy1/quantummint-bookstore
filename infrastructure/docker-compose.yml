@@ -1,0 +1,375 @@
+version: '3.8'
+
+services:
+  # Unified API Gateway
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    container_name: siera-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/siera.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ../logs/gateway:/var/log/nginx
+      - ../videos:/var/www/videos:ro
+      - ../audiobooks:/var/www/audiobooks:ro
+      - ../ebooks:/var/www/ebooks:ro
+    networks:
+      - siera-network
+    restart: unless-stopped
+    depends_on:
+      - video-api
+      - content-api
+      - subscription-service
+
+  # Monolithic API (Auth, Wallet, Payments, Bookstore)
+  monolith-api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: siera-monolith
+    environment:
+      - PORT=8000
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_NAME=${MYSQL_DATABASE:-siera_main}
+      - DB_USER=${MYSQL_USER:-siera_user}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=mysql
+      - STRIPE_CLIENT_ID=${STRIPE_CLIENT_ID}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - BACKEND_URL=${BACKEND_URL}
+    networks:
+      - siera-network
+    depends_on:
+      - mysql
+    expose:
+      - "8000"
+
+  # MySQL Database for Monolith
+  mysql:
+    image: mysql:8.0
+    container_name: siera-mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-siera_main}
+      - MYSQL_USER=${MYSQL_USER:-siera_user}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ../backend/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - siera-network
+    restart: unless-stopped
+
+  # User Management & Authentication
+  auth-service:
+    build:
+      context: ../services/auth
+      dockerfile: Dockerfile
+    container_name: siera-auth
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/siera
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./config/auth:/app/config
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+
+  # Subscription Management
+  subscription-service:
+    build:
+      context: ../services/subscription
+      dockerfile: Dockerfile
+    container_name: siera-subscription
+    ports:
+      - "4100:4100"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=siera_subscriptions
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: [ "CMD", "node", "-e", "require('http').get('http://localhost:4100/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Video Platform
+  video-api:
+    build:
+      context: ../services/video/api
+      dockerfile: Dockerfile
+    container_name: siera-video-api
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/siera_video
+      - REDIS_URL=redis://redis:6379
+      - UPLOAD_PATH=/var/www/videos
+      - MAX_UPLOAD_SIZE=10GB
+    volumes:
+      - ./videos:/var/www/videos
+      - ./logs/video-api:/app/logs
+    networks:
+      - siera-network
+
+  video-processor:
+    build:
+      context: ../services/video/processor
+      dockerfile: Dockerfile.gpu
+    container_name: siera-video-processor
+    volumes:
+      - ./videos:/var/www/videos
+      - /tmp:/tmp
+    environment:
+      - GPU_ENABLED=true
+      - NVIDIA_VISIBLE_DEVICES=all
+    networks:
+      - siera-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+  streaming-server:
+    build:
+      context: ../services/video/streaming
+      dockerfile: Dockerfile
+    container_name: siera-streaming
+    ports:
+      - "1935:1935"
+      - "8000:8000"
+    volumes:
+      - ./videos:/var/www/videos:ro
+    networks:
+      - siera-network
+
+  # Unified Content API (Audiobooks, E books, TTS)
+  content-api:
+    build:
+      context: ../services/content/api
+      dockerfile: Dockerfile
+    container_name: siera-content-api
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/siera_bookstore
+      - REDIS_URL=redis://redis:6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - TTS_MODEL_PATH=/app/models/tts
+      - PORT=5000
+    volumes:
+      - ./ebooks:/var/www/ebooks:ro
+      - ./audiobooks:/var/www/audiobooks
+      - ./videos:/var/www/videos:ro
+      - ./models/tts:/app/models/tts
+      - ./audiobooks/generated:/app/generated
+      - ./cache/tts:/app/cache
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    ports:
+      - "5000:5000"
+
+  formula-engine:
+    build:
+      context: ../services/formula-engine
+      dockerfile: Dockerfile
+    container_name: siera-formula
+    volumes:
+      - ./models/math:/app/models
+      - ./knowledge-base:/app/knowledge
+    environment:
+      - SYMPY_CACHE_SIZE=1GB
+      - MATHML_SUPPORT=true
+    networks:
+      - siera-network
+    ports:
+      - "5004:5004"
+
+  tts-microservice:
+    build:
+      context: ../services/tts/python
+      dockerfile: Dockerfile
+    container_name: siera-tts
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=5005
+    networks:
+      - siera-network
+    depends_on:
+      - redis
+    ports:
+      - "5005:5005"
+
+  concept-visualizer:
+    build:
+      context: ../services/concept-visualizer
+      dockerfile: Dockerfile
+    container_name: siera-visualizer
+    volumes:
+      - ./models/visualization:/app/models
+      - ./audiobooks/images:/app/output
+      - ./cache/visualization:/app/cache
+    environment:
+      - GPU_ENABLED=true
+      - STABLE_DIFFUSION_CHECKPOINT=/app/models/sd-scientific.ckpt
+    networks:
+      - siera-network
+
+  knowledge-graph:
+    build:
+      context: ../services/knowledge-graph
+      dockerfile: Dockerfile
+    container_name: siera-knowledge
+    volumes:
+      - ./knowledge-base:/app/data
+      - ./models/kg:/app/models
+    environment:
+      - NEO4J_URL=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+    networks:
+      - siera-network
+    depends_on:
+      - neo4j
+
+  # Infrastructure
+  postgres:
+    image: postgres:15-alpine
+    container_name: siera-postgres
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ../database/init-all-databases.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=siera,siera_video,siera_audiobook,siera_bookstore,siera_subscriptions
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - siera-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: siera-redis
+    volumes:
+      - ./data/redis:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - siera-network
+
+  neo4j:
+    image: neo4j:5-community
+    container_name: siera-neo4j
+    volumes:
+      - ./data/neo4j:/data
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+    networks:
+      - siera-network
+    ports:
+      - "7474:7474"
+
+  elasticsearch:
+    image: elasticsearch:8.10.0
+    container_name: siera-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - siera-network
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  # Frontend Interfaces
+  web-frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: siera-web
+    ports:
+      - "3000:80"
+    volumes:
+      - ../frontend/dist:/usr/share/nginx/html:ro
+      - ../frontend/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - siera-network
+    depends_on:
+      - api-gateway
+
+  admin-dashboard:
+    build:
+      context: ../admin
+      dockerfile: Dockerfile
+    container_name: siera-admin
+    ports:
+      - "3001:80"
+    volumes:
+      - ../admin/dist:/usr/share/nginx/html:ro
+    networks:
+      - siera-network
+
+  # Monitoring & Analytics
+  monitoring:
+    image: grafana/grafana:latest
+    container_name: siera-monitoring
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    networks:
+      - siera-network
+
+  analytics-engine:
+    build:
+      context: ../services/analytics/engine
+      dockerfile: Dockerfile
+    container_name: siera-analytics
+    environment:
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@postgres:5432/siera
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - siera-network
+
+networks:
+  siera-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+
+volumes:
+  videos:
+  audiobooks:
+  ebooks:
+  postgres-data:
+  redis-data:
+  neo4j-data:
+  elasticsearch-data:

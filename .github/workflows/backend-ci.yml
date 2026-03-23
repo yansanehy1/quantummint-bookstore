@@ -1,0 +1,57 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master, dev]
+
+jobs:
+  backend:
+    name: Run backend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (backend)
+        working-directory: backend
+        run: npm install
+
+      - name: Run tests (backend)
+        working-directory: backend
+        run: npm test
+
+      - name: Optional audit (backend)
+        working-directory: backend
+        run: npm audit --audit-level=moderate || true
+
+  voice_profile:
+    name: Run voice profile tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (voice profile)
+        working-directory: services/voice/profile
+        run: npm install
+
+      - name: Run tests (voice profile)
+        working-directory: services/voice/profile
+        run: JWT_SECRET=test-secret npm test
+

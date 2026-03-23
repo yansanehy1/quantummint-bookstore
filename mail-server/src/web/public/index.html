@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumMint Mail Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/mail-styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Login Container -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1><i class="fas fa-envelope"></i> QuantumMint</h1>
+                <p>Mail Server</p>
+            </div>
+            <div id="loginError" class="alert alert-error hidden"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mail Interface -->
+    <div id="mailInterface" class="mail-interface" style="display: none;">
+        <!-- Header -->
+        <div class="mail-header">
+            <div class="header-left">
+                <div class="app-logo">
+                    <i class="fas fa-envelope"></i>
+                    <span>QuantumMint</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search mail" class="search-input">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="icon-btn" title="Meet Now"><i class="fas fa-video"></i></button>
+                <button class="icon-btn" title="Calendar"><i class="fas fa-calendar"></i></button>
+                <button class="icon-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                <div class="user-menu">
+                    <button class="user-avatar-btn" id="userMenuBtn">
+                        <span id="userInitials">U</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                        <div class="dropdown-header">
+                            <div class="user-info-dropdown">
+                                <div class="user-name" id="userName">User</div>
+                                <div class="user-email" id="userEmail">user@example.com</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button class="btn-primary" id="composeBtn">
+                <i class="fas fa-plus"></i> New Email
+            </button>
+            <div class="action-divider"></div>
+            <button class="action-btn" id="deleteBtn" title="Delete"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" id="archiveBtn" title="Archive"><i class="fas fa-archive"></i></button>
+            <button class="action-btn" id="spamBtn" title="Mark as Spam"><i
+                    class="fas fa-exclamation-triangle"></i></button>
+            <button class="action-btn" id="moveBtn" title="Move to"><i class="fas fa-folder"></i></button>
+            <div class="action-divider"></div>
+            <button class="action-btn" id="replyBtn" title="Reply"><i class="fas fa-reply"></i></button>
+            <button class="action-btn" id="replyAllBtn" title="Reply All"><i class="fas fa-reply-all"></i></button>
+            <button class="action-btn" id="forwardBtn" title="Forward"><i class="fas fa-share"></i></button>
+            <div class="action-divider"></div>
+            <button class="action-btn" id="markReadBtn" title="Mark as Read"><i
+                    class="fas fa-envelope-open"></i></button>
+            <button class="action-btn" id="flagBtn" title="Flag"><i class="fas fa-flag"></i></button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="mail-content">
+            <!-- Left Sidebar - Folders -->
+            <div class="mail-sidebar">
+                <div class="folder-section">
+                    <div class="section-title">Favourites</div>
+                    <ul class="folder-list">
+                        <li class="folder-item active" data-folder="inbox">
+                            <div class="folder-icon"><i class="fas fa-inbox"></i></div>
+                            <div class="folder-name">Inbox</div>
+                            <div class="folder-count" id="inboxCount">5</div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="folder-section">
+                    <div class="section-title">Folders</div>
+                    <ul class="folder-list">
+                        <li class="folder-item" data-folder="inbox">
+                            <div class="folder-icon"><i class="fas fa-inbox"></i></div>
+                            <div class="folder-name">Inbox</div>
+                            <div class="folder-count" id="inboxCountMain">5</div>
+                        </li>
+                        <li class="folder-item" data-folder="spam">
+                            <div class="folder-icon"><i class="fas fa-ban"></i></div>
+                            <div class="folder-name">Spam Email</div>
+                            <div class="folder-count" id="spamCount">6</div>
+                        </li>
+                        <li class="folder-item" data-folder="drafts">
+                            <div class="folder-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="folder-name">Drafts</div>
+                            <div class="folder-count" id="draftsCount">0</div>
+                        </li>
+                        <li class="folder-item" data-folder="sent">
+                            <div class="folder-icon"><i class="fas fa-paper-plane"></i></div>
+                            <div class="folder-name">Sent Items</div>
+                        </li>
+                        <li class="folder-item" data-folder="deleted">
+                            <div class="folder-icon"><i class="fas fa-trash"></i></div>
+                            <div class="folder-name">Deleted Items</div>
+                        </li>
+                        <li class="folder-item" data-folder="archive">
+                            <div class="folder-icon"><i class="fas fa-archive"></i></div>
+                            <div class="folder-name">Archive</div>
+                        </li>
+                        <li class="folder-item" data-folder="notes">
+                            <div class="folder-icon"><i class="fas fa-sticky-note"></i></div>
+                            <div class="folder-name">Notes</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Email List -->
+            <div class="email-list">
+                <div class="email-list-header">
+                    <div class="list-controls">
+                        <button class="control-btn"><i class="fas fa-check-square"></i> Select</button>
+                        <button class="control-btn"><i class="fas fa-sort"></i> Jump to</button>
+                        <button class="control-btn"><i class="fas fa-filter"></i> Filter</button>
+                        <button class="control-btn"><i class="fas fa-calendar-alt"></i> By Date</button>
+                    </div>
+                </div>
+                <div class="email-list-content" id="emailListContent">
+                    <div class="loading" id="emailListLoading">
+                        <div class="spinner"></div>
+                        Loading emails...
+                    </div>
+                    <div id="emailListItems" style="display: none;">
+                        <!-- Email items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading Pane -->
+            <div class="reading-pane">
+                <div class="reading-pane-empty" id="readingPaneEmpty">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <p>Select an email to read</p>
+                </div>
+                <div class="reading-pane-content" id="readingPaneContent" style="display: none;">
+                    <div class="reading-pane-header">
+                        <div class="email-subject" id="emailSubject">Email Subject</div>
+                        <div class="email-actions-menu">
+                            <button class="menu-btn"><i class="fas fa-ellipsis-v"></i></button>
+                        </div>
+                    </div>
+                    <div class="email-meta">
+                        <div class="sender-info">
+                            <div class="sender-avatar" id="senderAvatar">C</div>
+                            <div class="sender-details">
+                                <div class="sender-name" id="senderName">Crossout</div>
+                                <div class="email-recipients">
+                                    <span class="meta-label">To:</span>
+                                    <span id="emailTo">recipient@example.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="email-date" id="emailDate">Dec 30, 2025</div>
+                    </div>
+                    <div class="email-body" id="emailBody">
+                        <!-- Email content will be populated here -->
+                    </div>
+                    <div class="email-attachments" id="emailAttachments" style="display: none;">
+                        <!-- Attachments will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Modal -->
+    <div class="modal" id="composeModal">
+        <div class="compose-window">
+            <div class="compose-header">
+                <div class="compose-title">New Email</div>
+                <div class="compose-controls">
+                    <button class="compose-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button>
+                    <button class="compose-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button>
+                    <button class="compose-control-btn" id="closeComposeBtn" title="Close"><i
+                            class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="compose-body">
+                <div class="compose-field">
+                    <label>To</label>
+                    <input type="email" id="composeTo" placeholder="Enter recipients">
+                    <div class="compose-field-actions">
+                        <button class="link-btn" id="showCcBtn">Cc</button>
+                        <button class="link-btn" id="showBccBtn">Bcc</button>
+                    </div>
+                </div>
+                <div class="compose-field" id="ccField" style="display: none;">
+                    <label>Cc</label>
+                    <input type="email" id="composeCc" placeholder="Enter Cc recipients">
+                </div>
+                <div class="compose-field" id="bccField" style="display: none;">
+                    <label>Bcc</label>
+                    <input type="email" id="composeBcc" placeholder="Enter Bcc recipients">
+                </div>
+                <div class="compose-field">
+                    <input type="text" id="composeSubject" placeholder="Add a subject" class="subject-input">
+                </div>
+                <div class="compose-toolbar">
+                    <button class="toolbar-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <select class="toolbar-select" id="fontSelect">
+                        <option>Calibri</option>
+                        <option>Arial</option>
+                        <option>Times New Roman</option>
+                        <option>Courier New</option>
+                    </select>
+                    <select class="toolbar-select" id="fontSizeSelect">
+                        <option>12</option>
+                        <option>14</option>
+                        <option>16</option>
+                        <option>18</option>
+                        <option>24</option>
+                    </select>
+                    <div class="toolbar-divider"></div>
+                    <button class="toolbar-icon-btn" id="boldBtn" title="Bold"><i class="fas fa-bold"></i></button>
+                    <button class="toolbar-icon-btn" id="italicBtn" title="Italic"><i
+                            class="fas fa-italic"></i></button>
+                    <button class="toolbar-icon-btn" id="underlineBtn" title="Underline"><i
+                            class="fas fa-underline"></i></button>
+                    <button class="toolbar-icon-btn" id="strikeBtn" title="Strikethrough"><i
+                            class="fas fa-strikethrough"></i></button>
+                    <div class="toolbar-divider"></div>
+                    <input type="color" id="textColorPicker" style="display: none;">
+                    <button class="toolbar-icon-btn" id="textColorBtn" title="Text Color"><i
+                            class="fas fa-font"></i></button>
+                    <input type="color" id="highlightColorPicker" style="display: none;">
+                    <button class="toolbar-icon-btn" id="highlightBtn" title="Highlight"><i
+                            class="fas fa-highlighter"></i></button>
+                    <div class="toolbar-divider"></div>
+                    <button class="toolbar-icon-btn" id="bulletListBtn" title="Bullet List"><i
+                            class="fas fa-list-ul"></i></button>
+                    <button class="toolbar-icon-btn" id="numberedListBtn" title="Numbered List"><i
+                            class="fas fa-list-ol"></i></button>
+                    <button class="toolbar-icon-btn" id="indentBtn" title="Increase Indent"><i
+                            class="fas fa-indent"></i></button>
+                    <button class="toolbar-icon-btn" id="outdentBtn" title="Decrease Indent"><i
+                            class="fas fa-outdent"></i></button>
+                    <div class="toolbar-divider"></div>
+                    <input type="file" id="attachFileInput" multiple style="display: none;">
+                    <button class="toolbar-icon-btn" id="attachBtn" title="Attach File"><i
+                            class="fas fa-paperclip"></i></button>
+                    <button class="toolbar-icon-btn" id="linkBtn" title="Insert Link"><i
+                            class="fas fa-link"></i></button>
+                    <button class="toolbar-icon-btn" id="emojiBtn" title="Emoji"><i class="fas fa-smile"></i></button>
+                </div>
+                <div class="compose-editor">
+                    <div id="composeBody" class="compose-body-editor" contenteditable="true"
+                        placeholder="Type your message here..."></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

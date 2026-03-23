@@ -41,6 +41,10 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: true
         },
+        sellerId: {
+            type: DataTypes.UUID,
+            allowNull: true
+        },
         educationLevel: {
             type: DataTypes.ENUM('JSS', 'SSS', 'College', 'University', 'Adult Education', 'General'),
             defaultValue: 'General'

@@ -1,0 +1,11 @@
+                <div class="compose-editor">
+                    <div id="composeBody" class="compose-body-editor" contenteditable="true" placeholder="Type your message here..."></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "name": "quantummint-bookstore",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@tanstack/react-query": "^5.90.21",
+    "axios": "^1.13.2",
+    "clsx": "^2.1.1",
+    "katex": "^0.16.25",
+    "lucide-react": "^0.555.0",
+    "prop-types": "^15.8.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.2.4",
+    "react-katex": "^3.1.0",
+    "react-quill": "^2.0.0",
+    "react-router-dom": "^7.9.6",
+    "recharts": "^3.5.1",
+    "sonner": "^1.4.0",
+    "tailwind-merge": "^3.4.0",
+    "uuid": "^13.0.0",
+    "wouter": "^3.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.24",
+    "tailwindcss": "^4.2.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "vite-plugin-pwa": "^0.19.8",
+    "workbox-window": "^7.4.0"
+  }
+}

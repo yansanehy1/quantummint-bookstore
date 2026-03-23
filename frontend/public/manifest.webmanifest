@@ -1,0 +1,44 @@
+{
+    "name": "QuantumMint Bookstore",
+    "short_name": "QuantumMint",
+    "description": "Create, publish, and manage audiobooks with AI-powered tools",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "books",
+        "productivity",
+        "education"
+    ],
+    "shortcuts": [
+        {
+            "name": "Create Book",
+            "short_name": "Create",
+            "description": "Start creating a new audiobook",
+            "url": "/studio",
+            "icons": [
+                {
+                    "src": "/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

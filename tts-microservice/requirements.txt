@@ -1,7 +1,0 @@
-flask
-flask-cors
-sympy
-redis
-gunicorn
-requests
-python-dotenv

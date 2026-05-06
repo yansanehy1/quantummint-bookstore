@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { z } from 'zod';
+import crypto from 'crypto';
 import { subscriptionManager } from './subscription-manager';
 import { billingEngine } from './billing-engine';
 import { initializePayGoManager, getPayGoManager } from './paygo-manager';
@@ -13,6 +14,12 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET && NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production');
+}
 
 // Security middleware
 app.set('trust proxy', 1);
@@ -23,7 +30,13 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
-app.use(express.json({ limit: '10kb' }));
+// Capture raw body for webhook signature verification. (Stripe needs the exact bytes.)
+app.use(express.json({
+    limit: '10kb',
+    verify: (req: any, res, buf) => {
+        req.rawBody = buf;
+    }
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -50,12 +63,42 @@ const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
         return res.status(401).json({ success: false, error: 'Missing or invalid authorization token' });
     }
     
-    const token = authHeader.substring(7);
+    const token = authHeader.substring(7).trim();
     try {
-        // In production, verify JWT signature here
-        // For now, extract user_id from token (dummy implementation)
-        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        (req as any).user = { id: decoded.id, role: decoded.role };
+        if (!JWT_SECRET) throw new Error('JWT_SECRET is not configured');
+
+        const parts = token.split('.');
+        if (parts.length !== 3) throw new Error('Invalid JWT format');
+        const [headerB64, payloadB64, signatureB64] = parts;
+
+        const base64UrlDecode = (input: string) => {
+            const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+            const pad = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
+            return Buffer.from(normalized + pad, 'base64');
+        };
+
+        const header = JSON.parse(base64UrlDecode(headerB64).toString('utf8'));
+        if (header.alg !== 'HS256') throw new Error('Unexpected JWT alg');
+
+        const payload = JSON.parse(base64UrlDecode(payloadB64).toString('utf8'));
+        const signature = base64UrlDecode(signatureB64);
+
+        const expected = crypto
+            .createHmac('sha256', JWT_SECRET)
+            .update(`${headerB64}.${payloadB64}`)
+            .digest();
+
+        if (signature.length !== expected.length || !crypto.timingSafeEqual(signature, expected)) {
+            throw new Error('Invalid JWT signature');
+        }
+
+        // Optional exp validation (seconds)
+        if (typeof payload.exp === 'number' && Math.floor(Date.now() / 1000) > payload.exp) {
+            throw new Error('JWT expired');
+        }
+
+        if (!payload.id) throw new Error('JWT missing id');
+        (req as any).user = { id: payload.id, role: payload.role };
         next();
     } catch (err) {
         return res.status(401).json({ success: false, error: 'Invalid token' });
@@ -393,8 +436,13 @@ app.post('/api/billing/webhooks/stripe', async (req: Request, res: Response) => 
     }
 
     try {
+        const rawBody = (req as any).rawBody;
+        if (!rawBody || !(rawBody instanceof Buffer)) {
+            return res.status(400).json({ error: 'Missing raw webhook payload' });
+        }
+
         const result = await billingEngine.handleStripeWebhook(
-            req.body,
+            rawBody,
             signature as string
         );
 

@@ -88,12 +88,14 @@ const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const walletRoutes = require('./routes/walletRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
+const educationalRoutes = require('./routes/educational');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/purchase', purchaseRoutes);
+app.use('/api/educational', educationalRoutes);
 
 // Health check
 app.get('/', (req, res) => {

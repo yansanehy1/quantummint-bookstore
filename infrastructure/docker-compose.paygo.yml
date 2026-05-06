@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # PayGO Service
+  paygo-service:
+    build:
+      context: ../services/paygo-service
+      dockerfile: Dockerfile
+    container_name: educational-paygo
+    ports:
+      - "8007:8007"
+    environment:
+      - NODE_ENV=production
+      - PORT=8007
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_MULTIPLE_DATABASES:-siera}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ../logs/paygo:/app/logs
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8007/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Update existing services to include PayGO database
+  postgres:
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ../database/paygo-schema.sql:/docker-entrypoint-initdb.d/03-paygo.sql
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=siera,siera_video,siera_audiobook,siera_bookstore,siera_subscriptions,siera_paygo
+
+  # Update frontend with PayGO environment variables
+  web-frontend:
+    environment:
+      - REACT_APP_PAYGO_API_URL=http://localhost:8007
+      - REACT_APP_MEDIA_SYNC_URL=http://localhost:8004
+      - REACT_APP_ANALYTICS_URL=http://localhost:8006
+      - REACT_APP_EDUCATIONAL_API_URL=http://localhost:8000/api/educational
+
+networks:
+  siera-network:
+    external: true

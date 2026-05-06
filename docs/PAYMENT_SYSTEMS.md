@@ -26,9 +26,9 @@ QuantumMint Bookstore - Sierra Books supports four payment methods for deposits 
 **Transaction Limits:**
 
 - Min deposit: Le 10
-- Max deposit: Le 500,000
+- Max deposit: Le 25,000
 - Min withdrawal: Le 10
-- Max withdrawal: Le 1,000,000
+- Max withdrawal: Le 25,000
 
 **Fees:**
 
@@ -54,9 +54,9 @@ QuantumMint Bookstore - Sierra Books supports four payment methods for deposits 
 **Transaction Limits:**
 
 - Min deposit: Le 10
-- Max deposit: Le 750,000
+- Max deposit: Le 18,000
 - Min withdrawal: Le 10
-- Max withdrawal: Le 1,500,000
+- Max withdrawal: Le 18,000
 
 **Fees:**
 
@@ -82,9 +82,9 @@ QuantumMint Bookstore - Sierra Books supports four payment methods for deposits 
 **Transaction Limits:**
 
 - Min deposit: Le 10
-- Max deposit: Le 1,000,000
+- Max deposit: Le 15,000
 - Min withdrawal: Le 10
-- Max withdrawal: Le 2,000,000
+- Max withdrawal: Le 15,000
 
 **Fees:**
 

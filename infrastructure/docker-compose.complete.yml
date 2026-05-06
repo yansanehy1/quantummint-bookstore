@@ -1,0 +1,343 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    container_name: siera-gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - siera-network
+    depends_on:
+      - monolith-api
+      - media-sync-service
+      - analytics-service
+      - paygo-service
+
+  # Main Backend API
+  monolith-api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: siera-monolith
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_MULTIPLE_DATABASES:-siera}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ../logs:/app/logs
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+
+  # Educational Services
+  media-sync-service:
+    build:
+      context: ../services/media-sync-service
+      dockerfile: Dockerfile
+    container_name: educational-media-sync
+    ports:
+      - "8004:8004"
+    environment:
+      - NODE_ENV=production
+      - PORT=8004
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_MULTIPLE_DATABASES:-siera}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+    volumes:
+      - ../logs/media-sync:/app/logs
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8004/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  analytics-service:
+    build:
+      context: ../services/analytics-service
+      dockerfile: Dockerfile
+    container_name: educational-analytics
+    ports:
+      - "8006:8006"
+    environment:
+      - NODE_ENV=production
+      - PORT=8006
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_MULTIPLE_DATABASES:-siera}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ../logs/analytics:/app/logs
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8006/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  paygo-service:
+    build:
+      context: ../services/paygo-service
+      dockerfile: Dockerfile
+    container_name: educational-paygo
+    ports:
+      - "8007:8007"
+    environment:
+      - NODE_ENV=production
+      - PORT=8007
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_MULTIPLE_DATABASES:-siera}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ../logs/paygo:/app/logs
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8007/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: siera-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=siera,siera_video,siera_audiobook,siera_bookstore,siera_subscriptions,siera_paygo
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ../backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ../database/educational_schema_update.sql:/docker-entrypoint-initdb.d/02-educational.sql
+      - ../database/paygo-schema.sql:/docker-entrypoint-initdb.d/03-paygo.sql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - siera-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: siera-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - siera-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  web-frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: siera-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_MEDIA_SYNC_URL=http://localhost:8004
+      - REACT_APP_ANALYTICS_URL=http://localhost:8006
+      - REACT_APP_PAYGO_API_URL=http://localhost:8007
+      - REACT_APP_EDUCATIONAL_API_URL=http://localhost:8000/api/educational
+      - REACT_APP_WS_URL=ws://localhost:8004
+    networks:
+      - siera-network
+    depends_on:
+      - monolith-api
+      - media-sync-service
+      - analytics-service
+      - paygo-service
+
+  # Additional Services (existing)
+  auth-service:
+    build:
+      context: ../services/auth-service
+      dockerfile: Dockerfile
+    container_name: siera-auth
+    ports:
+      - "8001:8001"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=siera
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+
+  subscription-service:
+    build:
+      context: ../services/subscription-service
+      dockerfile: Dockerfile
+    container_name: siera-subscriptions
+    ports:
+      - "8002:8002"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=siera_subscriptions
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+      - redis
+
+  video-api:
+    build:
+      context: ../services/video-api
+      dockerfile: Dockerfile
+    container_name: siera-video
+    ports:
+      - "8003:8003"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=siera_video
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+
+  content-api:
+    build:
+      context: ../services/content-api
+      dockerfile: Dockerfile
+    container_name: siera-content
+    ports:
+      - "8005:8005"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=siera
+    networks:
+      - siera-network
+    depends_on:
+      - postgres
+
+  # External Services
+  neo4j:
+    image: neo4j:5-community
+    container_name: siera-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/siera_password
+      - NEO4J_PLUGINS=["apoc"]
+    volumes:
+      - ./data/neo4j:/data
+    networks:
+      - siera-network
+
+  elasticsearch:
+    image: elasticsearch:8.8.0
+    container_name: siera-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - siera-network
+
+  # Monitoring
+  monitoring:
+    build:
+      context: ../services/monitoring
+      dockerfile: Dockerfile
+    container_name: siera-monitoring
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - siera-network
+
+  analytics-engine:
+    build:
+      context: ../services/analytics-engine
+      dockerfile: Dockerfile
+    container_name: siera-analytics-engine
+    ports:
+      - "8081:8081"
+    environment:
+      - NODE_ENV=production
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - siera-network
+    depends_on:
+      - elasticsearch
+
+networks:
+  siera-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  elasticsearch_data:

@@ -1,0 +1,29 @@
+{
+  "name": "media-sync-service",
+  "version": "1.0.0",
+  "description": "Media synchronization service for immersive educational content",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "mysql2": "^3.6.0",
+    "redis": "^4.6.7",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2"
+  },
+  "keywords": ["education", "media", "synchronization", "audiobook", "immersive"],
+  "author": "Quantummint Team",
+  "license": "MIT"
+}

@@ -6,10 +6,16 @@ function errorHandler(err, req, res, next) {
     console.error(err.stack || err);
 
     const statusCode = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal server error';
+    const isProd = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const message = (isProd && statusCode >= 500)
+        ? 'Internal server error'
+        : (err.message || 'Internal server error');
 
     // if the error object already has a response format, use it
     if (err.response && typeof err.response === 'object') {
+        if (isProd && statusCode >= 500) {
+            return res.status(statusCode).json({ error: 'Internal server error' });
+        }
         return res.status(statusCode).json(err.response);
     }
 

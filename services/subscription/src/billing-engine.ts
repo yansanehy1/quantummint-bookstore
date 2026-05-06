@@ -3,7 +3,14 @@ import { query, queryOne } from './database';
 import { UserSubscription, SubscriptionInvoice } from './types';
 
 // Initialize payment providers
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+if (!STRIPE_SECRET_KEY && NODE_ENV === 'production') {
+    throw new Error('STRIPE_SECRET_KEY must be set in production');
+}
+
+const stripe = new Stripe(STRIPE_SECRET_KEY || '', {
     apiVersion: '2023-10-16',
 });
 
@@ -140,7 +147,10 @@ export class BillingEngine {
         payload: string | Buffer,
         signature: string
     ): Promise<{ processed: boolean; event_type: string }> {
-        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            throw new Error('STRIPE_WEBHOOK_SECRET not configured');
+        }
 
         try {
             const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);

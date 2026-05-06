@@ -186,13 +186,36 @@ exports.handleStripeWebhook = async (req, payload) => {
 
 // Stripe Connect helpers
 exports.getStripeConnectUrl = (userId) => {
-    const STRIPE_CLIENT_ID = process.env.STRIPE_CLIENT_ID || 'ca_placeholder';
+    let STRIPE_CLIENT_ID = process.env.STRIPE_CLIENT_ID;
+    if (!STRIPE_CLIENT_ID) {
+        if ((process.env.NODE_ENV || '').toLowerCase() === 'production') {
+            throw new Error('STRIPE_CLIENT_ID must be set in production');
+        }
+        logger.warn('STRIPE_CLIENT_ID is not set; using placeholder for development only');
+        STRIPE_CLIENT_ID = 'ca_placeholder';
+    }
     const REDIRECT_URI = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/payments/stripe/callback`;
     return `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${STRIPE_CLIENT_ID}&scope=read_write&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${userId}`;
 };
 
 exports.handleStripeConnectCallback = async (req, userId, code) => {
     if (!code || !userId) throw new Error('Missing OAuth parameters');
+
+    // This project currently simulates the OAuth code exchange.
+    // To avoid abuse of an unverified callback in production, require an explicit opt-in.
+    const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const allowStub = process.env.STRIPE_CONNECT_STUB_ALLOWED === 'true';
+    if (isProduction && !allowStub) {
+        throw new Error('Stripe Connect callback stub is disabled in production');
+    }
+
+    if (typeof code !== 'string' || code.length < 5 || code.length > 128 || !/^[A-Za-z0-9_-]+$/.test(code)) {
+        throw new Error('Invalid OAuth code');
+    }
+    if (typeof userId !== 'string' || !/^[0-9a-fA-F-]{36}$/.test(userId)) {
+        throw new Error('Invalid OAuth state/userId');
+    }
+
     // simulate stripe token exchange for dev
     const stripeAccountId = `acct_${code.slice(0, 16)}`;
     const sequelize = getSequelizeFromReq(req);

@@ -3,10 +3,18 @@ const jwt = require('jsonwebtoken');
 // we'll access models from request (populated in server.js)
 const asyncHandler = require('../middleware/asyncHandler');
 
-// ensure we have a secret at startup
+// Ensure we have a secret at startup.
+// Using a hardcoded default in production is a critical security flaw.
 if (!process.env.JWT_SECRET) {
     const { main: logger } = require('../utils/logger');
-    logger.error('JWT_SECRET is not defined in environment - using default for development');
+    const nodeEnv = process.env.NODE_ENV || 'development';
+
+    if (nodeEnv === 'production') {
+        logger.error('JWT_SECRET is not defined in environment (refusing to start in production)');
+        throw new Error('JWT_SECRET must be set in production');
+    }
+
+    logger.warn('JWT_SECRET is not defined; defaulting for development only (DO NOT USE IN PRODUCTION)');
     process.env.JWT_SECRET = 'development_jwt_secret_change_in_production';
 }
 

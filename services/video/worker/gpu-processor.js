@@ -1,7 +1,44 @@
 // video-processor-worker/gpu-processor.js
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const util = require('util');
 const execAsync = util.promisify(exec);
+
+function runFFmpeg(args, timeoutMs = 3600000) {
+    return new Promise((resolve, reject) => {
+        const ffmpeg = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+        let stdout = '';
+        let stderr = '';
+
+        const timer = setTimeout(() => {
+            try {
+                ffmpeg.kill('SIGKILL');
+            } catch {}
+            reject(new Error('ffmpeg timeout'));
+        }, timeoutMs);
+
+        ffmpeg.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        ffmpeg.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        ffmpeg.on('error', (error) => {
+            clearTimeout(timer);
+            reject(error);
+        });
+
+        ffmpeg.on('close', (code) => {
+            clearTimeout(timer);
+            if (code === 0) {
+                resolve({ stdout, stderr });
+            } else {
+                reject(new Error(`ffmpeg failed with code ${code}: ${stderr}`));
+            }
+        });
+    });
+}
 
 class GPUVideoProcessor {
     constructor() {
@@ -44,36 +81,42 @@ class GPUVideoProcessor {
             quality = 23
         } = options;
 
-        // GPU-optimized encoding command
-        const command = [
-            'ffmpeg',
-            '-hwaccel', 'cuda',                     // Enable CUDA hardware acceleration
-            '-hwaccel_output_format', 'cuda',       // Output in CUDA format
-            '-i', `"${inputPath}"`,                 // Input file
-            '-vf', `scale_cuda=w=${width}:h=${height}:interp_algo=super`, // GPU scaling
-            '-c:v', 'h264_nvenc',                   // NVIDIA H.264 encoder
-            '-preset', preset,                      // GPU preset (p1-p7)
-            '-profile:v', 'high',                   // Encoding profile
-            '-rc', 'vbr',                           // Rate control
-            '-cq', quality,                         // Constant quality
-            '-b:v', bitrate,                        // Target bitrate
-            '-maxrate', `${parseInt(bitrate) * 1.5}k`, // Max bitrate
-            '-bufsize', `${parseInt(bitrate) * 2}k`,   // Buffer size
-            '-rc-lookahead', '32',                  // Lookahead for better quality
-            '-spatial-aq', '1',                     // Spatial adaptive quantization
-            '-temporal-aq', '1',                    // Temporal adaptive quantization
-            '-bf', '3',                             // B-frames
-            '-b_ref_mode', 'middle',                // B-frame reference mode
-            '-c:a', 'aac',                          // Audio codec
-            '-b:a', '192k',                         // Audio bitrate
-            '-y',                                   // Overwrite output
-            `"${outputPath}"`
-        ].join(' ');
+        const widthInt = Number.isFinite(width) ? Math.trunc(width) : parseInt(width, 10) || 1920;
+        const heightInt = Number.isFinite(height) ? Math.trunc(height) : parseInt(height, 10) || 1080;
+        const qualityInt = Number.isFinite(quality) ? Math.trunc(quality) : parseInt(quality, 10) || 23;
+        const bitrateK = typeof bitrate === 'string' && /^\\d+k$/i.test(bitrate) ? bitrate.toLowerCase() : '5000k';
+        const presetNV = typeof preset === 'string' && /^p[1-7]$/i.test(preset) ? preset.toLowerCase() : 'p4';
+        const bitrateNum = parseInt(bitrateK, 10);
 
-        console.log(`🎬 Encoding with GPU: ${command}`);
+        // IMPORTANT: use spawn(args) (no shell) to prevent command injection via paths/options.
+        const args = [
+            '-hwaccel', 'cuda',
+            '-hwaccel_output_format', 'cuda',
+            '-i', inputPath,
+            '-vf', `scale_cuda=w=${widthInt}:h=${heightInt}:interp_algo=super`,
+            '-c:v', 'h264_nvenc',
+            '-preset', presetNV,
+            '-profile:v', 'high',
+            '-rc', 'vbr',
+            '-cq', String(qualityInt),
+            '-b:v', bitrateK,
+            '-maxrate', `${Math.floor(bitrateNum * 1.5)}k`,
+            '-bufsize', `${Math.floor(bitrateNum * 2)}k`,
+            '-rc-lookahead', '32',
+            '-spatial-aq', '1',
+            '-temporal-aq', '1',
+            '-bf', '3',
+            '-b_ref_mode', 'middle',
+            '-c:a', 'aac',
+            '-b:a', '192k',
+            '-y',
+            outputPath
+        ];
+
+        console.log(`🎬 Encoding with GPU (ffmpeg args):`, args);
 
         try {
-            const { stdout, stderr } = await execAsync(command, { timeout: 3600000 });
+            const { stdout, stderr } = await runFFmpeg(args, 3600000);
 
             // Parse GPU stats from output
             const gpuStats = this.parseGPUStats(stderr);
@@ -100,28 +143,36 @@ class GPUVideoProcessor {
             crf = 23
         } = options;
 
-        const command = [
-            'ffmpeg',
-            '-i', `"${inputPath}"`,
-            '-vf', `scale=w=${width}:h=${height}:flags=lanczos`,
+        const widthInt = Number.isFinite(width) ? Math.trunc(width) : parseInt(width, 10) || 1920;
+        const heightInt = Number.isFinite(height) ? Math.trunc(height) : parseInt(height, 10) || 1080;
+        const crfInt = Number.isFinite(crf) ? Math.trunc(crf) : parseInt(crf, 10) || 23;
+        const bitrateK = typeof bitrate === 'string' && /^\\d+k$/i.test(bitrate) ? bitrate.toLowerCase() : '5000k';
+        const presetStr = typeof preset === 'string' ? preset : 'medium';
+        const presetSafe = /^[a-zA-Z0-9_-]+$/.test(presetStr) ? presetStr : 'medium';
+        const bitrateNum = parseInt(bitrateK, 10);
+
+        // IMPORTANT: use spawn(args) (no shell) to prevent command injection via paths/options.
+        const args = [
+            '-i', inputPath,
+            '-vf', `scale=w=${widthInt}:h=${heightInt}:flags=lanczos`,
             '-c:v', 'libx264',
-            '-preset', preset,
-            '-crf', crf,
-            '-maxrate', bitrate,
-            '-bufsize', `${parseInt(bitrate) * 2}k`,
+            '-preset', presetSafe,
+            '-crf', String(crfInt),
+            '-maxrate', bitrateK,
+            '-bufsize', `${Math.floor(bitrateNum * 2)}k`,
             '-profile:v', 'high',
             '-level', '4.0',
             '-c:a', 'aac',
             '-b:a', '192k',
             '-movflags', '+faststart',
             '-y',
-            `"${outputPath}"`
-        ].join(' ');
+            outputPath
+        ];
 
-        console.log(`🎬 Encoding with CPU: ${command}`);
+        console.log(`🎬 Encoding with CPU (ffmpeg args):`, args);
 
         try {
-            const { stdout, stderr } = await execAsync(command, { timeout: 3600000 });
+            const { stdout, stderr } = await runFFmpeg(args, 3600000);
 
             return {
                 success: true,

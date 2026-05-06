@@ -57,30 +57,40 @@ exports.stripeDisconnect = asyncHandler(async (req, res) => {
 // ─── Webhooks ─────────────────────────────────────────────────────────────────
 
 exports.handleMobileMoneyWebhook = asyncHandler(async (req, res) => {
+    // Optional shared secret protection for deployments that can configure it.
+    // If MOBILE_MONEY_WEBHOOK_SECRET is set (especially in production), require the matching header.
+    const secret = process.env.MOBILE_MONEY_WEBHOOK_SECRET;
+    if (secret && (process.env.NODE_ENV || 'development') === 'production') {
+        const provided = req.headers['x-webhook-secret'];
+        if (!provided || provided !== secret) {
+            return res.status(401).json({ error: 'Invalid webhook secret' });
+        }
+    }
+
     const result = await paymentService.handleMobileMoneyWebhook(req, req.body);
     res.json(result);
 });
 
 exports.handleStripeWebhook = asyncHandler(async (req, res) => {
+    // Stripe webhooks must always be verified if this endpoint is exposed.
+    // Never accept unverified events (this is a common webhook spoofing vulnerability).
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        return res.status(503).json({ error: 'Stripe webhook secret not configured' });
+    }
+    if (!stripe) {
+        return res.status(503).json({ error: 'Stripe SDK unavailable; cannot verify webhook signature' });
+    }
+
     let event;
     const rawBody = req.body;
 
-    if (process.env.STRIPE_WEBHOOK_SECRET && stripe) {
-        const sig = req.headers['stripe-signature'];
-        if (!sig) return res.status(400).json({ error: 'Stripe-Signature header missing' });
+    const sig = req.headers['stripe-signature'];
+    if (!sig) return res.status(400).json({ error: 'Stripe-Signature header missing' });
 
-        try {
-            event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
-        } catch (err) {
-            return res.status(400).json({ error: 'Invalid Stripe signature' });
-        }
-    } else {
-        if (!process.env.STRIPE_WEBHOOK_SECRET) {
-            console.warn('STRIPE_WEBHOOK_SECRET is not defined; skipping Stripe webhook signature verification');
-        } else {
-            console.warn('Stripe SDK not available; skipping Stripe webhook signature verification');
-        }
-        event = req.body || {};
+    try {
+        event = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+        return res.status(400).json({ error: 'Invalid Stripe signature' });
     }
 
     const result = await paymentService.handleStripeWebhook(req, event);

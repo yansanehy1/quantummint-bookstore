@@ -27,6 +27,11 @@ jobs:
 
       - name: Run tests (backend)
         working-directory: backend
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-for-ci
+          DISABLE_SUBSCRIPTION_WORKER: 'true'
+          SQLITE_PATH: ':memory:'
         run: npm test
 
       - name: Optional audit (backend)

@@ -1,5 +1,5 @@
 /**
- * Email Configuration for QuantumMint Bookstore - Sierra Books
+ * Email Configuration for QuantumMint Bookstore
  * Domain: quantum.quantummint.net
  */
 
@@ -12,19 +12,19 @@ module.exports = {
     senders: {
         orders: {
             email: 'orders@quantummint.net',
-            name: 'Sierra Books Order Confirmation'
+            name: 'QuantumMint Order Confirmation'
         },
         support: {
             email: 'support@quantummint.net',
-            name: 'Sierra Books Support'
+            name: 'QuantumMint Support'
         },
         newsletter: {
             email: 'newsletter@quantummint.net',
-            name: 'Sierra Books Newsletter'
+            name: 'QuantumMint Newsletter'
         },
         alerts: {
             email: 'alerts@quantummint.net',
-            name: 'Sierra Books Inventory Alerts'
+            name: 'QuantumMint Inventory Alerts'
         },
         admin: {
             email: 'admin@quantummint.net',
@@ -144,7 +144,7 @@ module.exports = {
 
     // Compliance Settings
     compliance: {
-        physicalAddress: 'Sierra Books, [Your Address]', // TODO: Update with actual address
+        physicalAddress: 'QuantumMint Bookstore, 123 Digital Ave, Tech City, SL', 
         requireUnsubscribe: true,
         oneClickUnsubscribe: true,
         includePreferenceCenter: true,
@@ -199,7 +199,7 @@ module.exports = {
     welcomeSeries: [
         {
             day: 1,
-            subject: 'Welcome to Sierra Books Insider',
+            subject: 'Welcome to QuantumMint Bookstore Insider',
             template: 'WELCOME_SERIES_1',
             includeDiscountCode: true
         },

@@ -16,6 +16,13 @@ export interface SyncPoint {
   audioUrl?: string; // URL for generated audio
 }
 
+export interface WordTimestamp {
+  word: string;
+  startMs: number;
+  endMs: number;
+  sentenceIndex?: number;
+}
+
 export interface VoiceProfile {
   id: string;
   name: string;
@@ -82,13 +89,109 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'seller' | 'admin';
+  role: 'learner' | 'seller' | 'admin' | 'support';
   walletBalance: {
     sll: number;
     usd: number;
   };
   avatarUrl?: string;
   status?: 'Active' | 'Suspended' | 'Pending';
+}
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: 'deposit' | 'withdrawal' | 'purchase' | 'refund' | 'payout' | 'admin_adjustment';
+  amount: number;
+  currency: 'USD' | 'SLL';
+  status: 'pending' | 'completed' | 'failed' | 'rejected';
+  method?: string;
+  accountNumber?: string;
+  description?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  User?: { name: string; email: string };
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  groupId?: string;
+  sponsorId?: string;
+  planId: string;
+  status: 'active' | 'expired' | 'cancelled';
+  startDate: string;
+  endDate: string;
+  amount: number;
+  currency: 'USD' | 'SLL';
+  allowedBookIds?: string[] | null;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  targetId: string;
+  details: Record<string, any>;
+  createdAt: string;
+  User: { name: string; email: string };
+}
+
+export interface FormulaBreakdown {
+  id: string;
+  latex: string;
+  explanation: string;
+  concepts: string[];
+}
+
+export interface ConceptDefinition {
+  id: string;
+  name: string;
+  description: string;
+  visualUrl?: string;
+}
+
+export interface SearchResults {
+  query: string;
+  results: {
+    books: Book[];
+    formulas: FormulaBreakdown[];
+    concepts: ConceptDefinition[];
+  };
+}
+
+export interface SellerProfile {
+  id: string;
+  userId: string;
+  storeName: string;
+  bio?: string;
+  status: 'pending' | 'active' | 'rejected';
+  logoUrl?: string;
+  User: { name: string; email: string };
+}
+
+export interface Note {
+  id: string;
+  bookId: string;
+  pageId: number;
+  content: string;
+  color?: string;
+  highlightText?: string;
+  createdAt: string;
+}
+
+export interface UserGroup {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'CUG' | 'ORGANIZATION' | 'GOVERNMENT' | 'PRIVATE';
+  sponsorId?: string;
+  status: 'pending' | 'active' | 'inactive';
+  maxMembers: number;
+  prepaidBalance: number;
+  currency: 'USD' | 'SLL';
+  allowedBookIds?: string[] | null;
+  GroupSponsor?: { name: string; email: string };
+  GroupMembers?: Array<{ id: string }>;
 }
 
 export interface GroundingChunk {

@@ -1,22 +1,40 @@
-FROM node:18-alpine
+# video-api/Dockerfile
+FROM node:20-alpine AS base
 
-RUN apk add --no-cache python3 make g++ ffmpeg libgomp bash
+# Install runtime dependencies
+RUN apk add --no-cache \
+    ffmpeg \
+    curl \
+    tini \
+    && addgroup -g 1001 nodejs \
+    && adduser -S -u 1001 nodejs
 
+# Set working directory
 WORKDIR /app
 
+# Copy package files first for better caching
 COPY package*.json ./
-RUN npm ci --only=production
 
-COPY . .
+# Install production dependencies only
+RUN npm ci --only=production --ignore-scripts \
+    && npm cache clean --force
 
-RUN mkdir -p /var/www/videos /var/www/uploads /app/logs
-RUN chown -R node:node /app /var/www
+# Copy application code
+COPY --chown=nodejs:nodejs . .
 
-USER node
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && chown -R nodejs:nodejs /app
+
+# Use tini as init system for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Run as non-root user
+USER nodejs
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
 
 EXPOSE 3000
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node healthcheck.js
 
 CMD ["node", "server.js"]

@@ -24,11 +24,15 @@ module.exports = (sequelize) => {
             allowNull: false
         },
         role: {
-            type: DataTypes.ENUM('user', 'educator', 'admin'),
-            defaultValue: 'user'
+            type: DataTypes.ENUM('learner', 'seller', 'admin', 'support'),
+            defaultValue: 'learner'
         },
-        balance: {
-            type: DataTypes.DECIMAL(10, 2),
+        usdBalance: {
+            type: DataTypes.DECIMAL(15, 2),
+            defaultValue: 0.00
+        },
+        sllBalance: {
+            type: DataTypes.DECIMAL(15, 2),
             defaultValue: 0.00
         },
         avatarUrl: {

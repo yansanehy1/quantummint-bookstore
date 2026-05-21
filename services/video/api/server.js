@@ -5,12 +5,19 @@ const helmet = require('helmet');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
 const { createClient } = require('redis');
+const { Pool } = require('pg');
 const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
 const { z } = require('zod');
+const jwt = require('jsonwebtoken');
+const cron = require('node-cron');
+const { register, metrics } = require('./metrics');
 
 const app = express();
+const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL
+});
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -46,40 +53,11 @@ const authenticateUser = (req, res, next) => {
     }
     try {
         const token = authHeader.substring(7);
-
         if (!JWT_SECRET) throw new Error('JWT_SECRET is not configured');
 
-        const parts = token.split('.');
-        if (parts.length !== 3) throw new Error('Invalid JWT format');
-        const [headerB64, payloadB64, signatureB64] = parts;
-
-        const base64UrlDecode = (input) => {
-            const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-            const pad = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
-            return Buffer.from(normalized + pad, 'base64');
-        };
-
-        const header = JSON.parse(base64UrlDecode(headerB64).toString('utf8'));
-        if (header.alg !== 'HS256') throw new Error('Unexpected JWT alg');
-
-        const payload = JSON.parse(base64UrlDecode(payloadB64).toString('utf8'));
-        const signature = base64UrlDecode(signatureB64);
-
-        const expected = crypto
-            .createHmac('sha256', JWT_SECRET)
-            .update(`${headerB64}.${payloadB64}`)
-            .digest();
-
-        if (signature.length !== expected.length || !crypto.timingSafeEqual(signature, expected)) {
-            throw new Error('Invalid JWT signature');
-        }
-
-        if (typeof payload.exp === 'number' && Math.floor(Date.now() / 1000) > payload.exp) {
-            throw new Error('JWT expired');
-        }
-
-        if (!payload.id) throw new Error('JWT missing id');
-        req.user = { id: payload.id };
+        req.user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        
+        if (!req.user.id) throw new Error('JWT missing id');
         next();
     } catch (err) {
         return res.status(401).json({ error: 'Invalid token' });
@@ -91,7 +69,8 @@ const InitUploadSchema = z.object({
     filename: z.string().regex(/^[a-zA-Z0-9._-]+$/).max(255),
     size: z.number().positive().max(5 * 1024 * 1024 * 1024),
     totalChunks: z.number().positive().max(10000),
-    userId: z.string().uuid()
+    userId: z.string().uuid(),
+    bookId: z.string().uuid().optional()
 });
 
 const ChunkUploadSchema = z.object({
@@ -169,16 +148,28 @@ class UploadManager {
         const state = {
             id: uploadId,
             userId,
+            bookId: metadata.bookId,
             filename: metadata.filename,
             size: metadata.size,
             totalChunks: metadata.totalChunks,
             uploadedSize: 0,
             chunks: [],
             status: 'uploading',
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            startTime: Date.now()
         };
 
         await this.saveState(uploadId, state);
+
+        // Record metrics
+        metrics.uploadSize.inc({ user_id: userId }, metadata.size);
+
+        // Persistent record in PostgreSQL
+        await pgPool.query(
+            'INSERT INTO video_jobs (id, user_id, book_id, original_filename, input_path, status, encoding_options) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [uploadId, userId, metadata.bookId, metadata.filename, uploadPath, 'queued', JSON.stringify({ qualities: metadata.qualities || [] })]
+        );
+
         return { uploadId, chunkSize: 5 * 1024 * 1024, expiresIn: 86400 };
     }
 
@@ -235,6 +226,10 @@ class UploadManager {
             writeStream.on('error', reject);
         });
         
+        // Record metrics
+        const duration = (Date.now() - state.startTime) / 1000;
+        metrics.uploadDuration.observe({ status: 'success' }, duration);
+
         // Cleanup temp directory
         try {
             await fs.rm(path.join(TEMP_DIR, uploadId), { recursive: true, force: true });
@@ -298,15 +293,17 @@ app.post('/api/upload/chunk/:uploadId', authenticateUser, upload.single('chunk')
         );
 
         if (result.status === 'completed') {
+            const state = await uploadManager.getState(req.params.uploadId);
             const jobId = crypto.randomBytes(8).toString('hex');
             if (redis) {
                 await redis.lPush('video:queue', JSON.stringify({
                     id: jobId,
                     userId: req.user.id,
+                    bookId: state?.bookId,
                     inputPath: result.filePath,
                     options: {
                         outputFormats: ['hls', 'mp4'],
-                        qualities: ['360p', '720p', '1080p']
+                        qualities: ['480p', '720p', '1080p']
                     }
                 }));
                 result.jobId = jobId;
@@ -320,11 +317,123 @@ app.post('/api/upload/chunk/:uploadId', authenticateUser, upload.single('chunk')
     }
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+// Internal endpoint for Nginx auth_request (not exposed to clients)
+app.post('/auth/verify', async (req, res) => {
+    const token = req.headers['x-user-token']?.replace('Bearer ', '');
+    const originalUri = req.headers['x-original-uri'];
+    
+    if (!token) {
+        return res.status(401).end();
+    }
+    
+    try {
+        // Verify JWT
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        
+        // Check if user has access to requested video
+        // Extract videoId from URI: /stream/{videoId}/...
+        const videoIdMatch = originalUri?.match(/\/stream\/([a-f0-9]+)/);
+        if (videoIdMatch) {
+            const videoId = videoIdMatch[1];
+            // Query database: does user own/have access to this video?
+            const hasAccess = await checkVideoAccess(decoded.id, videoId);
+            if (!hasAccess) {
+                return res.status(403).end();
+            }
+        }
+        
+        // Auth successful
+        res.status(200).end();
+    } catch (err) {
+        console.error('Auth verify error:', err.message);
+        res.status(401).end();
+    }
+});
+
+// Prometheus metrics endpoint (protected)
+app.get('/metrics', async (req, res) => {
+    try {
+        // Update dynamic metrics
+        metrics.queueDepth.set(await getQueueDepth());
+        
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (err) {
+        res.status(500).end(err.message);
+    }
+});
+
+// Helper: Check video access
+async function checkVideoAccess(userId, videoId) {
+    const result = await pgPool.query(
+        `SELECT 1 FROM video_jobs 
+         WHERE id = $1 AND (user_id = $2 OR status = 'public') 
+         LIMIT 1`,
+        [videoId, userId]
+    );
+    return result.rowCount > 0;
+}
+
+// Helper: Get queue depth from Redis
+async function getQueueDepth() {
+    if (!redis) return 0;
+    try {
+        return await redis.lLen('video:queue');
+    } catch (e) {
+        return 0;
+    }
+}
+
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
     res.status(500).json({ error: 'Internal server error' });
+});
+
+// Cleanup & Maintenance Cron (Runs daily at 3 AM)
+cron.schedule('0 3 * * *', async () => {
+    console.log('🧹 Running Video Service Cleanup...');
+    try {
+        const now = Date.now();
+        const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+        // 1. Cleanup expired temp upload directories
+        const tempDirs = await fs.readdir(TEMP_DIR);
+        for (const dir of tempDirs) {
+            const dirPath = path.join(TEMP_DIR, dir);
+            const stats = await fs.stat(dirPath);
+            if (now - stats.mtimeMs > EXPIRY_MS) {
+                await fs.rm(dirPath, { recursive: true, force: true });
+                console.log(`Removed expired temp upload: ${dir}`);
+            }
+        }
+
+        // 2. Cleanup stale Redis upload states
+        if (redis) {
+            const keys = await redis.keys('upload:*');
+            for (const key of keys) {
+                const ttl = await redis.ttl(key);
+                if (ttl <= 0) {
+                    await redis.del(key);
+                }
+            }
+        }
+
+        // 3. Process Dead Letter Queue (optional: notify admins)
+        if (redis) {
+            const failedCount = await redis.lLen('video:failed');
+            if (failedCount > 0) {
+                console.warn(`⚠️ There are ${failedCount} failed video jobs in DLQ`);
+            }
+        }
+
+    } catch (e) {
+        console.error('Cleanup job failed:', e);
+    }
 });
 
 if (!isTest) {

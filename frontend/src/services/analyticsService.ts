@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/react";
+
 // Analytics Service
 // Handles analytics tracking and reporting
 
@@ -16,8 +18,13 @@ class AnalyticsService {
 
         console.log('Page View:', pageName, properties);
 
-        // TODO: Integrate with analytics service (Google Analytics, Mixpanel, etc.)
-        // Example: gtag('event', 'page_view', { page_title: pageName, ...properties });
+        // Track as breadcrumb in Sentry
+        Sentry.addBreadcrumb({
+            category: 'navigation',
+            message: `Page View: ${pageName}`,
+            data: properties,
+            level: 'info',
+        });
     }
 
     /**
@@ -32,8 +39,13 @@ class AnalyticsService {
 
         console.log('Event:', eventName, category, properties);
 
-        // TODO: Integrate with analytics service
-        // Example: gtag('event', eventName, { event_category: category, ...properties });
+        // Track as breadcrumb in Sentry
+        Sentry.addBreadcrumb({
+            category: category,
+            message: eventName,
+            data: properties,
+            level: 'info',
+        });
     }
 
     /**
@@ -97,8 +109,10 @@ class AnalyticsService {
 
         console.error('Error tracked:', error, context);
 
-        // TODO: Integrate with error tracking service (Sentry, etc.)
-        // Example: Sentry.captureException(error, { extra: context });
+        // Track with Sentry
+        Sentry.captureException(error, {
+            extra: context,
+        });
     }
 
     /**
@@ -109,7 +123,8 @@ class AnalyticsService {
 
         console.log('Performance:', metric, value, unit);
 
-        // TODO: Integrate with performance monitoring
+        // Track performance via Sentry measurement
+        Sentry.setMeasurement(metric, value, unit as Sentry.MeasurementUnit);
     }
 
     /**
@@ -120,8 +135,11 @@ class AnalyticsService {
 
         console.log('User properties:', userId, properties);
 
-        // TODO: Integrate with analytics service
-        // Example: gtag('set', 'user_properties', properties);
+        // Set user context in Sentry
+        Sentry.setUser({
+            id: userId,
+            ...properties
+        });
     }
 
     /**

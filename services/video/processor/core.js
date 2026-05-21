@@ -296,7 +296,7 @@ class QuantumVideoProcessor {
         for (const job of qualityJobs) {
             await fs.mkdir(path.dirname(job.outputPath), { recursive: true });
 
-            await this.runFFmpeg(job.args);
+            await this.runFFmpegWithRetry(job.args);
 
             // Add to master playlist
             masterPlaylist += `EXT-X-STREAM-INF:BANDWIDTH=${parseInt(job.profile.bitrate) * 1000},RESOLUTION=${job.profile.width}x${job.profile.height}\n`;
@@ -330,7 +330,7 @@ class QuantumVideoProcessor {
             const args = this.buildFFmpegArgs(inputPath, 'mp4', profile, options);
             args.push(outputPath);
 
-            await this.runFFmpeg(args);
+            await this.runFFmpegWithRetry(args);
 
             results[quality] = outputPath;
         }
@@ -413,7 +413,7 @@ class QuantumVideoProcessor {
                 outputFile
             ];
 
-            await this.runFFmpeg(args);
+            await this.runFFmpegWithRetry(args);
             thumbnails.push({
                 time: Math.round(time),
                 percentage: i * 10,
@@ -448,7 +448,7 @@ class QuantumVideoProcessor {
             previewPath
         ];
 
-        await this.runFFmpeg(args);
+        await this.runFFmpegWithRetry(args);
 
         return {
             path: previewPath,
@@ -474,6 +474,19 @@ ${masterContent}`;
         await fs.writeFile(finalPath, enhancedContent);
 
         return finalPath;
+    }
+
+    async runFFmpegWithRetry(args, maxRetries = 3) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return await this.runFFmpeg(args);
+            } catch (error) {
+                if (attempt === maxRetries) throw error;
+                // Exponential backoff
+                await new Promise(res => setTimeout(res, 1000 * attempt));
+                console.log(`FFmpeg retry ${attempt}/${maxRetries} for args: ${args.join(' ')}`);
+            }
+        }
     }
 
     async runFFmpeg(args) {

@@ -45,9 +45,6 @@ export function Layout({ children }: LayoutProps) {
                                     <span className="text-lg font-bold text-white leading-tight">
                                         QuantumMint Bookstore
                                     </span>
-                                    <span className="text-xs text-purple-300 leading-tight">
-                                        Sierra Books
-                                    </span>
                                 </div>
                             </Link>
                         </div>
@@ -199,12 +196,23 @@ export function Layout({ children }: LayoutProps) {
             </nav>
 
             {/* Main Content */}
-            <main>{children}</main>
+            <main className="flex-grow">
+                {children}
+            </main>
 
             {/* Footer */}
             <footer className="bg-gray-900 border-t border-gray-800 mt-auto">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="grid md:grid-cols-4 gap-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div className="col-span-1 md:col-span-2">
+                            <div className="flex items-center gap-3 mb-4">
+                                <img src="/logo.png" alt="Logo" className="h-8 w-8" />
+                                <span className="text-xl font-bold text-white tracking-tight">QuantumMint Bookstore</span>
+                            </div>
+                            <p className="text-gray-400 max-w-sm mb-6">
+                                Transforming education through high-performance digital content and sponsored learning.
+                            </p>
+                        </div>
                         <div>
                             <h3 className="text-white font-semibold mb-4">Platform</h3>
                             <ul className="space-y-2">
@@ -214,30 +222,15 @@ export function Layout({ children }: LayoutProps) {
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-white font-semibold mb-4">Creators</h3>
-                            <ul className="space-y-2">
-                                <li><Link to="/create" className="text-gray-400 hover:text-white">Create Book</Link></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">Resources</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">Support</a></li>
-                            </ul>
-                        </div>
-                        <div>
                             <h3 className="text-white font-semibold mb-4">Legal</h3>
                             <ul className="space-y-2">
                                 <li><a href="#" className="text-gray-400 hover:text-white">Privacy</a></li>
                                 <li><a href="#" className="text-gray-400 hover:text-white">Terms</a></li>
                             </ul>
                         </div>
-                        <div>
-                            <h3 className="text-white font-semibold mb-4">Connect</h3>
-                            <ul className="space-y-2">
-                                <li><a href="#" className="text-gray-400 hover:text-white">Twitter</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white">Discord</a></li>
-                            </ul>
-                        </div>
                     </div>
-                    <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-                        <p>&copy; 2024 QuantumMint Bookstore - Sierra Books. All rights reserved.</p>
+                    <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-400">
+                        <p>&copy; 2024 QuantumMint Bookstore. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

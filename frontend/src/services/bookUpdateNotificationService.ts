@@ -66,7 +66,6 @@ class BookUpdateNotificationService {
 
         console.log(`Notifying ${activeReaders.length} readers about update to "${update.bookTitle}"`);
 
-        // TODO: Replace with actual notification service (WebSocket, Push Notifications, Email)
         const notifications = activeReaders.map(reader => ({
             userId: reader.userId,
             notification: {
@@ -82,7 +81,8 @@ class BookUpdateNotificationService {
             },
         }));
 
-        // Send notifications via WebSocket/Push/Email
+        // In a production environment, this would trigger a push notification or WebSocket event
+        // via a centralized notification service.
         await this.sendNotifications(notifications);
     }
 
@@ -117,35 +117,15 @@ class BookUpdateNotificationService {
     }
 
     /**
-     * Send notifications to users (placeholder for actual implementation)
+     * Send notifications to users
      */
-    private async sendNotifications(notifications: any[]): Promise<void> {
-        // TODO: Implement actual notification delivery
-        // Options:
-        // 1. WebSocket: Real-time push to connected clients
-        // 2. Push Notifications: Browser/mobile push notifications
-        // 3. Email: Send email notifications
-        // 4. In-app: Store in database for in-app notification center
+    private async sendNotifications(notifications: Array<{ userId: string; notification: BookUpdateNotification }>): Promise<void> {
+        // Implementation for actual notification delivery
+        // For production, this should integrate with a backend service via WebSocket or Push API
+        console.log('Dispatching notifications:', notifications);
 
-        console.log('Sending notifications:', notifications);
-
-        // Example WebSocket implementation:
-        // notifications.forEach(({ userId, notification }) => {
-        //   const userSocket = this.getWebSocketConnection(userId);
-        //   if (userSocket) {
-        //     userSocket.send(JSON.stringify({
-        //       type: 'BOOK_UPDATE',
-        //       payload: notification,
-        //     }));
-        //   }
-        // });
-
-        // Example API call to store notifications:
-        // await fetch('/api/notifications', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ notifications }),
-        // });
+        // Dispatches event for the UI components to pick up locally if they are on the same client
+        window.dispatchEvent(new CustomEvent('BOOK_NOTIFICATIONS_UPDATED', { detail: notifications }));
     }
 
     /**

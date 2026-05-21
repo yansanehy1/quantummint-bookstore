@@ -1,6 +1,12 @@
-flask
+httpx
+fastapi
+uvicorn
+azure-cognitiveservices-speech
+pydantic
+python-dotenv
+redis
+flask  # Keeping for backward compatibility if needed temporarily
 flask-cors
 flask-limiter
-gunicorn
 requests
-python-dotenv
+re-path  # for advanced regex if needed

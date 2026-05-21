@@ -11,6 +11,7 @@ import {
   DollarSign,
   Coins
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePayGO } from '../hooks/usePayGO';
 
 interface PayGOWalletProps {
@@ -35,8 +36,8 @@ export const PayGOWallet: React.FC<PayGOWalletProps> = ({ className = '' }) => {
   const [processingDeposit, setProcessingDeposit] = useState(false);
 
   const handleDeposit = async () => {
-    if (!depositAmount || parseFloat(depositAmount) <= 0) {
-      alert('Please enter a valid amount');
+    if (!depositAmount || isNaN(parseFloat(depositAmount)) || parseFloat(depositAmount) <= 0) {
+      toast.error('Please enter a valid amount');
       return;
     }
 
@@ -57,9 +58,9 @@ export const PayGOWallet: React.FC<PayGOWalletProps> = ({ className = '' }) => {
       // Refresh transactions
       getTransactions();
       
-      alert('Deposit successful!');
+      toast.success('Deposit successful!');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Deposit failed');
+      toast.error(err instanceof Error ? err.message : 'Deposit failed');
     } finally {
       setProcessingDeposit(false);
     }

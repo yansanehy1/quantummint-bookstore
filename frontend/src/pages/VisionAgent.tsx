@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { analyzeImage } from '../services/geminiService';
 import Button from '../components/ui/Button';
 import { Camera, Upload, Sparkles, Image as ImageIcon, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const VisionAgent: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -35,7 +36,7 @@ const VisionAgent: React.FC = () => {
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert("Could not access camera");
+      toast.error("Could not access camera");
       setShowCamera(false);
     }
   };

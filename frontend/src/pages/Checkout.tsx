@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowLeft, AlertCircle, CheckCircle2, CreditCard, Smartphone, DollarSign, Loader2, Wallet as WalletIcon } from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle2, CreditCard, Smartphone, DollarSign, Loader2, Wallet as WalletIcon, BookOpen, ChevronLeft } from "lucide-react";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
 import * as paymentService from "../services/paymentService";
+import api from "../utils/api";
+import { toast } from 'sonner';
+import { Book } from "../types/types";
 import { PaymentMethod, Currency } from "../types/payments";
 
 interface CheckoutStep {
@@ -11,47 +17,15 @@ interface CheckoutStep {
   completed: boolean;
 }
 
-// Mock components to satisfy the imports for a single-file environment
-const MockButton = ({ children, onClick, disabled = false, variant = 'default', className = '' }: any) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`px-4 py-2 font-semibold rounded-lg transition-colors duration-200 shadow-sm flex items-center justify-center ${variant === 'outline' ? 'border border-gray-300 text-gray-700 hover:bg-gray-100' :
-      variant === 'ghost' ? 'text-gray-600 hover:bg-gray-100' :
-        'bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed'
-      } ${className}`}
-  >
-    {children}
-  </button>
-);
 
-const MockCard = ({ children, className = '' }: any) => (
-  <div className={`bg-white rounded-xl shadow-lg ${className}`}>
-    {children}
-  </div>
-);
-
-const MockInput = ({ value, onChange, placeholder, type = 'text', className = '', required, disabled }: any) => (
-  <input
-    type={type}
-    value={value}
-    onChange={onChange}
-    placeholder={placeholder}
-    required={required}
-    disabled={disabled}
-    className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-150 outline-none ${disabled ? 'bg-gray-100 text-gray-500' : ''} ${className}`}
-  />
-);
 
 export default function Checkout() {
-  // Replace imported components with mock versions
-  const Button = MockButton;
-  const Card = MockCard;
-  const Input = MockInput;
 
   const navigate = useNavigate();
+  const { bookId } = useParams();
   const { user } = useAuth();
 
+  const [book, setBook] = useState<Book | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>("SLL");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("wallet"); // Default to wallet
@@ -79,7 +53,24 @@ export default function Checkout() {
   useEffect(() => {
     document.title = 'Checkout - Quantummint Bookstore';
     fetchBalance();
-  }, []);
+    if (bookId) {
+      fetchBookDetails();
+    }
+  }, [bookId]);
+
+  const fetchBookDetails = async () => {
+    setLoading(true);
+    try {
+      const data = await api.books.get(bookId!);
+      setBook(data);
+    } catch (err) {
+      console.error("Failed to fetch book:", err);
+      toast.error("Failed to load book details");
+      navigate("/library");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchBalance = async () => {
     try {
@@ -91,15 +82,6 @@ export default function Checkout() {
   };
 
 
-  const mockBook = {
-    id: 0,
-    title: "Language Arts - JSS 1, Term 1",
-    author: "Sierra Books Admin",
-    priceUSD: 4.99,
-    priceSLL: 82000,
-    description: "Comprehensive English Language Arts course, tailored for the Sierra Leone Junior Secondary School curriculum.",
-  };
-
   const steps: CheckoutStep[] = [
     { id: 1, title: "Review", completed: currentStep > 1 },
     { id: 2, title: "Billing", completed: currentStep > 2 },
@@ -107,7 +89,7 @@ export default function Checkout() {
     { id: 4, title: "Confirm", completed: false },
   ];
 
-  const price = selectedCurrency === "USD" ? mockBook.priceUSD : mockBook.priceSLL;
+  const price = book ? (selectedCurrency === "USD" ? book.priceUSD : book.priceSLL) : 0;
   const currencySymbol = selectedCurrency === "USD" ? "$" : "Le ";
 
   const handleBillingChange = (field: string, value: string) => {
@@ -168,50 +150,70 @@ export default function Checkout() {
   };
 
   const processPayment = async () => {
+    if (!book) return;
     setLoading(true);
     setError("");
     try {
-      const amount = selectedCurrency === "USD" ? mockBook.priceUSD : mockBook.priceSLL;
+      const amount = selectedCurrency === "USD" ? book.priceUSD : book.priceSLL;
 
       if (selectedPaymentMethod === "wallet") {
         // Direct purchase from wallet
         await paymentService.purchaseBook({
-          bookId: "book-123", // In real app, use dynamic ID
+          bookId: book.id,
           amount,
           currency: selectedCurrency
         });
       } else {
-        // Deposit then Purchase (simplified flow for demo)
+        // Deposit then Purchase
         if (selectedPaymentMethod === "card") {
-          await paymentService.depositStripe({ amountUSD: mockBook.priceUSD });
+          await paymentService.depositStripe({ amountUSD: book.priceUSD });
         } else {
           const method = selectedPaymentMethod === "orange" ? "orange_money" :
-            selectedPaymentMethod === "afrimoney" ? "afrimoney" : "qmoney" as any;
+            selectedPaymentMethod === "afrimoney" ? "afrimoney" : "qmoney";
           await paymentService.depositMobileMoney({
-            method,
+            method: method as any,
             phoneNumber: billingInfo.phone,
-            amountSLL: mockBook.priceSLL
+            amountSLL: book.priceSLL
           });
         }
 
         // After deposit, finalize purchase
         await paymentService.purchaseBook({
-          bookId: "book-123",
+          bookId: book.id,
           amount,
           currency: selectedCurrency
         });
       }
 
-      const newOrderId = `SLBOOKS-${Math.floor(Math.random() * 900000 + 100000)}`;
+      const newOrderId = `QM-ORD-${Math.floor(Math.random() * 900000 + 100000)}`;
       setOrderId(newOrderId);
       setOrderPlaced(true);
-    } catch (err: any) {
-      setError(err.message || "Payment processing failed. Please try again.");
+    } catch (err: unknown) {
+      const error = err as Error;
+      setError(error.message || "Payment processing failed. Please try again.");
       setCurrentStep(3);
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading && !book) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-orange-600" />
+      </div>
+    );
+  }
+
+  if (!book && !orderPlaced) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <BookOpen className="w-16 h-16 text-gray-300 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-900">No book selected</h2>
+        <Button onClick={() => navigate("/library")} className="mt-4">Return to Library</Button>
+      </div>
+    );
+  }
 
   if (orderPlaced) {
     return (
@@ -238,7 +240,7 @@ export default function Checkout() {
               <div className="mt-8">
                 <h3 className="font-bold text-xl text-gray-800 mb-3">Item Purchased</h3>
                 <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <span className="text-gray-700 font-medium">{mockBook.title}</span>
+                  <span className="text-gray-700 font-medium">{book?.title}</span>
                   <span className="font-bold text-gray-900 text-lg">{currencySymbol}{price.toFixed(selectedCurrency === "USD" ? 2 : 0)}</span>
                 </div>
               </div>
@@ -295,7 +297,7 @@ export default function Checkout() {
 
             {/* Step 1: Order Review */}
 
-            {currentStep === 1 && (
+            {currentStep === 1 && book && (
               <Card className="p-8 shadow-xl">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-3">1. Review Your Order</h2>
                 <div className="space-y-6">
@@ -304,9 +306,9 @@ export default function Checkout() {
                   <div className="flex flex-col sm:flex-row gap-4 p-5 bg-orange-50 rounded-xl border border-orange-200">
                     <div className="text-4xl flex items-center justify-center w-16 h-16 bg-white rounded-lg shadow-inner">📖</div>
                     <div className="flex-1">
-                      <h3 className="font-extrabold text-xl text-gray-900">{mockBook.title}</h3>
-                      <p className="text-sm text-gray-600">by {mockBook.author}</p>
-                      <p className="text-sm text-gray-700 mt-2 italic">{mockBook.description}</p>
+                      <h3 className="font-extrabold text-xl text-gray-900">{book.title}</h3>
+                      <p className="text-sm text-gray-600">by {book.author}</p>
+                      <p className="text-sm text-gray-700 mt-2 italic">{book.description}</p>
                     </div>
                   </div>
 
@@ -316,13 +318,13 @@ export default function Checkout() {
                     <div className="grid grid-cols-2 gap-4">
                       <CurrencyButton
                         currency="USD"
-                        price={mockBook.priceUSD}
+                        price={book.priceUSD}
                         selected={selectedCurrency === "USD"}
                         onClick={() => setSelectedCurrency("USD")}
                       />
                       <CurrencyButton
                         currency="SLL"
-                        price={mockBook.priceSLL}
+                        price={book.priceSLL}
                         selected={selectedCurrency === "SLL"}
 
                         onClick={() => setSelectedCurrency("SLL")}
@@ -396,11 +398,6 @@ export default function Checkout() {
                     onClick={() => setSelectedPaymentMethod("qmoney")}
 
                   />
-                </div>
-                <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                  <p className="text-sm text-blue-900">
-                    <strong className="font-semibold">Note:</strong> Payment is currently in demo mode. The transaction will complete immediately upon clicking "Place Order".
-                  </p>
                 </div>
               </Card>
             )}
@@ -590,7 +587,7 @@ const FormGroup = ({ label, field, value, onChange, placeholder, type = 'text', 
     <label className="block text-sm font-medium text-gray-700 mb-1">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
-    <MockInput
+    <Input
       type={type}
       value={value}
       onChange={(e: any) => onChange(field, e.target.value)}

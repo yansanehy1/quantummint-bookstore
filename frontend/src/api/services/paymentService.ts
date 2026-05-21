@@ -36,9 +36,10 @@ export const paymentService = {
     },
 
     /**
-     * Request refund
+     * Request refund for a completed purchase (main API)
      */
-    async requestRefund(orderId: string, reason: string): Promise<void> {
-        return paymentClient.post('/payments/refund', { orderId, reason });
+    async requestRefund(purchaseId: string, reason: string): Promise<{ success: boolean; message: string }> {
+        const { refundsAPI } = await import('../../utils/api');
+        return refundsAPI.submit({ purchaseId, reason });
     },
 };

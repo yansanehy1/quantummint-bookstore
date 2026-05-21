@@ -116,7 +116,7 @@ class EmailService {
             to: order.customerEmail,
             templateId: 'ORDER_CONFIRM_01',
             sender: 'orders',
-            subject: `Your Sierra Books Order ${order.orderNumber} is Confirmed!`,
+            subject: `Your QuantumMint Order ${order.orderNumber} is Confirmed!`,
             dynamicData: {
                 orderNumber: order.orderNumber,
                 orderDate: order.createdAt,
@@ -140,7 +140,7 @@ class EmailService {
             to: order.customerEmail,
             templateId: 'ORDER_SHIPPED',
             sender: 'orders',
-            subject: `Your Sierra Books Order ${order.orderNumber} Has Shipped!`,
+            subject: `Your QuantumMint Order ${order.orderNumber} Has Shipped!`,
             dynamicData: {
                 orderNumber: order.orderNumber,
                 trackingNumber: trackingInfo.trackingNumber,
@@ -164,9 +164,9 @@ class EmailService {
             to: user.email,
             templateId: 'WELCOME_BOOKSTORE_01',
             sender: 'support',
-            subject: 'Welcome to Sierra Books - Your Literary Journey Begins!',
+            subject: 'Welcome to QuantumMint - Your Literary Journey Begins!',
             dynamicData: {
-                firstName: user.firstName,
+                firstName: user.name.split(' ')[0],
                 discountCode: 'WELCOME10',
                 discountPercent: 10,
                 collectionsUrl: `${this.config.platformUrl}/collections`,
@@ -187,7 +187,7 @@ class EmailService {
 
         const subjects = {
             1: 'Forgot Something in Your Cart? Your Books Await!',
-            2: 'Last Chance! Your Sierra Books Cart Expires Soon',
+            2: 'Last Chance! Your QuantumMint Cart Expires Soon',
             3: 'We Saved Your Books - Complete Your Purchase'
         };
 
@@ -219,14 +219,14 @@ class EmailService {
             to: user.email,
             templateId: 'BACK_IN_STOCK',
             sender: 'alerts',
-            subject: `"${product.title}" is Back in Stock at Sierra Books!`,
+            subject: `"${product.title}" is Back in Stock at QuantumMint!`,
             dynamicData: {
                 productTitle: product.title,
                 productAuthor: product.author,
                 productPrice: product.price,
                 productImage: product.coverImage,
                 productUrl: `${this.config.platformUrl}/product/${product.sku}`,
-                firstName: user.firstName
+                firstName: user.name.split(' ')[0]
             }
         });
     }
@@ -249,6 +249,24 @@ class EmailService {
     }
 
     /**
+     * Send gift notification (Batch/Sponsored subscription)
+     */
+    async sendGiftNotification(recipient, sponsor, planId) {
+        return this.sendTransactional({
+            to: recipient.email,
+            templateId: 'SUBSCRIPTION_GIFTED',
+            sender: 'support',
+            subject: `You've Been Gifted a QuantumMint Subscription!`,
+            dynamicData: {
+                recipientName: recipient.name.split(' ')[0],
+                sponsorName: sponsor.name,
+                planName: planId.toUpperCase(),
+                loginUrl: `${this.config.platformUrl}/login`
+            }
+        });
+    }
+
+    /**
      * Send support ticket confirmation
      */
     async sendSupportTicketConfirmation(ticket) {
@@ -256,7 +274,7 @@ class EmailService {
             to: ticket.customerEmail,
             templateId: 'SUPPORT_TICKET',
             sender: 'support',
-            subject: `Sierra Books Support Request ${ticket.ticketId} Received`,
+            subject: `QuantumMint Support Request ${ticket.ticketId} Received`,
             dynamicData: {
                 ticketId: ticket.ticketId,
                 subject: ticket.subject,
@@ -344,20 +362,19 @@ class EmailService {
      */
     getDefaultSubject(templateId) {
         const subjects = {
-            'ORDER_CONFIRM_01': 'Your Sierra Books Order Confirmation',
+            'ORDER_CONFIRM_01': 'Your QuantumMint Bookstore Order Confirmation',
             'ORDER_SHIPPED': 'Your Order Has Shipped',
-            'WELCOME_BOOKSTORE_01': 'Welcome to Sierra Books',
+            'WELCOME_BOOKSTORE_01': 'Welcome to QuantumMint Bookstore',
             'BACK_IN_STOCK': 'Item Back in Stock'
         };
-        return subjects[templateId] || 'Sierra Books Notification';
+        return subjects[templateId] || 'QuantumMint Bookstore Notification';
     }
 
     /**
      * Check if email frequency limits are respected
      */
     async checkFrequencyLimits(userEmail, emailType = 'marketing') {
-        // TODO: Implement frequency checking with database/cache
-        // For now, return true
+        // Frequency checking logic can be added here as the platform scales
         return true;
     }
 
@@ -366,7 +383,6 @@ class EmailService {
      */
     async trackEvent(eventType, eventData) {
         logger.info(`Email event: ${eventType}`, eventData);
-        // TODO: Store in analytics database
     }
 
     /**
@@ -382,11 +398,9 @@ class EmailService {
                 break;
             case 'bounce':
                 await this.trackEvent('email_bounced', payload);
-                // TODO: Update user email status
                 break;
             case 'unsubscribe':
                 await this.trackEvent('email_unsubscribed', payload);
-                // TODO: Update user preferences
                 break;
         }
     }

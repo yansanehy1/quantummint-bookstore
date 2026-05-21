@@ -8,7 +8,12 @@ import { API_BASE_URL } from '../utils/api';
 const base = API_BASE_URL.replace(/\/api$/, '');
 
 function authHeaders(): Record<string, string> {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    const token =
+        localStorage.getItem('auth_token') ||
+        localStorage.getItem('token') ||
+        sessionStorage.getItem('auth_token') ||
+        sessionStorage.getItem('token') ||
+        '';
     return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 }
 
@@ -116,9 +121,38 @@ export async function disconnectStripe() {
     return handleResponse<{ success: boolean; message: string }>(res);
 }
 
-// ─── Fee preview (client-side, no API call needed) ───────────────────────────
+// ─── Exchange rate (live from main API) ─────────────────────────────────────
 
-export const SLL_TO_USD = 59;
+export const SLL_TO_USD_DEFAULT = 59;
+
+let _cachedRate = SLL_TO_USD_DEFAULT;
+let _cacheTime = 0;
+const RATE_CACHE_MS = 5 * 60 * 1000;
+
+export async function fetchExchangeRate(): Promise<number> {
+    const now = Date.now();
+    if (now - _cacheTime < RATE_CACHE_MS && _cachedRate > 0) {
+        return _cachedRate;
+    }
+    try {
+        const { API_BASE_URL } = await import('../utils/api');
+        const res = await fetch(`${API_BASE_URL}/subscriptions/plans`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.exchangeRate > 0) {
+                _cachedRate = data.exchangeRate;
+                _cacheTime = now;
+                return _cachedRate;
+            }
+        }
+    } catch {
+        // use cached or default
+    }
+    return _cachedRate;
+}
+
+/** @deprecated Use fetchExchangeRate() or useExchangeRate hook — static fallback only */
+export const SLL_TO_USD = SLL_TO_USD_DEFAULT;
 
 export function previewDepositFee(method: string, amount: number) {
     if (method === 'stripe') {

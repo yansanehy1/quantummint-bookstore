@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { getSystemSettings, updateSystemSettings, resetPlatformData, subscribe } from '@/services/store';
 import { AppSystemSettings } from '@/services/store';
+import { toast } from 'sonner';
 import { Save, Shield, CreditCard, Cpu, Globe, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export const SystemSettings: React.FC = () => {
@@ -38,14 +39,14 @@ export const SystemSettings: React.FC = () => {
     setTimeout(() => {
       updateSystemSettings(settings);
       setIsLoading(false);
-      alert("Settings saved successfully and applied to the store!");
+      toast.success("Settings saved successfully and applied to the store!");
     }, 800);
   };
 
   const handleReset = () => {
-    if (confirm("WARNING: This will reset all books, users, and balances to default mock data. Are you sure?")) {
+    if (window.confirm("WARNING: This will reset all books, users, and balances to default mock data. Are you sure?")) {
       resetPlatformData();
-      alert("Platform data reset.");
+      toast.error("Platform data reset.");
     }
   };
 

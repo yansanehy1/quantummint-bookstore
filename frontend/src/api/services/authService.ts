@@ -1,56 +1,43 @@
-import { userClient } from '../client';
-import type { User, LoginRequest, RegisterRequest } from '../../types/api';
+import { authAPI } from '../../utils/api';
+import type { User } from '../../types/types';
+
+export interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface RegisterRequest {
+    name: string;
+    email: string;
+    password: string;
+    role?: 'user' | 'seller';
+}
 
 export const authService = {
-    /**
-     * Login user
-     */
     async login(credentials: LoginRequest): Promise<{ user: User; token: string }> {
-        const response = await userClient.post<{ user: User; token: string }>('/auth/login', credentials);
-        if (response.token) {
-            localStorage.setItem('auth_token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-        }
-        return response;
+        const data = await authAPI.login(credentials.email, credentials.password);
+        return { user: data.user as User, token: data.token };
     },
 
-    /**
-     * Register new user
-     */
     async register(data: RegisterRequest): Promise<{ user: User; token: string }> {
-        const response = await userClient.post<{ user: User; token: string }>('/auth/register', data);
-        if (response.token) {
-            localStorage.setItem('auth_token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-        }
-        return response;
+        const result = await authAPI.register({
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            role: data.role,
+        });
+        return { user: result.user as User, token: result.token };
     },
 
-    /**
-     * Logout user
-     */
     async logout(): Promise<void> {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
+        await authAPI.logout();
     },
 
-    /**
-     * Get current user from storage
-     */
     getCurrentUser(): User | null {
-        const userStr = localStorage.getItem('user');
-        if (!userStr) return null;
-        try {
-            return JSON.parse(userStr);
-        } catch {
-            return null;
-        }
+        return authAPI.getCurrentUser() as User | null;
     },
 
-    /**
-     * Check if authenticated
-     */
     isAuthenticated(): boolean {
-        return !!localStorage.getItem('auth_token');
-    }
+        return authAPI.isAuthenticated();
+    },
 };

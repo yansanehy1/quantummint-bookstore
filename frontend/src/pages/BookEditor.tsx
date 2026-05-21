@@ -39,7 +39,7 @@ const BookEditor: React.FC = () => {
     const [book, setBook] = useState<Book>({
         id: 1,
         title: "Language Arts - JSS 1, Term 1",
-        author: "Sierra Books Admin",
+        author: "QuantumMint Admin",
         description: "Comprehensive English Language Arts course for Junior Secondary School 1",
         category: "Language Arts",
         priceUsd: 4.99,

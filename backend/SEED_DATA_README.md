@@ -8,11 +8,9 @@ This directory contains seed data files for populating the database with demo us
 Ready-to-use SQL file containing INSERT statements with bcrypt-hashed passwords.
 
 **How to use:**
-1. Open phpMyAdmin
-2. Select the `quantummint_db` database
-3. Click the "Import" tab
-4. Choose `seed-users.sql`
-5. Click "Go" to import
+1. Open your database management tool (pgAdmin, phpMyAdmin, etc.)
+2. Select your database
+3. Execute the SQL statements in `seed-users.sql`
 
 **What it creates:**
 - 6 demo user accounts
@@ -27,7 +25,7 @@ cd backend
 node seed-users-generator.js > seed-output.sql
 ```
 
-Then import the output SQL file using phpMyAdmin.
+Then import the output SQL file into your database.
 
 ## Demo Accounts
 

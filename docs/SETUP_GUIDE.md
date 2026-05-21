@@ -61,14 +61,29 @@ MAIL_SERVER_URL=http://mail-server:8082
 
 ### 3. Set Up Database
 
+#### Backend Service (Multi-dialect Support)
+
+The backend service supports **MySQL**, **PostgreSQL**, and **SQLite**.
+
+**Configuration in `backend/.env`:**
+```env
+DB_DIALECT=postgres    # options: mysql, postgres, sqlite
+DB_HOST=localhost
+DB_PORT=5432           # default for postgres: 5432, mysql: 3306
+DB_NAME=siera
+DB_USER=postgres
+DB_PASS=your_password
+```
+
+For local development, if no host is provided, it defaults to **SQLite** (`database.sqlite`).
+
+#### Mail Server & Subscription Services
+
 ```bash
 cd mail-server
 
 # Option 1: Using Node.js script
 node src/utils/run-migrations.js
-
-# Option 2: Using PostgreSQL directly
-psql -U your_username -d quantummint -f migrations/002_email_system_tables.sql
 ```
 
 See `mail-server/migrations/README.md` for detailed instructions.
@@ -163,6 +178,7 @@ The migration creates these tables:
 
 **Core Tables:**
 - `users` (extended with wallet_balance, user_type)
+- `BookDrafts` - Persistent storage for creator book drafts
 - `wallet_transactions` - All financial transactions
 - `content` - Audiobooks and videos
 - `content_sessions` - Listening/viewing sessions

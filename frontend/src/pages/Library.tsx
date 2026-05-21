@@ -16,33 +16,59 @@ export const Library: React.FC = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedExam, setSelectedExam] = useState("all");
+  const [selectedGrade, setSelectedGrade] = useState("all");
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   useEffect(() => {
-    document.title = 'Library - Quantummint Bookstore';
-  }, []);
+    document.title = 'Library - QuantumMint';
+    if (user) {
+      fetchRecommendations();
+    }
+  }, [user]);
 
-  // Unified Categories
+  const fetchRecommendations = async () => {
+    try {
+      const data = await api.learner.getRecommendations();
+      setRecommendations(data);
+    } catch (err) {
+      console.error("Failed to fetch recommendations", err);
+    }
+  };
+
+  // Educational-first Filters
+  const examTypes = [
+    { id: "all", name: "All Exams" },
+    { id: "WASSCE", name: "WASSCE" },
+    { id: "JAMB", name: "JAMB/UTME" },
+    { id: "BECE", name: "BECE" },
+    { id: "NECO", name: "NECO" },
+  ];
+
+  const gradeLevels = [
+    { id: "all", name: "All Grades" },
+    { id: "JSS", name: "Junior Secondary (JSS)" },
+    { id: "SSS", name: "Senior Secondary (SSS)" },
+    { id: "Undergrad", name: "Undergraduate" },
+  ];
+
   const categories = [
-    { id: "all", name: "All Books" },
-    { id: "JSS1", name: "JSS 1" },
-    { id: "JSS2", name: "JSS 2" },
-    { id: "JSS3", name: "JSS 3" },
+    { id: "all", name: "All Subjects" },
     { id: "Science", name: "Science" },
     { id: "Mathematics", name: "Mathematics" },
     { id: "Language Arts", name: "Language Arts" },
     { id: "History", name: "History" },
     { id: "Technology", name: "Technology" },
-    { id: "Literature", name: "Literature" },
-    { id: "Psychology", name: "Psychology" },
     { id: "Economics", name: "Economics" },
-    { id: "Art", name: "Art" },
   ];
 
   const filteredBooks = books.filter(book => {
     const matchesCategory = selectedCategory === "all" || book.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesExam = selectedExam === "all" || (book.description && book.description.includes(selectedExam));
+    const matchesGrade = selectedGrade === "all" || (book.category && book.category.includes(selectedGrade));
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSearch && matchesExam && matchesGrade;
   });
 
   const handleBuy = (book: Book) => {
@@ -121,27 +147,99 @@ export const Library: React.FC = () => {
               </Button>
             </div>
 
-            {/* Categories */}
-            <div
-              role="group"
-              aria-label="Book categories"
-              className="flex gap-2 flex-wrap"
-            >
-              {categories.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-full font-medium transition text-sm border ${selectedCategory === cat.id
-                    ? "bg-amber-600 text-white border-amber-600 shadow-md"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-amber-600 hover:text-amber-600"
-                    }`}
-                  aria-current={selectedCategory === cat.id ? 'true' : undefined}
-                >
-                  {cat.name}
-                </button>
-              ))}
+            {/* Filter Groups */}
+            <div className="space-y-6">
+              {/* Exam Types */}
+              <div className="space-y-3">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Exam Focus</p>
+                <div role="group" aria-label="Exam types" className="flex gap-2 flex-wrap">
+                  {examTypes.map(exam => (
+                    <button
+                      key={exam.id}
+                      onClick={() => setSelectedExam(exam.id)}
+                      className={`px-4 py-1.5 rounded-xl font-bold transition text-xs border ${selectedExam === exam.id
+                        ? "bg-quantum-600 text-white border-quantum-600 shadow-md"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-quantum-600 hover:text-quantum-600"
+                        }`}
+                    >
+                      {exam.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grade Levels */}
+              <div className="space-y-3">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Grade Level</p>
+                <div role="group" aria-label="Grade levels" className="flex gap-2 flex-wrap">
+                  {gradeLevels.map(grade => (
+                    <button
+                      key={grade.id}
+                      onClick={() => setSelectedGrade(grade.id)}
+                      className={`px-4 py-1.5 rounded-xl font-bold transition text-xs border ${selectedGrade === grade.id
+                        ? "bg-quantum-600 text-white border-quantum-600 shadow-md"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-quantum-600 hover:text-quantum-600"
+                        }`}
+                    >
+                      {grade.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subjects */}
+              <div className="space-y-3">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Subject Area</p>
+                <div role="group" aria-label="Subjects" className="flex gap-2 flex-wrap">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-4 py-1.5 rounded-xl font-bold transition text-xs border ${selectedCategory === cat.id
+                        ? "bg-quantum-600 text-white border-quantum-600 shadow-md"
+                        : "bg-white text-slate-500 border-slate-200 hover:border-quantum-600 hover:text-quantum-600"
+                        }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
+
+          {/* Recommended Section (Real Adaptive) */}
+          {user && searchQuery === "" && selectedCategory === "all" && recommendations.length > 0 && (
+            <section className="mb-16">
+              <div className="flex items-center gap-2 mb-8">
+                <div className="p-2 bg-quantum-50 text-quantum-600 rounded-lg">
+                  <Sparkles size={20} />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Adaptive Recommendations</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {recommendations.map((rec, index) => (
+                  <Card 
+                    key={rec.id} 
+                    className={`p-6 ${index % 2 === 0 ? 'bg-slate-900 text-white' : 'bg-quantum-600 text-white'} border-none shadow-2xl relative overflow-hidden group cursor-pointer`}
+                    onClick={() => navigate(`/book/${rec.id}`)}
+                  >
+                    <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all" />
+                    <div className="relative z-10">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Based on your interests in {rec.category}</span>
+                      <h4 className="text-xl font-bold mt-2 mb-4">{rec.title}</h4>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-white/80">{rec.author}</span>
+                        <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-100 font-bold">
+                          Start Reading
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Books Grid */}
           <section aria-labelledby="books-heading">
@@ -180,8 +278,8 @@ export const Library: React.FC = () => {
 
                       <div className="pt-2 mt-auto">
                         <div className="flex justify-between items-center mb-4">
-                          <span className="text-xl font-bold text-amber-600">
-                            ${book.price}
+                          <span className="text-sm font-bold text-amber-600 uppercase tracking-tight">
+                            Pay-As-You-Go
                           </span>
                           {/* Audio Indicator */}
                           <div className="flex items-center gap-1 text-blue-500 text-xs font-semibold" title="Audio available">
@@ -191,11 +289,11 @@ export const Library: React.FC = () => {
                         </div>
 
                         <Button
-                          onClick={() => handleBuy(book)}
+                          onClick={() => navigate(`/read/${book.id}`)}
                           className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium"
                         >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Buy Now
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Read Now
                         </Button>
                       </div>
                     </div>

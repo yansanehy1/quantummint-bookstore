@@ -169,12 +169,12 @@ export function BookDetail() {
                             {/* Pricing Info */}
                             <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                                 <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-2">
-                                    💡 Flexible Listening Options
+                                    💡 Educational Access
                                 </h3>
                                 <ul className="text-sm text-purple-800 dark:text-purple-300 space-y-1">
-                                    <li>• Pay-per-use: $0.10/minute</li>
-                                    <li>• Or subscribe for unlimited listening</li>
-                                    <li>• 75% of revenue goes to the creator</li>
+                                    <li>• Pay-per-use: Billed via Pay-As-You-Go mechanism</li>
+                                    <li>• Or subscribe for unlimited listening & reading</li>
+                                    <li>• Support creators with every minute you spend learning</li>
                                 </ul>
                             </div>
                         </div>

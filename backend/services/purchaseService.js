@@ -1,10 +1,14 @@
-const { v4: uuidv4 } = require('uuid');
-
-function getSequelizeFromReq(req) {
-    return req.app.get('sequelize');
-}
+const { Book, User, Purchase, Transaction } = require('../models');
+const { uuidv4 } = require('../utils/id');
 
 exports.purchaseBook = async (req, userId, bookId, amount, currency) => {
+    // Check if system is in Pay-As-You-Go mode
+    const isPayGO = true; // Transitioning to PayGO model
+    
+    if (isPayGO) {
+        throw new Error('Direct book purchases are disabled. Please use Pay-As-You-Go access.');
+    }
+
     if (!bookId || !amount || !currency) {
         throw new Error('Missing purchase details');
     }
@@ -13,11 +17,8 @@ exports.purchaseBook = async (req, userId, bookId, amount, currency) => {
         throw new Error('Invalid amount');
     }
 
-    const sequelize = getSequelizeFromReq(req);
-
     // ensure book exists and price matches the selected currency
-    const [bookRows] = await sequelize.query('SELECT priceSLL, priceUSD FROM Books WHERE id = ?', { replacements: [bookId] });
-    const book = bookRows[0];
+    const book = await Book.findByPk(bookId);
     if (!book) {
         throw new Error('Book not found');
     }
@@ -30,45 +31,43 @@ exports.purchaseBook = async (req, userId, bookId, amount, currency) => {
         throw new Error('Amount does not match book price');
     }
 
-    const walletQuery = await sequelize.query('SELECT balanceSLL, balanceUSD FROM Wallets WHERE userId = ?', { replacements: [userId] });
-    const wallets = walletQuery[0] || [];
-    const wallet = wallets[0];
-    if (!wallet) {
-        throw new Error('Wallet not found');
+    const user = await User.findByPk(userId);
+    if (!user) {
+        throw new Error('User not found');
     }
 
-    if (currency === 'SLL') {
-        if (parseFloat(wallet.balanceSLL) < amountNum) {
-            throw new Error('Insufficient SLL balance');
-        }
-    } else if (currency === 'USD') {
-        if (parseFloat(wallet.balanceUSD) < amountNum) {
-            throw new Error('Insufficient USD balance');
-        }
-    } else {
-        throw new Error('Invalid currency');
+    const balanceField = currency === 'SLL' ? 'sllBalance' : 'usdBalance';
+    if (parseFloat(user[balanceField]) < amountNum) {
+        throw new Error(`Insufficient ${currency} balance`);
     }
 
-    return sequelize.transaction(async (t) => {
-        const balanceField = currency === 'SLL' ? 'balanceSLL' : 'balanceUSD';
-        await sequelize.query(
-            `UPDATE Wallets SET ${balanceField} = ${balanceField} - ? WHERE userId = ?`,
-            { replacements: [amountNum, userId], transaction: t }
-        );
+    return User.sequelize.transaction(async (t) => {
+        // Deduct balance
+        await user.update({
+            [balanceField]: (parseFloat(user[balanceField]) - amountNum).toFixed(2)
+        }, { transaction: t });
 
         const purchaseId = uuidv4();
-        await sequelize.query(
-            'INSERT INTO Purchases (id, userId, bookId, amount, currency, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, "completed", NOW(), NOW())',
-            { replacements: [purchaseId, userId, bookId, amountNum, currency], transaction: t }
-        );
+        const purchase = await Purchase.create({
+            id: purchaseId,
+            userId,
+            bookId,
+            amount: amountNum,
+            currency,
+            status: 'completed'
+        }, { transaction: t });
 
         const txId = uuidv4();
-        const description = `Purchase: Book ID ${bookId}`;
-        await sequelize.query(
-            `INSERT INTO Transactions (id, userId, type, amount, currency, description, status, createdAt, updatedAt) 
-       VALUES (?, ?, 'purchase', ?, ?, ?, 'completed', NOW(), NOW())`,
-            { replacements: [txId, userId, amountNum, currency, description], transaction: t }
-        );
+        const description = `Purchase: ${book.title}`;
+        await Transaction.create({
+            id: txId,
+            userId,
+            type: 'purchase',
+            amount: amountNum,
+            currency,
+            description,
+            status: 'completed'
+        }, { transaction: t });
 
         return { purchaseId, transactionId: txId };
     });

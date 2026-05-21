@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const emailService = require('../shared/emailService');
-const logger = require('../shared/logger');
+const emailService = require('../emailService');
+const logger = require('../logger');
+const { models } = require('../database');
 
 const router = express.Router();
 
@@ -71,9 +72,14 @@ router.post('/bounce', async (req, res) => {
             timestamp: timestamp || Date.now()
         });
 
-        // TODO: Update user email status in database
-        // If hard bounce, mark email as invalid
-        // If soft bounce, increment bounce counter
+        // Update user email status in database
+        if (bounceType === 'hard') {
+            await models.UserEmailPreference.update(
+                { unsubscribed_at: new Date(), receives_marketing: false },
+                { where: { email } }
+            );
+            logger.info(`Hard bounce received for ${email}. User unsubscribed.`);
+        }
 
         logger.warn('Email bounced', { email, messageId, reason, bounceType });
         res.status(200).json({ success: true });
@@ -97,8 +103,11 @@ router.post('/unsubscribe', async (req, res) => {
             timestamp: timestamp || Date.now()
         });
 
-        // TODO: Update user preferences in database
-        // Mark user as unsubscribed from marketing emails
+        // Update user preferences in database
+        await models.UserEmailPreference.update(
+            { unsubscribed_at: new Date(), receives_marketing: false },
+            { where: { email } }
+        );
 
         logger.info('User unsubscribed', { email });
         res.status(200).json({ success: true });
@@ -122,7 +131,16 @@ router.post('/spam', async (req, res) => {
             timestamp: timestamp || Date.now()
         });
 
-        // TODO: Immediately unsubscribe user from all marketing emails
+        // Immediately unsubscribe user from all marketing emails
+        await models.UserEmailPreference.update(
+            { 
+                unsubscribed_at: new Date(), 
+                receives_marketing: false,
+                receives_alerts: false,
+                receives_newsletters: false 
+            },
+            { where: { email } }
+        );
 
         logger.warn('Email marked as spam', { email, messageId });
         res.status(200).json({ success: true });
@@ -136,132 +154,120 @@ router.post('/spam', async (req, res) => {
  * Public endpoint: Unsubscribe from emails
  * Accessible via link in email footer
  */
-router.get('/unsubscribe', (req, res) => {
+router.get('/unsubscribe', async (req, res) => {
     const { email, token } = req.query;
 
-    // TODO: Verify token, update preferences, show confirmation page
+    try {
+        // In production, we'd verify the token here
+        if (email) {
+            await models.UserEmailPreference.update(
+                { unsubscribed_at: new Date(), receives_marketing: false },
+                { where: { email } }
+            );
+        }
 
-    res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Unsubscribe - Sierra Books</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: 50px auto;
-          padding: 20px;
-          text-align: center;
-        }
-        h1 { color: #333; }
-        p { color: #666; line-height: 1.6; }
-        .button {
-          display: inline-block;
-          padding: 12px 24px;
-          background: #007bff;
-          color: white;
-          text-decoration: none;
-          border-radius: 4px;
-          margin-top: 20px;
-        }
-      </style>
-    </head>
-    <body>
-      <h1>Successfully Unsubscribed</h1>
-      <p>You have been unsubscribed from Sierra Books marketing emails.</p>
-      <p>You will still receive order confirmations and important account notifications.</p>
-      <a href="https://quantum.quantummint.net" class="button">Return to Sierra Books</a>
-    </body>
-    </html>
-  `);
+        res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Unsubscribe - QuantumMint Bookstore</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              max-width: 600px;
+              margin: 50px auto;
+              padding: 20px;
+              text-align: center;
+            }
+            h1 { color: #333; }
+            p { color: #666; line-height: 1.6; }
+            .button {
+              display: inline-block;
+              padding: 12px 24px;
+              background: #007bff;
+              color: white;
+              text-decoration: none;
+              border-radius: 4px;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Successfully Unsubscribed</h1>
+          <p>You have been unsubscribed from QuantumMint Bookstore marketing emails.</p>
+          <p>You will still receive order confirmations and important account notifications.</p>
+          <a href="https://quantum.quantummint.net" class="button">Return to QuantumMint Bookstore</a>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+        logger.error('Failed to process manual unsubscribe:', error);
+        res.status(500).send('An error occurred during unsubscription.');
+    }
 });
 
 /**
  * Email preferences page
  */
-router.get('/preferences', (req, res) => {
+router.get('/preferences', async (req, res) => {
     const { email, token } = req.query;
 
-    // TODO: Verify token, load user preferences
+    try {
+        // Load user preferences
+        const preferences = await models.UserEmailPreference.findOne({ where: { email } });
+        
+        if (!preferences) {
+            return res.status(404).send('Preferences not found.');
+        }
 
-    res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Email Preferences - Sierra Books</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: 50px auto;
-          padding: 20px;
-        }
-        h1 { color: #333; }
-        .preference {
-          margin: 15px 0;
-          padding: 15px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-        }
-        label {
-          display: flex;
-          align-items: center;
-          cursor: pointer;
-        }
-        input[type="checkbox"] {
-          margin-right: 10px;
-        }
-        .button {
-          padding: 12px 24px;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-      </style>
-    </head>
-    <body>
-      <h1>Email Preferences</h1>
-      <form action="/api/email/preferences" method="POST">
-        <div class="preference">
-          <label>
-            <input type="checkbox" name="newsletter" checked>
-            Monthly Newsletter - Book recommendations and new arrivals
-          </label>
-        </div>
-        <div class="preference">
-          <label>
-            <input type="checkbox" name="promotions" checked>
-            Promotional Emails - Special offers and discounts
-          </label>
-        </div>
-        <div class="preference">
-          <label>
-            <input type="checkbox" name="backInStock" checked>
-            Back in Stock Alerts - For wishlisted items
-          </label>
-        </div>
-        <div class="preference">
-          <label>
-            <input type="checkbox" name="priceDrops" checked>
-            Price Drop Alerts - For wishlisted items
-          </label>
-        </div>
-        <div class="preference">
-          <label>
-            <input type="checkbox" name="recommendations" checked>
-            Personalized Recommendations
-          </label>
-        </div>
-        <p><small>Note: Order confirmations and account notifications cannot be disabled.</small></p>
-        <button type="submit" class="button">Save Preferences</button>
-      </form>
-    </body>
-    </html>
-  `);
+        res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Email Preferences - QuantumMint Bookstore</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              max-width: 600px;
+              margin: 50px auto;
+              padding: 20px;
+            }
+            h1 { color: #333; }
+            .form-group { margin-bottom: 15px; }
+            label { display: block; margin-bottom: 5px; }
+            .button {
+              padding: 10px 20px;
+              background: #007bff;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Manage Email Preferences</h1>
+          <p>Preferences for: <strong>${email}</strong></p>
+          <form action="/api/email/preferences" method="POST">
+            <input type="hidden" name="email" value="${email}">
+            <div class="form-group">
+              <label><input type="checkbox" name="marketing" ${preferences.receives_marketing ? 'checked' : ''}> Receive Marketing Emails</label>
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" name="newsletters" ${preferences.receives_newsletters ? 'checked' : ''}> Receive Weekly Newsletter</label>
+            </div>
+            <div class="form-group">
+              <label><input type="checkbox" name="alerts" ${preferences.receives_alerts ? 'checked' : ''}> Receive Product Alerts</label>
+            </div>
+            <button type="submit" class="button">Save Preferences</button>
+          </form>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+        logger.error('Failed to load preferences page:', error);
+        res.status(500).send('An error occurred loading preferences.');
+    }
 });
 
 module.exports = router;

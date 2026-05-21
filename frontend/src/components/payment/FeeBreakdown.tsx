@@ -1,15 +1,17 @@
 import React from 'react';
 import { Info } from 'lucide-react';
-import { previewDepositFee, previewWithdrawalFee, SLL_TO_USD } from '../../services/paymentService';
+import { previewDepositFee, previewWithdrawalFee } from '../../services/paymentService';
 
 interface FeeBreakdownProps {
     method: string;
     amount: number;
     direction: 'deposit' | 'withdrawal';
     currency: 'SLL' | 'USD';
+    /** Live SLL per 1 USD from GET /api/subscriptions/plans */
+    exchangeRate?: number;
 }
 
-export default function FeeBreakdown({ method, amount, direction, currency }: FeeBreakdownProps) {
+export default function FeeBreakdown({ method, amount, direction, currency, exchangeRate = 59 }: FeeBreakdownProps) {
     if (!amount || amount <= 0) return null;
 
     const amountNum = parseFloat(String(amount));
@@ -37,7 +39,7 @@ export default function FeeBreakdown({ method, amount, direction, currency }: Fe
     const isFree = fee === 0;
 
     // Also show SLL ↔ USD conversion for Stripe
-    const usdEquiv = currency === 'SLL' ? (amountNum / SLL_TO_USD).toFixed(2) : null;
+    const usdEquiv = currency === 'SLL' ? (amountNum / exchangeRate).toFixed(2) : null;
 
     return (
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-2">

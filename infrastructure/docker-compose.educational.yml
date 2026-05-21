@@ -1,80 +1,28 @@
 version: '3.8'
 
 services:
-  # Educational Platform Services
-  media-sync-service:
+  # STEM Visualization Engine
+  formula-engine:
     build:
-      context: ../services/media-sync-service
-      dockerfile: Dockerfile
-    container_name: educational-media-sync
-    ports:
-      - "8004:8004"
-    environment:
-      - NODE_ENV=production
-      - PORT=8004
-      - DB_HOST=mysql
-      - DB_USER=${MYSQL_USER:-siera_user}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
-      - DB_NAME=${MYSQL_DATABASE:-siera_main}
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
-    volumes:
-      - ../logs/media-sync:/app/logs
+      context: ../services/formula-engine
+    container_name: quantummint-formula
     networks:
-      - siera-network
-    depends_on:
-      - mysql
-      - redis
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8004/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - quantummint-network
 
-  analytics-service:
+  concept-visualizer:
     build:
-      context: ../services/analytics-service
-      dockerfile: Dockerfile
-    container_name: educational-analytics
-    ports:
-      - "8006:8006"
-    environment:
-      - NODE_ENV=production
-      - PORT=8006
-      - DB_HOST=mysql
-      - DB_USER=${MYSQL_USER:-siera_user}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
-      - DB_NAME=${MYSQL_DATABASE:-siera_main}
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-    volumes:
-      - ../logs/analytics:/app/logs
+      context: ../services/concept-visualizer
+    container_name: quantummint-visualizer
     networks:
-      - siera-network
-    depends_on:
-      - mysql
-      - redis
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8006/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - quantummint-network
 
-  # Update existing MySQL to include educational schema
-  mysql:
-    volumes:
-      - ./data/mysql:/var/lib/mysql
-      - ../backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
-      - ../database/educational_schema_update.sql:/docker-entrypoint-initdb.d/02-educational.sql
-
-  # Update existing frontend to include educational routes
-  web-frontend:
-    environment:
-      - REACT_APP_MEDIA_SYNC_URL=http://localhost:8004
-      - REACT_APP_ANALYTICS_URL=http://localhost:8006
-      - REACT_APP_EDUCATIONAL_API_URL=http://localhost:8000/api/educational
+  knowledge-graph:
+    build:
+      context: ../services/knowledge-graph
+    container_name: quantummint-knowledge
+    networks:
+      - quantummint-network
 
 networks:
-  siera-network:
+  quantummint-network:
     external: true

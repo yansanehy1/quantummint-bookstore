@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Wallet as WalletIcon, ArrowDown, ArrowUp, History,
-  RefreshCw, CheckCircle, AlertCircle, Phone
+  RefreshCw, CheckCircle, AlertCircle, Phone, RotateCcw
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import PaymentMethodCard from "../components/payment/PaymentMethodCard";
@@ -12,11 +12,12 @@ import TransactionHistory from "../components/payment/TransactionHistory";
 import {
   getWalletBalance, getTransactionHistory, depositMobileMoney, depositStripe,
   withdrawMobileMoney, withdrawStripe, type SavedMethod, type Transaction,
-  SLL_TO_USD,
 } from "../services/paymentService";
+import { refundsAPI, type RefundRequest, type EligiblePurchase } from "../utils/api";
+import { useExchangeRate } from "../hooks/useExchangeRate";
 import { PAYMENT_CONFIGS, type PaymentMethod } from "../types/payments";
 
-type Tab = "balance" | "deposit" | "withdraw" | "history";
+type Tab = "balance" | "deposit" | "withdraw" | "history" | "refunds";
 
 const MOBILE_METHODS: PaymentMethod[] = ["orange_money", "afrimoney", "qmoney"];
 const ALL_METHODS: PaymentMethod[] = [...MOBILE_METHODS, "stripe"];
@@ -98,6 +99,16 @@ export default function Wallet() {
   const [historyFilters, setHistoryFilters] = useState<{ type?: string; method?: string; status?: string }>({});
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  const { rate: exchangeRate } = useExchangeRate();
+
+  // ─ Refunds state
+  const [eligiblePurchases, setEligiblePurchases] = useState<EligiblePurchase[]>([]);
+  const [myRefunds, setMyRefunds] = useState<RefundRequest[]>([]);
+  const [refundPurchaseId, setRefundPurchaseId] = useState("");
+  const [refundReason, setRefundReason] = useState("");
+  const [refundsLoading, setRefundsLoading] = useState(false);
+  const [refundSubmitting, setRefundSubmitting] = useState(false);
+
   // ─ Notification
   const [banner, setBanner] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -113,6 +124,23 @@ export default function Wallet() {
       // Balance unavailable — show zeros
     } finally {
       setBalanceLoading(false);
+    }
+  }, []);
+
+  const loadRefunds = useCallback(async () => {
+    setRefundsLoading(true);
+    try {
+      const [eligible, refunds] = await Promise.all([
+        refundsAPI.getEligiblePurchases(),
+        refundsAPI.getMyRefunds(),
+      ]);
+      setEligiblePurchases(eligible);
+      setMyRefunds(refunds);
+    } catch {
+      setEligiblePurchases([]);
+      setMyRefunds([]);
+    } finally {
+      setRefundsLoading(false);
     }
   }, []);
 
@@ -133,7 +161,25 @@ export default function Wallet() {
   useEffect(() => { loadBalance(); }, [loadBalance]);
   useEffect(() => {
     if (activeTab === "history") loadHistory();
-  }, [activeTab, loadHistory]);
+    if (activeTab === "refunds") loadRefunds();
+  }, [activeTab, loadHistory, loadRefunds]);
+
+  const handleRefundSubmit = async () => {
+    if (!refundPurchaseId) return setBanner({ type: "error", message: "Select a purchase to refund." });
+    if (refundReason.trim().length < 10) return setBanner({ type: "error", message: "Reason must be at least 10 characters." });
+    setRefundSubmitting(true);
+    try {
+      const result = await refundsAPI.submit({ purchaseId: refundPurchaseId, reason: refundReason.trim() });
+      setBanner({ type: "success", message: result.message });
+      setRefundPurchaseId("");
+      setRefundReason("");
+      loadRefunds();
+    } catch (e: unknown) {
+      setBanner({ type: "error", message: e instanceof Error ? e.message : "Failed to submit refund request." });
+    } finally {
+      setRefundSubmitting(false);
+    }
+  };
 
   // Handle Stripe connect callback redirect
   useEffect(() => {
@@ -234,7 +280,10 @@ export default function Wallet() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">My Wallet</h1>
-            <p className="text-gray-500 text-sm mt-1">Manage deposits, withdrawals, and payment methods</p>
+            <p className="text-gray-500 text-sm mt-1">
+              Manage deposits, withdrawals, and payment methods
+              <span className="ml-2 text-amber-600 font-medium">· 1 USD = {exchangeRate.toLocaleString()} SLL</span>
+            </p>
           </div>
           <button onClick={loadBalance} disabled={balanceLoading}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-2 rounded-xl transition-colors">
@@ -251,7 +300,7 @@ export default function Wallet() {
           <BalanceCard
             label="SLL Balance"
             value={`Le ${(balanceLoading ? 0 : balanceSLL).toLocaleString()}`}
-            sub={`≈ $${((balanceSLL || 0) / SLL_TO_USD).toFixed(2)} USD`}
+            sub={`≈ $${((balanceSLL || 0) / exchangeRate).toFixed(2)} USD`}
             gradient="bg-gradient-to-br from-amber-500 to-orange-600"
             onDeposit={() => { setActiveTab("deposit"); setDepositMethod("orange_money"); }}
             onWithdraw={() => { setActiveTab("withdraw"); setWithdrawMethod("orange_money"); }}
@@ -259,7 +308,7 @@ export default function Wallet() {
           <BalanceCard
             label="USD Balance"
             value={`$${(balanceLoading ? 0 : balanceUSD).toFixed(2)}`}
-            sub={`≈ Le ${((balanceUSD || 0) * SLL_TO_USD).toLocaleString()}`}
+            sub={`≈ Le ${((balanceUSD || 0) * exchangeRate).toLocaleString()}`}
             gradient="bg-gradient-to-br from-violet-600 to-purple-700"
             onDeposit={() => { setActiveTab("deposit"); setDepositMethod("stripe"); }}
             onWithdraw={() => { setActiveTab("withdraw"); setWithdrawMethod("stripe"); }}
@@ -273,6 +322,7 @@ export default function Wallet() {
             { id: "deposit", label: "💳 Deposit" },
             { id: "withdraw", label: "💸 Withdraw" },
             { id: "history", label: <span className="flex items-center gap-1.5"><History className="w-3.5 h-3.5" />History</span> },
+            { id: "refunds", label: <span className="flex items-center gap-1.5"><RotateCcw className="w-3.5 h-3.5" />Refunds</span> },
           ] as { id: Tab; label: React.ReactNode }[]).map(tab => (
             <button
               key={tab.id}
@@ -381,7 +431,7 @@ export default function Wallet() {
               </div>
 
               {/* Fee breakdown */}
-              <FeeBreakdown method={depositMethod} amount={parseFloat(depositAmount) || 0} direction="deposit" currency={depositCfg.currency} />
+              <FeeBreakdown method={depositMethod} amount={parseFloat(depositAmount) || 0} direction="deposit" currency={depositCfg.currency} exchangeRate={exchangeRate} />
 
               {/* Stripe special note */}
               {depositMethod === "stripe" && (
@@ -478,7 +528,7 @@ export default function Wallet() {
                 </div>
 
                 {/* Fee breakdown */}
-                <FeeBreakdown method={withdrawMethod} amount={parseFloat(withdrawAmount) || 0} direction="withdrawal" currency={withdrawCfg.currency} />
+                <FeeBreakdown method={withdrawMethod} amount={parseFloat(withdrawAmount) || 0} direction="withdrawal" currency={withdrawCfg.currency} exchangeRate={exchangeRate} />
 
                 <button
                   onClick={handleWithdraw}
@@ -490,6 +540,92 @@ export default function Wallet() {
                     : <><ArrowUp className="w-4 h-4" /> Request Withdrawal</>
                   }
                 </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── REFUNDS TAB ──────────────────────────────────────────────── */}
+        {activeTab === "refunds" && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
+              <h3 className="font-semibold text-gray-900">Request a Refund</h3>
+              <p className="text-sm text-gray-500">Select a completed purchase and explain why you need a refund. An admin will review your request.</p>
+              {refundsLoading ? (
+                <div className="flex justify-center py-8">
+                  <RefreshCw className="w-6 h-6 animate-spin text-amber-500" />
+                </div>
+              ) : eligiblePurchases.length === 0 ? (
+                <p className="text-sm text-gray-500 py-4">No eligible purchases for refund at this time.</p>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Purchase</label>
+                    <select
+                      value={refundPurchaseId}
+                      onChange={(e) => setRefundPurchaseId(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    >
+                      <option value="">Select a purchase…</option>
+                      {eligiblePurchases.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.book?.title || "Book"} — {p.currency === "USD" ? "$" : "Le "}
+                          {parseFloat(String(p.amount)).toLocaleString()} ({new Date(p.createdAt).toLocaleDateString()})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Reason (min 10 characters)</label>
+                    <textarea
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      rows={4}
+                      maxLength={1000}
+                      placeholder="Describe why you are requesting a refund…"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">{refundReason.length}/1000</p>
+                  </div>
+                  <button
+                    onClick={handleRefundSubmit}
+                    disabled={refundSubmitting || !refundPurchaseId}
+                    className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-semibold rounded-xl py-3.5 transition-colors text-sm"
+                  >
+                    {refundSubmitting ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Submitting…</>
+                    ) : (
+                      <><RotateCcw className="w-4 h-4" /> Submit Refund Request</>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {myRefunds.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                <h3 className="font-semibold text-gray-900 mb-4">Your Refund Requests</h3>
+                <div className="space-y-3">
+                  {myRefunds.map((r) => (
+                    <div key={r.id} className="flex justify-between items-start p-4 rounded-xl bg-gray-50 border border-gray-100">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {r.Purchase?.Book?.title || "Purchase"} — {r.currency === "USD" ? "$" : "Le "}
+                          {parseFloat(String(r.amount)).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{r.reason}</p>
+                        <p className="text-xs text-gray-400 mt-1">{new Date(r.createdAt).toLocaleString()}</p>
+                      </div>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full shrink-0 ${
+                        r.status === "pending" ? "bg-amber-100 text-amber-700" :
+                        r.status === "approved" ? "bg-green-100 text-green-700" :
+                        "bg-red-100 text-red-700"
+                      }`}>
+                        {r.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

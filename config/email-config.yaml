@@ -1,5 +1,5 @@
 # Email System Configuration
-# Sierra Books - QuantumMint Bookstore
+# QuantumMint Bookstore
 
 email:
   # Service Providers
@@ -7,14 +7,14 @@ email:
     sendgrid:
       api_key: ${SENDGRID_API_KEY}
       from_email: orders@quantummint.net
-      from_name: "Sierra Books"
+      from_name: "QuantumMint Bookstore"
       webhook_url: https://quantum.quantummint.net/webhook/sendgrid
     
     mailchimp:
       api_key: ${MAILCHIMP_API_KEY}
       server: us1
       list_id: ${MAILCHIMP_LIST_ID}
-      from_name: "Sierra Books Newsletter"
+      from_name: "QuantumMint Newsletter"
   
   # SendGrid Template IDs
   templates:
@@ -145,7 +145,7 @@ email:
     physical_address: "123 Library Lane, Bookville, CA 90210"
     
     # Company name
-    company_name: "Sierra Books - QuantumMint Bookstore"
+    company_name: "QuantumMint Bookstore"
     
     # Automatically add unsubscribe link
     auto_unsubscribe_link: true

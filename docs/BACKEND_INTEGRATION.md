@@ -1,6 +1,6 @@
 # Backend Integration Plan
 
-## QuantumMint Bookstore - Sierra Books
+## QuantumMint Bookstore
 
 ---
 
@@ -18,10 +18,11 @@ This document outlines the backend integration strategy for the QuantumMint Book
 
 - Node.js + Express (or NestJS for enterprise)
 - TypeScript for type safety
+- Sequelize ORM (supporting PostgreSQL, MySQL, and SQLite)
 
 **Database:**
 
-- PostgreSQL (primary data store)
+- PostgreSQL (primary data store, now supported in backend implementation)
 - Redis (caching & sessions)
 
 **Services:**

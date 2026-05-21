@@ -1,45 +1,53 @@
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'uuid-fixed') }));
 
+jest.mock('../models', () => ({
+    Book: {
+        findByPk: jest.fn(),
+    },
+    User: {
+        findByPk: jest.fn(),
+        sequelize: {
+            transaction: jest.fn(async (work) => work({})),
+        },
+    },
+    Purchase: {
+        create: jest.fn().mockResolvedValue({ id: 'purchase-1' }),
+    },
+    Transaction: {
+        create: jest.fn().mockResolvedValue({ id: 'tx-1' }),
+    },
+}));
+
+const { Book, User } = require('../models');
 const purchaseService = require('../services/purchaseService');
 const paymentService = require('../services/paymentService');
 const walletService = require('../services/walletService');
 
 describe('purchaseService', () => {
     it('throws when purchase amount does not match book price', async () => {
-        const sequelize = {
-            query: jest.fn()
-                .mockResolvedValueOnce([[{ priceSLL: '100', priceUSD: '2.00' }]])
-                .mockResolvedValueOnce([[{ balanceSLL: '1000', balanceUSD: '10.00' }]]),
-            transaction: async (work) => await work({})
-        };
-        const req = { app: { get: () => sequelize } };
+        Book.findByPk.mockResolvedValue({ priceSLL: '100', priceUSD: '2.00' });
+        User.findByPk.mockResolvedValue({
+            usdBalance: '10.00',
+            sllBalance: '1000',
+            update: jest.fn(),
+        });
 
-        await expect(purchaseService.purchaseBook(req, 'user1', 'bookid', 3, 'USD')).rejects.toThrow('Amount does not match book price');
+        await expect(purchaseService.purchaseBook({}, 'user1', 'bookid', 3, 'USD')).rejects.toThrow('Amount does not match book price');
     });
 
     it('processes purchase with exact price in transaction', async () => {
-        const queries = [];
-        const sequelize = {
-            query: jest.fn(async (sql, opts) => {
-                queries.push({ sql, opts });
-                if (sql.startsWith('SELECT priceSLL')) {
-                    return [[{ priceSLL: '100', priceUSD: '2.00' }]];
-                }
-                if (sql.startsWith('SELECT balanceSLL')) {
-                    return [[{ balanceSLL: '1000', balanceUSD: '10.00' }]];
-                }
-                return [];
-            }),
-            transaction: async (work) => await work({})
-        };
+        const mockUpdate = jest.fn().mockResolvedValue(undefined);
+        Book.findByPk.mockResolvedValue({ priceSLL: '100', priceUSD: '2.00' });
+        User.findByPk.mockResolvedValue({
+            usdBalance: '10.00',
+            sllBalance: '1000',
+            update: mockUpdate,
+        });
 
-        const req = { app: { get: () => sequelize } };
-
-        const result = await purchaseService.purchaseBook(req, 'user1', 'bookid', 2.00, 'USD');
+        const result = await purchaseService.purchaseBook({}, 'user1', 'bookid', 2.00, 'USD');
         expect(result).toHaveProperty('purchaseId');
         expect(result).toHaveProperty('transactionId');
-        expect(sequelize.query).toHaveBeenCalled();
-        expect(queries.some(q => q.sql.includes('UPDATE Wallets'))).toBe(true);
+        expect(mockUpdate).toHaveBeenCalled();
     });
 });
 

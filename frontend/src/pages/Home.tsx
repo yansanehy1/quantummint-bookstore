@@ -1,54 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const Button = ({
-    children,
-    onClick,
-    className = '',
-    variant = 'default',
-    size = 'default'
-}: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    className?: string;
-    variant?: 'default' | 'warm' | 'outline';
-    size?: 'default' | 'lg';
-}) => {
-    const baseClasses = 'inline-flex items-center justify-center rounded-xl font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500';
-
-    let variantClasses;
-    switch (variant) {
-        case 'warm':
-            variantClasses = 'bg-amber-600 text-white hover:bg-amber-700 shadow-lg shadow-amber-500/30';
-            break;
-        case 'outline':
-            variantClasses = 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-sm';
-            break;
-        default:
-            variantClasses = 'bg-slate-700 text-white hover:bg-slate-800 shadow-md shadow-slate-500/20';
-    }
-
-    const sizeClasses = size === 'lg' ? 'h-12 px-8 text-lg' : 'h-10 px-4 text-base';
-
-    return (
-        <button onClick={onClick} className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}>
-            {children}
-        </button>
-    );
-};
-
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`bg-white rounded-3xl shadow-xl hover:shadow-2xl transition duration-300 border border-gray-100 ${className}`}>
-        {children}
-    </div>
-);
+import { Search, BrainCircuit, BookOpen, Sigma, Mic } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import api from '../utils/api';
+import type { SearchResults, Book, ConceptDefinition } from '../types/types';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         document.title = 'QuantumMint - Educational Audiobooks Platform';
     }, []);
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) return;
+        
+        setIsSearching(true);
+        try {
+            const response = await api.search.deepSearch(searchQuery);
+            setSearchResults(response);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsSearching(false);
+        }
+    };
 
     const handleNavigation = (path: string) => {
         navigate(path);
@@ -63,7 +44,7 @@ const Home: React.FC = () => {
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 rounded-lg object-contain" />
                         <div className="text-2xl font-bold">
                             <span className="text-amber-600">Quantummint Bookstore</span>{' '}
-                            <span className="text-slate-700">- Sierra Books</span>
+                            <span className="text-slate-700">- QuantumMint</span>
                         </div>
                     </div>
                     <nav className="hidden md:flex space-x-6">
@@ -77,7 +58,7 @@ const Home: React.FC = () => {
                             Analytics
                         </button>
                     </nav>
-                    <Button size="default" variant="default" onClick={() => handleNavigation('/login')}>
+                    <Button size="md" variant="secondary" onClick={() => handleNavigation('/login')}>
                         Sign In
                     </Button>
                 </div>
@@ -96,11 +77,82 @@ const Home: React.FC = () => {
                         Explore educational books with integrated audio support. Perfect for students, teachers, and lifelong learners seeking engaging content.
                     </p>
 
+                    {/* Deep Search Bar */}
+                    <div className="max-w-2xl mx-auto mb-12 relative">
+                        <form onSubmit={handleSearch} className="relative">
+                            <input 
+                                type="text" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search for books, formulas, or concepts (e.g., 'E=mc^2' or 'mitosis')..."
+                                className="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 backdrop-blur-md transition-all"
+                            />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            {isSearching && <div className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent" />}
+                        </form>
+
+                        {/* Search Results Dropdown */}
+                        {searchResults && (
+                            <div className="absolute top-full left-0 right-0 mt-4 bg-white rounded-2xl shadow-2xl overflow-hidden z-[60] text-left border border-slate-200 animate-in fade-in slide-in-from-top-2">
+                                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Search Results</h3>
+                                    <button onClick={() => setSearchResults(null)} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
+                                </div>
+                                <div className="max-h-[400px] overflow-y-auto">
+                                    {/* Books */}
+                                    {searchResults.results.books.length > 0 && (
+                                        <div className="p-4">
+                                            <p className="text-[10px] font-bold text-amber-600 uppercase mb-2">Books</p>
+                                            <div className="space-y-3">
+                                                {searchResults.results.books.map((book: Book) => (
+                                                    <div key={book.id} onClick={() => handleNavigation(`/book/${book.id}`)} className="flex items-center gap-3 cursor-pointer group">
+                                                        <div className="w-10 h-12 bg-slate-100 rounded flex items-center justify-center text-slate-400 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors">
+                                                            <BookOpen size={16} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-slate-800 group-hover:text-amber-600 transition-colors">{book.title}</p>
+                                                            <p className="text-xs text-slate-500">{book.author}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Concepts/Symbols */}
+                                    {searchResults.results.concepts.length > 0 && (
+                                        <div className="p-4 border-t border-slate-100">
+                                            <p className="text-[10px] font-bold text-purple-600 uppercase mb-2">Concepts & Symbols</p>
+                                            <div className="space-y-3">
+                                                {searchResults.results.concepts.map((concept: ConceptDefinition) => (
+                                                    <div key={concept.id} onClick={() => handleNavigation(`/book/${concept.Formula.Book.id}`)} className="cursor-pointer group">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded font-mono text-xs font-bold">{concept.symbol}</span>
+                                                            <span className="text-xs font-bold text-slate-700 group-hover:text-purple-600 transition-colors">{concept.spoken}</span>
+                                                        </div>
+                                                        <p className="text-[10px] text-slate-500 line-clamp-1">{concept.definition}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {searchResults.results.books.length === 0 && searchResults.results.concepts.length === 0 && (
+                                        <div className="p-12 text-center text-slate-400">
+                                            <Search className="mx-auto mb-3 opacity-20 w-8 h-8" />
+                                            <p className="text-sm">No exact matches found. Try a different term.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex gap-4 justify-center flex-wrap">
-                        <Button variant="warm" size="lg" onClick={() => handleNavigation('/studio')}>
+                        <Button variant="primary" size="lg" onClick={() => handleNavigation('/studio')}>
                             Start Creating Audiobooks
                         </Button>
-                        <Button size="lg" variant="warm" className="px-8 py-4 text-lg font-bold" onClick={() => handleNavigation('/library')}>
+                        <Button size="lg" variant="primary" className="px-8" onClick={() => handleNavigation('/library')}>
                             Browse Library
                         </Button>
                     </div>
@@ -123,7 +175,7 @@ const Home: React.FC = () => {
                             Explore a growing library of quality educational content with integrated audio narration and personalized reading analytics to track your progress and retention.
                         </p>
                         <div className="flex gap-4">
-                            <Button variant="default" size="default" onClick={() => handleNavigation('/library')} className="w-full">
+                            <Button variant="secondary" size="md" onClick={() => handleNavigation('/library')} className="w-full">
                                 Start Learning
                             </Button>
                             <Button variant="outline" onClick={() => handleNavigation('/analytics')}>
@@ -133,7 +185,7 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Action Card */}
-                    <Card className="p-8 md:p-10 shadow-2xl">
+                    <Card className="p-8 md:p-10 shadow-2xl rounded-3xl">
                         <div className="mb-4">
                             <span className="text-amber-600 text-3xl mb-2 block">📚</span>
                             <h3 className="text-2xl font-bold text-slate-800">Jump Back In</h3>
@@ -141,7 +193,7 @@ const Home: React.FC = () => {
                         <p className="text-gray-600 mb-6">
                             Continue reading your last book or quickly find new resources to aid your studies. Your progress is saved automatically.
                         </p>
-                        <Button variant="default" className="w-full" onClick={() => handleNavigation('/library')}>
+                        <Button variant="secondary" className="w-full" onClick={() => handleNavigation('/library')}>
                             Go to Your Library
                         </Button>
                     </Card>

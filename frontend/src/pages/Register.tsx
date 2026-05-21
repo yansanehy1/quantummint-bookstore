@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Lock, ArrowRight, BookOpen } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { toast } from 'sonner';
 
 export default function Register() {
     const navigate = useNavigate();
@@ -13,9 +14,10 @@ export default function Register() {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'user' as 'user' | 'seller'
+        role: 'learner' as 'learner' | 'seller'
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         document.title = 'Register - Quantummint Bookstore';
@@ -23,6 +25,15 @@ export default function Register() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        setIsLoading(true);
         try {
             await register({
                 name: formData.name,
@@ -30,9 +41,15 @@ export default function Register() {
                 password: formData.password,
                 role: formData.role
             });
-            navigate('/');
-        } catch (error) {
-            console.error('Registration error:', error);
+            toast.success('Registration successful! Welcome to QuantumMint.');
+            navigate('/dashboard');
+        } catch (err: any) {
+            const message = err.message || 'Registration failed. Please try again.';
+            setError(message);
+            toast.error(message);
+            console.error('Registration error:', err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -115,18 +132,43 @@ export default function Register() {
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700">
+                                Confirm Password
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-slate-400" />
+                                </div>
+                                <input
+                                    type="password"
+                                    required
+                                    className="focus:ring-quantum-500 focus:border-quantum-500 block w-full pl-10 sm:text-sm border-slate-300 rounded-md py-2 border"
+                                    placeholder="••••••••"
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="text-red-500 text-sm mt-2">
+                                {error}
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700">
                                 I want to...
                             </label>
                             <div className="mt-2 grid grid-cols-2 gap-3">
                                 <div
-                                    onClick={() => setFormData({ ...formData, role: 'user' })}
-                                    className={`cursor-pointer rounded-lg border p-4 flex flex-col items-center justify-center text-center transition-all ${formData.role === 'user'
+                                    onClick={() => setFormData({ ...formData, role: 'learner' })}
+                                    className={`cursor-pointer rounded-lg border p-4 flex flex-col items-center justify-center text-center transition-all ${formData.role === 'learner'
                                         ? 'border-quantum-500 bg-quantum-50 ring-1 ring-quantum-500'
                                         : 'border-slate-200 hover:border-slate-300'
                                         }`}
                                 >
-                                    <BookOpen className={`h-6 w-6 mb-2 ${formData.role === 'user' ? 'text-quantum-600' : 'text-slate-400'}`} />
-                                    <span className={`text-sm font-medium ${formData.role === 'user' ? 'text-quantum-900' : 'text-slate-900'}`}>
+                                    <BookOpen className={`h-6 w-6 mb-2 ${formData.role === 'learner' ? 'text-quantum-600' : 'text-slate-400'}`} />
+                                    <span className={`text-sm font-medium ${formData.role === 'learner' ? 'text-quantum-900' : 'text-slate-900'}`}>
                                         Read & Learn
                                     </span>
                                 </div>

@@ -91,7 +91,8 @@ def process_text():
             
         segments = parser.segment_text(text)
         complexity = calculate_complexity(segments)
-        ssml = ssml_gen.generate_ssml(segments, complexity)
+        # Use default voice mapping for basic endpoint
+        ssml = ssml_gen.generate_ssml(segments)
         
         return jsonify({
             "segments": segments,
@@ -99,8 +100,36 @@ def process_text():
             "ssml": ssml
         })
     except Exception as e:
-        logger.error(f"Error in /process: {e}")
-        return jsonify({"error": "Processing failed"}), 500
+        logger.error(f"Error processing text: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/process/multi', methods=['POST'])
+@limiter.limit("5 per minute")
+def process_multi():
+    """
+    Advanced Multi-Voice Orchestration Endpoint
+    """
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        text = data.get('text', '').strip()
+        voice_map = data.get('voice_map', {}) # Optional custom voice mapping
+        
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+            
+        segments = parser.segment_text(text)
+        complexity = calculate_complexity(segments)
+        ssml = ssml_gen.generate_ssml(segments, voice_map)
+        
+        return jsonify({
+            "segments": segments,
+            "complexity": complexity,
+            "ssml": ssml,
+            "billing_estimated_duration": len(text) / 15 # rough estimate: 15 chars/sec
+        })
+    except Exception as e:
+        logger.error(f"Error in multi-voice processing: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/synthesize', methods=['POST'])
 @limiter.limit("10 per minute")

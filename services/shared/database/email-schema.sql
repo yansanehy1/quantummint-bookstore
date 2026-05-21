@@ -1,4 +1,4 @@
--- Sierra Books Email System Database Schema
+-- QuantumMint Bookstore Email System Database Schema
 -- PostgreSQL / MySQL Compatible
 
 -- Email Templates

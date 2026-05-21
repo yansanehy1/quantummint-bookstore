@@ -1,180 +1,218 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+    BookOpen, 
+    Clock, 
+    Award, 
+    TrendingUp, 
+    Calendar, 
+    ChevronRight, 
+    Trophy, 
+    Users, 
+    Play, 
+    BarChart3,
+    Zap,
+    Target
+} from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { getBooks, getCurrentUser } from '@/services/store';
-import { User, Book } from '../types/types';
-import { BookOpen, Clock, Trophy, Target, Play } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { Card } from '../components/ui/Card';
+import api from '../utils/api';
+import { toast } from 'sonner';
 
-const LEARNING_DATA = [
-   { day: 'Mon', hours: 1.5 },
-   { day: 'Tue', hours: 2.2 },
-   { day: 'Wed', hours: 0.8 },
-   { day: 'Thu', hours: 3.0 },
-   { day: 'Fri', hours: 2.5 },
-   { day: 'Sat', hours: 4.0 },
-   { day: 'Sun', hours: 1.2 },
-];
+export const LearnerDashboard: React.FC = () => {
+    const navigate = useNavigate();
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [leaderboard, setLeaderboard] = useState<any[]>([]);
+    const [dueNotesCount, setDueNotesCount] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-interface LearnerDashboardProps {
-   onNavigate: (page: string, bookId?: string) => void;
-}
+    useEffect(() => {
+        fetchData();
+    }, []);
 
-export const LearnerDashboard: React.FC<LearnerDashboardProps> = ({ onNavigate }) => {
-   const user = getCurrentUser();
-   const books = getBooks();
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const [analyticsData, leaderboardData, dueNotes] = await Promise.all([
+                api.learner.getAnalytics(),
+                api.learner.getLeaderboard(),
+                api.learner.getDueNotes()
+            ]);
+            setAnalytics(analyticsData);
+            setLeaderboard(leaderboardData);
+            setDueNotesCount(dueNotes.length);
+        } catch (error) {
+            console.error('Failed to fetch dashboard data:', error);
+            toast.error('Failed to load dashboard statistics');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-   // Mock "Continue Reading" - just take the first 2 books
-   const continueReading = books.slice(0, 2);
-   const recommended = books.slice(2, 4);
-
-   return (
-      <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in">
-         {/* Welcome Section */}
-         <div className="flex justify-between items-end">
-            <div>
-               <h1 className="text-3xl font-bold text-slate-900">Welcome back, {user?.name.split(' ')[0]}!</h1>
-               <p className="text-slate-500 mt-2">You're on a 5-day learning streak. Keep it up!</p>
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-quantum-600"></div>
             </div>
-            <div className="hidden md:block">
-               <span className="text-sm font-medium text-slate-500 mr-2">Current Level:</span>
-               <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">SSS 2</span>
-            </div>
-         </div>
+        );
+    }
 
-         {/* Stats Grid */}
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <StatsCard label="Books Read" value="12" icon={<BookOpen size={20} />} color="bg-blue-500" />
-            <StatsCard label="Hours Learned" value="34.5" icon={<Clock size={20} />} color="bg-emerald-500" />
-            <StatsCard label="Achievements" value="7" icon={<Trophy size={20} />} color="bg-yellow-500" />
-            <StatsCard label="Quiz Avg" value="88%" icon={<Target size={20} />} color="bg-indigo-500" />
-         </div>
+    return (
+        <div className="min-h-screen bg-slate-50 pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Welcome Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+                    <div>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Student Hub</h1>
+                        <p className="text-slate-500 font-bold mt-1">Track your STEM progress and peer rankings</p>
+                    </div>
+                    <div className="flex gap-3">
+                        {dueNotesCount > 0 && (
+                            <Button 
+                                onClick={() => navigate('/review')} 
+                                className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20"
+                            >
+                                <Zap size={18} className="mr-2" /> Review {dueNotesCount} Notes
+                            </Button>
+                        )}
+                        <Button onClick={() => navigate('/library')} className="bg-quantum-600 hover:bg-quantum-700">
+                            <Play size={18} className="mr-2" /> Continue Studying
+                        </Button>
+                    </div>
+                </div>
 
-         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Continue Reading & Recommendations */}
-            <div className="lg:col-span-2 space-y-8">
-
-               <section>
-                  <div className="flex items-center justify-between mb-4">
-                     <h2 className="text-xl font-bold text-slate-900">Continue Learning</h2>
-                     <Button variant="ghost" size="sm" onClick={() => onNavigate('library')}>View Library</Button>
-                  </div>
-                  <div className="space-y-4">
-                     {continueReading.map((book, idx) => (
-                        <div key={book.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4 hover:shadow-md transition-shadow group">
-                           <div className="w-20 h-28 bg-slate-200 rounded-lg overflow-hidden shrink-0">
-                              <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
-                           </div>
-                           <div className="flex-1 flex flex-col justify-between py-1">
-                              <div>
-                                 <div className="flex justify-between">
-                                    <h3 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{book.title}</h3>
-                                    <span className="text-xs text-slate-400 font-mono">Ch. {idx + 1}</span>
-                                 </div>
-                                 <p className="text-xs text-slate-500">{book.author}</p>
-                              </div>
-                              <div className="space-y-2">
-                                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${60 - idx * 20}%` }}></div>
-                                 </div>
-                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-slate-400">{60 - idx * 20}% Complete</span>
-                                    <Button size="sm" className="h-8 gap-2" onClick={() => onNavigate('player', book.id)}>
-                                       <Play size={14} /> Resume
-                                    </Button>
-                                 </div>
-                              </div>
-                           </div>
+                {/* Core Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <Card className="p-6 border-l-4 border-l-blue-500">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Clock size={24} /></div>
                         </div>
-                     ))}
-                  </div>
-               </section>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Study Time</p>
+                        <p className="text-3xl font-black text-slate-900">{analytics?.totalHours || 0}h</p>
+                        <p className="text-xs text-slate-400 font-bold mt-1">Total across sessions</p>
+                    </Card>
 
-               <section>
-                  <h2 className="text-xl font-bold text-slate-900 mb-4">Recommended for You</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     {recommended.length > 0 ? recommended.map(book => (
-                        <Card key={book.id} className="cursor-pointer hover:border-emerald-500 transition-colors group">
-                           <CardContent className="p-4 flex gap-4">
-                              <img src={book.coverUrl} className="w-16 h-20 object-cover rounded shadow-sm" alt={book.title} />
-                              <div>
-                                 <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-600 line-clamp-1">{book.title}</h4>
-                                 <p className="text-xs text-slate-500 mb-2">{book.category}</p>
-                                 <div className="flex items-center gap-1 text-xs font-bold text-slate-700">
-                                    <span className="text-yellow-400">★</span> {book.rating.toFixed(1)}
-                                 </div>
-                              </div>
-                           </CardContent>
+                    <Card className="p-6 border-l-4 border-l-quantum-500">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 bg-quantum-50 text-quantum-600 rounded-lg"><BookOpen size={24} /></div>
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Books Read</p>
+                        <p className="text-3xl font-black text-slate-900">{analytics?.totalBooks || 0}</p>
+                        <p className="text-xs text-slate-400 font-bold mt-1">Completed & In-progress</p>
+                    </Card>
+
+                    <Card className="p-6 border-l-4 border-l-amber-500">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg"><Zap size={24} /></div>
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Study Streak</p>
+                        <p className="text-3xl font-black text-slate-900">5 Days</p>
+                        <p className="text-xs text-slate-400 font-bold mt-1">Keep it going!</p>
+                    </Card>
+
+                    <Card className="p-6 border-l-4 border-l-purple-500">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Target size={24} /></div>
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Retention</p>
+                        <p className="text-3xl font-black text-slate-900">82%</p>
+                        <p className="text-xs text-slate-400 font-bold mt-1">Knowledge check score</p>
+                    </Card>
+                </div>
+
+                <div className="grid lg:grid-cols-3 gap-8">
+                    {/* Recent Activity */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <Card className="p-8">
+                            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <History size={20} className="text-quantum-600" /> Recent Study Sessions
+                            </h3>
+                            <div className="space-y-4">
+                                {analytics?.sessions?.length > 0 ? analytics.sessions.map((session: any) => (
+                                    <div key={session.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors cursor-pointer group">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-quantum-600 group-hover:border-quantum-100 transition-all">
+                                                <BookOpen size={24} />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900">Chapter {session.pagesRead?.length || 1} Review</h4>
+                                                <p className="text-xs text-slate-400 font-bold">{new Date(session.startTime).toLocaleDateString()} • {(session.durationSeconds / 60).toFixed(0)} mins</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={20} className="text-slate-300 group-hover:text-quantum-500 group-hover:translate-x-1 transition-all" />
+                                    </div>
+                                )) : (
+                                    <div className="text-center py-12 opacity-30">
+                                        <Calendar size={48} className="mx-auto mb-2" />
+                                        <p className="text-sm font-bold uppercase tracking-widest">No recent activity</p>
+                                    </div>
+                                )}
+                            </div>
                         </Card>
-                     )) : (
-                        <div className="col-span-2 text-center text-slate-400 py-8 border-2 border-dashed border-slate-200 rounded-xl">
-                           Explore the library to get recommendations.
-                        </div>
-                     )}
-                  </div>
-               </section>
 
+                        <Card className="p-8">
+                            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <BarChart3 size={20} className="text-quantum-600" /> Weekly Deep-Work
+                            </h3>
+                            <div className="h-48 flex items-end justify-between gap-2 px-4">
+                                {[40, 70, 45, 90, 65, 30, 80].map((val, i) => (
+                                    <div key={i} className="w-full space-y-2">
+                                        <div className="bg-quantum-500 rounded-t-lg transition-all hover:bg-quantum-400" style={{ height: `${val}%` }} />
+                                        <p className="text-[10px] font-black text-slate-400 text-center uppercase tracking-tighter">
+                                            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Peer Leaderboard */}
+                    <div className="space-y-8">
+                        <Card className="p-8 bg-slate-900 text-white border-none shadow-2xl">
+                            <h3 className="text-xl font-black mb-6 flex items-center gap-2">
+                                <Trophy size={20} className="text-amber-400" /> Peer Leaderboard
+                            </h3>
+                            <div className="space-y-4">
+                                {leaderboard.map((item, index) => (
+                                    <div key={item.userId} className={`flex items-center justify-between p-3 rounded-xl ${index === 0 ? 'bg-amber-400/10 border border-amber-400/20' : 'bg-white/5'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${
+                                                index === 0 ? 'bg-amber-400 text-slate-900' : 
+                                                index === 1 ? 'bg-slate-300 text-slate-900' :
+                                                index === 2 ? 'bg-orange-400 text-slate-900' : 'bg-white/10 text-white/50'
+                                            }`}>
+                                                {index + 1}
+                                            </span>
+                                            <span className="text-sm font-bold">{item.User?.name || 'Anonymous'}</span>
+                                        </div>
+                                        <span className="text-xs font-black text-quantum-400">{(item.totalDuration / 3600).toFixed(1)}h</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button variant="outline" className="w-full mt-6 border-white/10 text-white hover:bg-white/10" size="sm">
+                                <Users size={16} className="mr-2" /> See Global Ranking
+                            </Button>
+                        </Card>
+
+                        <Card className="p-8">
+                            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <TrendingUp size={20} className="text-quantum-600" /> Study Insights
+                            </h3>
+                            <div className="space-y-6">
+                                <div className="p-4 bg-blue-50 rounded-2xl">
+                                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-1">Peak Focus</p>
+                                    <p className="text-sm font-bold text-slate-700">You study best between 7 PM - 9 PM.</p>
+                                </div>
+                                <div className="p-4 bg-purple-50 rounded-2xl">
+                                    <p className="text-xs font-black text-purple-600 uppercase tracking-widest mb-1">Weak Point</p>
+                                    <p className="text-sm font-bold text-slate-700">Calculus formulas need more review taps.</p>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
             </div>
-
-            {/* Right Column: Activity Chart & Goals */}
-            <div className="space-y-8">
-               <Card>
-                  <CardHeader><CardTitle>Weekly Activity</CardTitle></CardHeader>
-                  <CardContent>
-                     <div className="h-48 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                           <BarChart data={LEARNING_DATA}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                              <Tooltip cursor={{ fill: '#f8fafc' }} />
-                              <Bar dataKey="hours" fill="#10b981" radius={[4, 4, 0, 0]} />
-                           </BarChart>
-                        </ResponsiveContainer>
-                     </div>
-                     <div className="mt-4 text-center">
-                        <p className="text-sm text-slate-500">Total this week</p>
-                        <p className="text-2xl font-bold text-slate-900">15.2 Hours</p>
-                     </div>
-                  </CardContent>
-               </Card>
-
-               <Card className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white">
-                  <CardContent className="p-6">
-                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold">Daily Goal</h3>
-                        <Target className="text-emerald-400" />
-                     </div>
-                     <div className="mb-2 flex justify-between text-sm text-slate-300">
-                        <span>Progress</span>
-                        <span>45m / 60m</span>
-                     </div>
-                     <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden mb-4">
-                        <div className="h-full bg-emerald-500 w-3/4 rounded-full"></div>
-                     </div>
-                     <p className="text-xs text-slate-400">Read for 15 more minutes to reach your daily goal!</p>
-                  </CardContent>
-               </Card>
-            </div>
-         </div>
-      </div>
-   );
+        </div>
+    );
 };
-
-const StatsCard = ({ label, value, icon, color }: any) => (
-   <Card>
-      <CardContent className="p-6 flex items-center justify-between">
-         <div>
-            <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">{label}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-         </div>
-         <div className={`p-3 rounded-lg text-white ${color}`}>
-            {icon}
-         </div>
-      </CardContent>
-   </Card>
-);
-
-
-
-

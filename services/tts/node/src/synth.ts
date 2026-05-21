@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { ssmlToPhonemeSequence } from './g2p.js';
 import { DefaultVoice, VoiceProfile, voices } from './voice.js';
+import { azureSynthesizeToFile } from './azure_synth.js';
 
 // Simple oscillator + formant filter per frame
 type SynthParams = {
@@ -15,6 +16,15 @@ type SynthParams = {
 };
 
 export async function synthesizeToFile(p: SynthParams) {
+    // If Azure credentials are provided, use Azure TTS for high quality
+    if (process.env.AZURE_SPEECH_KEY) {
+        try {
+            return await azureSynthesizeToFile(p.ssml, p.outPath, p.voiceId);
+        } catch (error) {
+            console.error('Azure TTS failed, falling back to internal synthesizer:', error);
+        }
+    }
+
     const phonemes = ssmlToPhonemeSequence(p.ssml);
     const voice = voices[p.voiceId ?? 'default'] ?? DefaultVoice;
     const sr = 22050;

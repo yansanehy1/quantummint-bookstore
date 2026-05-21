@@ -1,345 +1,354 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '../utils/api';
 import {
     CheckCircle,
     Clock,
     XCircle,
     Eye,
-    ArrowLeft
+    ArrowLeft,
+    FileText,
+    User,
+    Tag
 } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-
-interface Book {
-    id: number;
-    title: string;
-    author: string;
-    seller: string;
-    category: string;
-    status: 'approved' | 'pending' | 'rejected';
-    submittedDate: string;
-    pages: number;
-    rejectionReason?: string;
-}
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import { toast } from 'sonner';
 
 export default function AdminBookManagement() {
     const navigate = useNavigate();
-
-    useEffect(() => {
-        document.title = 'Book Management - Quantummint Bookstore';
-    }, []);
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
-    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+        interface Book {
+            id: string;
+            title: string;
+            author: string;
+            status: string;
+            rejectionReason?: string;
+        }
+        const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [showBulkRejectDialog, setShowBulkRejectDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
 
-    const [books, setBooks] = useState<Book[]>([
-        {
-            id: 1,
-            title: 'Language Arts - JSS 1, Term 1',
-            author: 'Sierra Books Admin',
-            seller: 'Administrator',
-            category: 'Language Arts',
-            status: 'approved',
-            submittedDate: '2025-11-02',
-            pages: 3,
-        },
-        {
-            id: 2,
-            title: 'Advanced Mathematics',
-            author: 'Prof. Fatima Jalloh',
-            seller: 'Fatima Jalloh',
-            category: 'Mathematics',
-            status: 'pending',
-            submittedDate: '2025-11-01',
-            pages: 5,
-        },
-        {
-            id: 3,
-            title: 'Physics Basics',
-            author: 'Dr. Ahmed Hassan',
-            seller: 'Ahmed Hassan',
-            category: 'Science',
-            status: 'pending',
-            submittedDate: '2025-10-31',
-            pages: 4,
-        },
-        {
-            id: 4,
-            title: 'West African History',
-            author: 'Binta K. Mansaray',
-            seller: 'Binta K. Mansaray',
-            category: 'History',
-            status: 'rejected',
-            submittedDate: '2025-10-29',
-            pages: 7,
-            rejectionReason: 'Formatting issues and blurry images. Please revise.'
-        },
-    ]);
+    const { data: books, isLoading } = useQuery({
+        queryKey: ['admin', 'books'],
+        queryFn: () => api.admin.getAllBooks()
+    });
 
-    const pendingBooks = books.filter(b => b.status === 'pending');
-    const approvedBooks = books.filter(b => b.status === 'approved');
-    const rejectedBooks = books.filter(b => b.status === 'rejected');
-
-    const approveBook = (bookId: number) => {
-        setBooks(books.map(b => b.id === bookId ? { ...b, status: 'approved' as const, rejectionReason: undefined } : b));
-        alert('Book approved successfully!');
-    };
-
-    const rejectBook = (bookId: number) => {
-        if (!rejectionReason.trim()) {
-            alert('Please provide a rejection reason.');
-            return;
+    const statusMutation = useMutation({
+        mutationFn: ({ id, status, reason }: { id: string; status: string; reason?: string }) => 
+            api.admin.updateBookStatus(id, { status, rejectionReason: reason }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'books'] });
+            toast.success('Book status updated');
+            setShowRejectDialog(false);
+            setRejectionReason('');
+        },
+        onError: () => {
+            toast.error('Failed to update book status');
         }
-        setBooks(books.map(b => b.id === bookId ? { ...b, status: 'rejected' as const, rejectionReason } : b));
-        setShowRejectDialog(false);
-        setRejectionReason('');
-        setSelectedBook(null);
-        alert('Book rejected. Reason sent to seller.');
+    });
+
+    const bulkStatusMutation = useMutation({
+        mutationFn: (data: { ids: string[]; status: string; rejectionReason?: string }) => 
+            api.admin.bulkUpdateBookStatus(data),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['admin', 'books'] });
+            toast.success(`Bulk updated ${data.count} books`);
+            setSelectedIds([]);
+            setShowBulkRejectDialog(false);
+            setRejectionReason('');
+        },
+        onError: () => {
+            toast.error('Failed to bulk update books');
+        }
+    });
+
+    const handleApprove = (id: string) => {
+        statusMutation.mutate({ id, status: 'approved' });
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'approved': return 'bg-green-100 text-green-800 border-green-300';
-            case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-            case 'rejected': return 'bg-red-100 text-red-800 border-red-300';
-            default: return 'bg-gray-100 text-gray-800';
+    const handleReject = () => {
+        if (!rejectionReason.trim() || !selectedBook) return;
+        statusMutation.mutate({ id: selectedBook.id, status: 'rejected', reason: rejectionReason });
+    };
+
+    const handleBulkApprove = () => {
+        if (selectedIds.length === 0) return;
+        bulkStatusMutation.mutate({ ids: selectedIds, status: 'approved' });
+    };
+
+    const handleBulkReject = () => {
+        if (selectedIds.length === 0 || !rejectionReason.trim()) return;
+        bulkStatusMutation.mutate({ ids: selectedIds, status: 'rejected', rejectionReason });
+    };
+
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredBooks.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredBooks.map((b: any) => b.id));
         }
     };
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'approved': return <CheckCircle className="w-4 h-4 mr-1.5" />;
-            case 'pending': return <Clock className="w-4 h-4 mr-1.5" />;
-            case 'rejected': return <XCircle className="w-4 h-4 mr-1.5" />;
-            default: return null;
-        }
-    };
+    const filteredBooks = books?.filter((b: any) => b.status === activeTab) || [];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-quantum-600"></div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-10">
-            <div className="container max-w-7xl mx-auto px-4">
-                <div className="flex justify-between items-center mb-10 pb-4 border-b">
-                    <div>
-                        <h1 className="text-4xl font-extrabold text-blue-900">Book Submission Review</h1>
-                        <p className="text-lg text-gray-600 mt-2">Manage educational content submissions.</p>
+        <div className="min-h-screen bg-slate-50 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-10">
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
+                            <ArrowLeft size={16} />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Content Moderation</h1>
+                            <p className="text-slate-500 font-bold">Review AI-native STEM books</p>
+                        </div>
                     </div>
-                    <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Admin Dashboard
-                    </Button>
                 </div>
 
+                {/* Stats */}
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
-                    <Card className="p-5 bg-yellow-50 border-yellow-300 hover:shadow-2xl transition">
-                        <div className="flex items-center justify-between">
+                    <Card className="p-6 bg-amber-50 border-amber-100">
+                        <div className="flex justify-between items-center">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Pending Review</p>
-                                <p className="text-4xl font-extrabold text-yellow-700 mt-1">{pendingBooks.length}</p>
+                                <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Pending Review</p>
+                                <p className="text-3xl font-black text-slate-900 mt-1">{books?.filter((b:any) => b.status === 'pending').length || 0}</p>
                             </div>
-                            <Clock className="w-10 h-10 text-yellow-500 opacity-60" />
+                            <Clock className="text-amber-500" size={32} />
                         </div>
                     </Card>
-                    <Card className="p-5 bg-green-50 border-green-300 hover:shadow-2xl transition">
-                        <div className="flex items-center justify-between">
+                    <Card className="p-6 bg-green-50 border-green-100">
+                        <div className="flex justify-between items-center">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Approved</p>
-                                <p className="text-4xl font-extrabold text-green-700 mt-1">{approvedBooks.length}</p>
+                                <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Live Content</p>
+                                <p className="text-3xl font-black text-slate-900 mt-1">{books?.filter((b:any) => b.status === 'approved').length || 0}</p>
                             </div>
-                            <CheckCircle className="w-10 h-10 text-green-500 opacity-60" />
+                            <CheckCircle className="text-green-500" size={32} />
                         </div>
                     </Card>
-                    <Card className="p-5 bg-red-50 border-red-300 hover:shadow-2xl transition">
-                        <div className="flex items-center justify-between">
+                    <Card className="p-6 bg-red-50 border-red-100">
+                        <div className="flex justify-between items-center">
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Rejected</p>
-                                <p className="text-4xl font-extrabold text-red-700 mt-1">{rejectedBooks.length}</p>
+                                <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Rejected</p>
+                                <p className="text-3xl font-black text-slate-900 mt-1">{books?.filter((b:any) => b.status === 'rejected').length || 0}</p>
                             </div>
-                            <XCircle className="w-10 h-10 text-red-500 opacity-60" />
+                            <XCircle className="text-red-500" size={32} />
                         </div>
                     </Card>
                 </div>
 
-                <div className="mb-8">
-                    <div className="flex gap-4 bg-gray-100 p-1 rounded-xl max-w-lg mx-auto">
+                {/* Tabs */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div className="flex gap-4 bg-white p-1 rounded-2xl border border-slate-200 w-fit">
                         {[
-                            { id: 'pending' as const, label: `Pending (${pendingBooks.length})` },
-                            { id: 'approved' as const, label: `Approved (${approvedBooks.length})` },
-                            { id: 'rejected' as const, label: `Rejected (${rejectedBooks.length})` },
-                        ].map(tab => (
+                            { id: 'pending', label: 'Queued', icon: Clock },
+                            { id: 'approved', label: 'Approved', icon: CheckCircle },
+                            { id: 'rejected', label: 'Rejected', icon: XCircle },
+                        ].map((tab) => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex-1 px-4 py-2 rounded-lg font-semibold transition ${activeTab === tab.id ? 'bg-white text-blue-700 shadow-md' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
+                                onClick={() => { setActiveTab(tab.id as any); setSelectedIds([]); }}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm transition-all ${
+                                    activeTab === tab.id
+                                        ? 'bg-quantum-600 text-white shadow-lg shadow-quantum-600/20'
+                                        : 'text-slate-500 hover:bg-slate-50'
+                                }`}
                             >
+                                <tab.icon size={16} />
                                 {tab.label}
                             </button>
                         ))}
                     </div>
-                </div>
 
-                <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
-                    {(activeTab === 'pending' ? pendingBooks : activeTab === 'approved' ? approvedBooks : rejectedBooks).map(book => (
-                        <BookCard
-                            key={book.id}
-                            book={book}
-                            getStatusColor={getStatusColor}
-                            getStatusIcon={getStatusIcon}
-                            onView={() => {
-                                setSelectedBook(book);
-                                setShowViewDialog(true);
-                            }}
-                            onApprove={() => approveBook(book.id)}
-                            onReject={() => {
-                                setSelectedBook(book);
-                                setRejectionReason(book.rejectionReason || '');
-                                setShowRejectDialog(true);
-                            }}
-                        />
-                    ))}
-                </div>
-
-                {/* View Dialog */}
-                {showViewDialog && selectedBook && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowViewDialog(false)}>
-                        <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-2xl font-bold mb-4">{selectedBook.title}</h3>
-                            <div className="grid md:grid-cols-2 gap-4 mb-4">
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-sm text-gray-600">Author</p>
-                                    <p className="font-bold text-lg">{selectedBook.author}</p>
-                                </div>
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-sm text-gray-600">Seller</p>
-                                    <p className="font-bold text-lg">{selectedBook.seller}</p>
-                                </div>
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-sm text-gray-600">Category</p>
-                                    <p className="font-bold text-lg">{selectedBook.category}</p>
-                                </div>
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-sm text-gray-600">Pages</p>
-                                    <p className="font-bold text-lg">{selectedBook.pages}</p>
-                                </div>
-                            </div>
-                            <Button onClick={() => setShowViewDialog(false)} className="w-full">Close</Button>
+                    {selectedIds.length > 0 && (
+                        <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">{selectedIds.length} Selected</span>
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600 border-red-100 hover:bg-red-50"
+                                onClick={() => setShowBulkRejectDialog(true)}
+                            >
+                                Bulk Reject
+                            </Button>
+                            <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={handleBulkApprove}
+                                isLoading={bulkStatusMutation.isPending}
+                            >
+                                Bulk Approve
+                            </Button>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
-                {/* Reject Dialog */}
-                {showRejectDialog && selectedBook && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRejectDialog(false)}>
-                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-xl font-bold mb-4">Reject: {selectedBook.title}</h3>
-                            <p className="text-sm text-gray-600 mb-4">
-                                Provide feedback for <strong>{selectedBook.seller}</strong>.
-                            </p>
-                            <textarea
-                                value={rejectionReason}
-                                onChange={(e) => setRejectionReason(e.target.value)}
-                                placeholder="Explain the issues..."
-                                rows={5}
-                                className="w-full px-3 py-3 border border-gray-300 rounded-lg mb-4"
+                {/* Content */}
+                <div className="grid gap-6">
+                    {filteredBooks.length > 0 && (
+                        <div className="flex items-center gap-3 px-6 mb-2">
+                            <label htmlFor="select-all-books" className="sr-only">Select All Books</label>
+                            <input 
+                                id="select-all-books"
+                                type="checkbox" 
+                                checked={selectedIds.length === filteredBooks.length && filteredBooks.length > 0}
+                                onChange={toggleSelectAll}
+                                className="w-5 h-5 rounded border-slate-300 text-quantum-600 focus:ring-quantum-500"
                             />
-                            <div className="flex gap-3">
-                                <Button onClick={() => setShowRejectDialog(false)} variant="outline" className="flex-1">
-                                    Cancel
-                                </Button>
-                                <Button onClick={() => rejectBook(selectedBook.id)} className="flex-1 bg-red-600" disabled={!rejectionReason.trim()}>
-                                    <XCircle className="w-4 h-4 mr-2" />
-                                    Confirm
-                                </Button>
-                            </div>
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Select All</span>
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
+                    )}
+                    {filteredBooks.length > 0 ? (
+                        filteredBooks.map((book: any) => (
+                            <Card key={book.id} className={`p-6 transition-all ${selectedIds.includes(book.id) ? 'border-quantum-500 bg-quantum-50/30' : ''}`}>
+                                <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
+                                    <div className="flex items-center gap-6">
+                                        <label htmlFor={`select-book-${book.id}`} className="sr-only">Select Book {book.title}</label>
+                                        <input 
+                                            id={`select-book-${book.id}`}
+                                            type="checkbox" 
+                                            checked={selectedIds.includes(book.id)}
+                                            onChange={() => toggleSelect(book.id)}
+                                            className="w-5 h-5 rounded border-slate-300 text-quantum-600 focus:ring-quantum-500"
+                                        />
+                                        <div className="w-16 h-24 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 overflow-hidden">
+                                            {book.coverUrl ? (
+                                                <img src={book.coverUrl} alt={book.title + ' cover'} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <FileText size={32} />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-900">{book.title}</h3>
+                                            <div className="flex flex-wrap gap-4 mt-2">
+                                                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-500">
+                                                    <User size={14} /> {book.Seller?.User?.name || 'Unknown'}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-500">
+                                                    <Tag size={14} /> {book.category}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[10px] font-black text-quantum-600 bg-quantum-50 px-2 py-0.5 rounded-full uppercase">
+                                                    {book.difficulty_level}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-const BookCard: React.FC<{
-    book: Book;
-    getStatusColor: (status: string) => string;
-    getStatusIcon: (status: string) => React.ReactNode;
-    onView: () => void;
-    onApprove: () => void;
-    onReject: () => void;
-}> = ({
-    book,
-    getStatusColor,
-    getStatusIcon,
-    onView,
-    onApprove,
-    onReject
-}) => (
-        <Card className="p-5 hover:shadow-2xl transition">
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                    <h3 className="font-extrabold text-xl text-gray-900">{book.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">By <span className="font-semibold">{book.author}</span></p>
-                </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center ${getStatusColor(book.status)}`}>
-                    {getStatusIcon(book.status)}
-                    {book.status.toUpperCase()}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-sm mb-4 p-3 bg-gray-50 rounded-lg">
-                <div>
-                    <p className="text-gray-500 font-medium">Category</p>
-                    <p className="font-semibold text-gray-800">{book.category}</p>
-                </div>
-                <div>
-                    <p className="text-gray-500 font-medium">Pages</p>
-                    <p className="font-semibold text-gray-800">{book.pages}</p>
-                </div>
-                <div>
-                    <p className="text-gray-500 font-medium">Submitted</p>
-                    <p className="font-semibold text-gray-800">{book.submittedDate}</p>
+                                    <div className="flex items-center gap-3">
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            onClick={() => { setSelectedBook(book); setShowViewDialog(true); }}
+                                        >
+                                            <Eye size={18} className="mr-2" /> Preview
+                                        </Button>
+                                        
+                                        {activeTab === 'pending' && (
+                                            <>
+                                                <Button 
+                                                    variant="outline"
+                                                    className="text-red-600 border-red-100 hover:bg-red-50"
+                                                    onClick={() => { setSelectedBook(book); setShowRejectDialog(true); }}
+                                                >
+                                                    Reject
+                                                </Button>
+                                                <Button 
+                                                    onClick={() => handleApprove(book.id)}
+                                                    className="bg-green-600 hover:bg-green-700"
+                                                >
+                                                    Approve Content
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </Card>
+                        ))
+                    ) : (
+                        <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-slate-300">
+                            <FileText size={48} className="mx-auto text-slate-200 mb-4" />
+                            <p className="text-slate-400 font-bold">No {activeTab} content found</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {book.rejectionReason && (
-                <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-4">
-                    <p className="text-xs font-bold text-red-900 flex items-center mb-1">
-                        <XCircle className="w-4 h-4 mr-2" />
-                        REJECTED: Feedback
-                    </p>
-                    <p className="text-sm text-red-700">{book.rejectionReason}</p>
+            {/* Reject Dialog */}
+            {showRejectDialog && selectedBook && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+                    <Card className="w-full max-w-md p-8 bg-white rounded-[2rem] shadow-2xl">
+                        <h3 className="text-xl font-black text-slate-900 mb-2">Reject Content</h3>
+                        <p className="text-sm text-slate-500 font-bold mb-6">Provide feedback to {selectedBook.Seller?.User?.name}</p>
+                        
+                        <textarea
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            placeholder="Why is this content being rejected? (e.g., incorrect STEM formulas, low audio quality)"
+                            className="w-full h-32 p-4 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none font-medium mb-6"
+                        />
+
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+                            <Button 
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                                onClick={handleReject}
+                                disabled={!rejectionReason.trim()}
+                            >
+                                Confirm Rejection
+                            </Button>
+                        </div>
+                    </Card>
                 </div>
             )}
 
-            <div className="flex gap-3">
-                <Button
-                    onClick={onView}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View
-                </Button>
+            {/* Bulk Reject Dialog */}
+            {showBulkRejectDialog && selectedIds.length > 0 && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+                    <Card className="w-full max-w-md p-8 bg-white rounded-[2rem] shadow-2xl">
+                        <h3 className="text-xl font-black text-slate-900 mb-2">Bulk Reject Content</h3>
+                        <p className="text-sm text-slate-500 font-bold mb-6">Provide feedback for {selectedIds.length} books</p>
+                        
+                        <textarea
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            placeholder="Reason for bulk rejection..."
+                            className="w-full h-32 p-4 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none font-medium mb-6"
+                        />
 
-                {book.status === 'pending' && (
-                    <>
-                        <Button onClick={onApprove} size="sm" className="flex-1 bg-green-600">
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Approve
-                        </Button>
-                        <Button
-                            onClick={onReject}
-                            size="sm"
-                            className="flex-1 bg-red-600"
-                        >
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Reject
-                        </Button>
-                    </>
-                )}
-            </div>
-        </Card>
+                        <div className="flex gap-3">
+                            <Button variant="outline" className="flex-1" onClick={() => setShowBulkRejectDialog(false)}>Cancel</Button>
+                            <Button 
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                                onClick={handleBulkReject}
+                                disabled={!rejectionReason.trim()}
+                                isLoading={bulkStatusMutation.isPending}
+                            >
+                                Confirm Bulk Reject
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
+        </div>
     );
+}

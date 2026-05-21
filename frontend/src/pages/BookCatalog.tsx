@@ -151,8 +151,6 @@ export const BookCatalog: React.FC<CatalogProps> = ({
                         >
                             <option value="popular">Most Popular</option>
                             <option value="rating">Highest Rated</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
                         </select>
 
                         {/* Filter Button */}
@@ -211,7 +209,7 @@ export const BookCatalog: React.FC<CatalogProps> = ({
                                         <span className="text-sm font-medium text-slate-700">{book.rating}</span>
                                         <span className="text-xs text-slate-500">({book.sales})</span>
                                     </div>
-                                    <span className="text-lg font-bold text-emerald-600">${book.price}</span>
+                                    <span className="text-xs font-bold text-emerald-600 uppercase">Pay-As-You-Go</span>
                                 </div>
                             </div>
                         </div>

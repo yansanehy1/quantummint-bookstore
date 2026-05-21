@@ -3,10 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 
 const requestIdMiddleware = (req, res, next) => {
     // Generate or use existing request ID
-    req.id = req.headers['x-request-id'] || uuidv4();
+    const requestId = req.headers['x-request-id'] || req.headers['x-correlation-id'] || uuidv4();
+    req.id = requestId;
+    req.correlationId = requestId;
 
-    // Set response header
-    res.setHeader('X-Request-ID', req.id);
+    // Set response headers
+    res.setHeader('X-Request-ID', requestId);
+    res.setHeader('X-Correlation-ID', requestId);
 
     next();
 };

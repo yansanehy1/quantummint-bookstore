@@ -48,6 +48,54 @@ module.exports = (sequelize) => {
         educationLevel: {
             type: DataTypes.ENUM('JSS', 'SSS', 'College', 'University', 'Adult Education', 'General'),
             defaultValue: 'General'
+        },
+        hasAudio: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        audioUrl: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        voiceId: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        durationSeconds: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        isSTEM: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        hasVideo: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        videoUrl: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        videoMetadata: {
+            type: DataTypes.JSONB,
+            defaultValue: {}
+        },
+        videoStatus: {
+            type: DataTypes.ENUM('none', 'pending', 'processing', 'completed', 'failed'),
+            defaultValue: 'none'
+        },
+        status: {
+            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+            defaultValue: 'pending'
+        },
+        rejectionReason: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        difficulty_level: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     });
 

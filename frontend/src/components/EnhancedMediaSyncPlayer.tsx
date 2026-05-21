@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, Eye, BookOpen, Wallet, Clock, AlertCircle } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Eye, BookOpen, Wallet, Clock, AlertCircle, Mic, User, GraduationCap, Info } from 'lucide-react';
 import { useEducationalSync } from '../hooks/useEducationalSync';
 import { usePayGO } from '../hooks/usePayGO';
 
@@ -18,7 +18,11 @@ interface MediaCue {
   timestamp_ms: number;
   cue_type: 'visual' | 'formula' | 'step' | 'highlight';
   content: string;
-  metadata?: any;
+  metadata?: {
+    voice_role?: 'narrator' | 'tutor' | 'character' | 'explainer';
+    complexity?: number;
+    explanation?: string;
+  };
 }
 
 export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = ({
@@ -36,11 +40,16 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [adaptiveMode, setAdaptiveMode] = useState(true);
   const [activeCues, setActiveCues] = useState<MediaCue[]>([]);
   const [currentCue, setCurrentCue] = useState<MediaCue | null>(null);
   const [paygoSession, setPaygoSession] = useState<any>(null);
   const [showPaygoWarning, setShowPaygoWarning] = useState(false);
   const [sessionTime, setSessionTime] = useState(0);
+  const [pauseHistory, setPauseHistory] = useState<number[]>([]);
+  const [adaptiveSuggestion, setAdaptiveSuggestion] = useState<string | null>(null);
+
+  // ... rest of the component
 
   const {
     cues,
@@ -88,6 +97,25 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
         setCurrentCue(primaryCue);
         onCueTrigger?.(primaryCue);
         triggerCue(primaryCue.id);
+
+        // Adaptive Pacing Logic
+        if (adaptiveMode && primaryCue.metadata?.complexity !== undefined) {
+          const complexity = primaryCue.metadata.complexity;
+          // complexity is 0-10. 
+          // 0 complexity -> 1.0x speed
+          // 10 complexity -> 0.75x speed
+          const newRate = 1.0 - (complexity / 10) * 0.25;
+          if (Math.abs(audio.playbackRate - newRate) > 0.05) {
+            audio.playbackRate = newRate;
+            setPlaybackRate(newRate);
+          }
+        }
+      } else if (adaptiveMode) {
+        // Return to normal speed if no active complexity cue
+        if (audio.playbackRate !== 1.0) {
+          audio.playbackRate = 1.0;
+          setPlaybackRate(1.0);
+        }
       }
 
       // Auto-update progress every 5 seconds
@@ -209,6 +237,17 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
+
+      // Adaptive Learning: Track pauses
+      if (adaptiveMode) {
+        const now = Date.now();
+        const recentPauses = [...pauseHistory, now].filter(p => now - p < 60000); // last 60 seconds
+        setPauseHistory(recentPauses);
+
+        if (recentPauses.length >= 3 && playbackRate > 0.75) {
+          setAdaptiveSuggestion("You've paused several times. Would you like to slow down the narration?");
+        }
+      }
     } else {
       // Check if PayGO session is needed
       if (!paygoSession) {
@@ -331,6 +370,34 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
         </div>
       )}
 
+      {/* Adaptive Learning Suggestion */}
+      {adaptiveSuggestion && (
+        <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center space-x-2 text-purple-800">
+            <GraduationCap className="w-4 h-4" />
+            <span className="text-sm">{adaptiveSuggestion}</span>
+          </div>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => {
+                handlePlaybackRateChange(0.75);
+                setAdaptiveSuggestion(null);
+                setPauseHistory([]);
+              }}
+              className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
+            >
+              Slow Down
+            </button>
+            <button 
+              onClick={() => setAdaptiveSuggestion(null)}
+              className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+            >
+              Ignore
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Audio Element */}
       <audio
         ref={audioRef}
@@ -342,15 +409,41 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
       {/* Current Cue Display */}
       {currentCue && (
         <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-center space-x-2 mb-2">
-            {currentCue.cue_type === 'visual' && <Eye className="w-4 h-4 text-blue-600" />}
-            {currentCue.cue_type === 'formula' && <BookOpen className="w-4 h-4 text-blue-600" />}
-            {currentCue.cue_type === 'step' && <SkipForward className="w-4 h-4 text-blue-600" />}
-            <span className="text-sm font-medium text-blue-900 capitalize">
-              {currentCue.cue_type} Cue
-            </span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              {currentCue.cue_type === 'visual' && <Eye className="w-4 h-4 text-blue-600" />}
+              {currentCue.cue_type === 'formula' && <BookOpen className="w-4 h-4 text-blue-600" />}
+              {currentCue.cue_type === 'step' && <SkipForward className="w-4 h-4 text-blue-600" />}
+              <span className="text-sm font-medium text-blue-900 capitalize">
+                {currentCue.cue_type} Cue
+              </span>
+            </div>
+            
+            {/* Voice Role Indicator */}
+            {currentCue.metadata?.voice_role && (
+              <div className="flex items-center space-x-1 px-2 py-0.5 bg-purple-100 rounded-full">
+                {currentCue.metadata.voice_role === 'narrator' && <Mic className="w-3 h-3 text-purple-600" />}
+                {currentCue.metadata.voice_role === 'tutor' && <GraduationCap className="w-3 h-3 text-purple-600" />}
+                {currentCue.metadata.voice_role === 'character' && <User className="w-3 h-3 text-purple-600" />}
+                {currentCue.metadata.voice_role === 'explainer' && <Info className="w-3 h-3 text-purple-600" />}
+                <span className="text-[10px] font-bold text-purple-700 uppercase">
+                  {currentCue.metadata.voice_role}
+                </span>
+              </div>
+            )}
           </div>
           <p className="text-sm text-gray-700">{currentCue.content}</p>
+          {currentCue.metadata?.complexity !== undefined && (
+             <div className="mt-2 flex items-center space-x-2">
+               <div className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                 <div 
+                   className="h-full bg-blue-500" 
+                   style={{ width: `${currentCue.metadata.complexity * 10}%` }}
+                 />
+               </div>
+               <span className="text-[10px] text-gray-500">Complexity: {currentCue.metadata.complexity}/10</span>
+             </div>
+          )}
         </div>
       )}
 
@@ -420,20 +513,33 @@ export const EnhancedMediaSyncPlayer: React.FC<EnhancedMediaSyncPlayerProps> = (
         </div>
 
         {/* Playback Speed */}
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-600">Speed:</span>
-          <select
-            value={playbackRate}
-            onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
-            className="text-sm border border-gray-300 rounded px-2 py-1"
-          >
-            <option value={0.5}>0.5x</option>
-            <option value={0.75}>0.75x</option>
-            <option value={1}>1x</option>
-            <option value={1.25}>1.25x</option>
-            <option value={1.5}>1.5x</option>
-            <option value={2}>2x</option>
-          </select>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500">Adaptive Pacing:</span>
+            <button
+              onClick={() => setAdaptiveMode(!adaptiveMode)}
+              className={`w-8 h-4 rounded-full relative transition-colors ${adaptiveMode ? 'bg-blue-600' : 'bg-gray-300'}`}
+            >
+              <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${adaptiveMode ? 'left-4.5' : 'left-0.5'}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600">Speed:</span>
+            <select
+              value={playbackRate}
+              onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
+              className="text-sm border border-gray-300 rounded px-2 py-1"
+              disabled={adaptiveMode}
+            >
+              <option value={0.5}>0.5x</option>
+              <option value={0.75}>0.75x</option>
+              <option value={1}>1x</option>
+              <option value={1.25}>1.25x</option>
+              <option value={1.5}>1.5x</option>
+              <option value={2}>2x</option>
+            </select>
+          </div>
         </div>
       </div>
 

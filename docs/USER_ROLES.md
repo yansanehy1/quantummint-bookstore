@@ -2,7 +2,7 @@
 
 ## Overview
 
-QuantumMint Bookstore - Sierra Books has four distinct user roles, each with specific responsibilities and access levels.
+QuantumMint Bookstore has four distinct user roles, each with specific responsibilities and access levels.
 
 ---
 

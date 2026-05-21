@@ -63,9 +63,23 @@ Successfully transformed the Quantummint Bookstore into a comprehensive **Immers
 
 ## ð Technical Implementation
 
+### 🎨 AI-Native Creator Studio
+- **STEM-Aware Authoring**: Real-time recognition and intelligent narration of LaTeX math and chemical formulas.
+- **Backend Draft Saving**: Secure, persistent storage of book drafts across sessions, replacing unreliable local storage.
+- **Visual Sync Orchestration**: Bulk processing of narration segments and visual cues for complex STEM chapters.
+- **Neural TTS Selection**: Choose from high-fidelity neural voices optimized for educational clarity.
+
+### 🔔 Professional Communication & UI
+- **Enhanced Notifications**: Replaced intrusive browser alerts with professional, non-blocking **Sonner** toast notifications.
+- **Real-time Book Alerts**: Notification system to alert readers when new chapters or updates are published to their subscribed books.
+- **Branding Audit**: 100% synchronization of the **QuantumMint Bookstore** identity across all UI components and automated emails.
+
+## 🚀 Technical Implementation
+
 ### Microservices Architecture
 - **API Gateway** (Port 80) - Central routing and load balancing
 - **Main Backend** (Port 8000) - Core educational platform APIs
+- **Draft Service** (Internal) - Integrated persistent storage for creators
 - **Media Sync Service** (Port 8004) - Real-time synchronization engine
 - **Analytics Service** (Port 8006) - Learning analytics processing
 - **PayGO Service** (Port 8007) - Billing and wallet management

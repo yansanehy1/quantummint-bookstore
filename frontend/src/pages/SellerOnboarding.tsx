@@ -41,7 +41,7 @@ export default function SellerOnboarding() {
         {
             id: "bank_verify",
             title: "Verify Bank Account",
-            description: "We'll deposit $0.01 to your account. Confirm the amount to verify.",
+            description: "We'll deposit a small amount to your account. Confirm the amount to verify.",
             status: "pending",
             icon: <Shield className="w-6 h-6" />,
             action: "Verify Account",
@@ -70,20 +70,12 @@ export default function SellerOnboarding() {
 
     const handleTaskAction = (taskId: string, actionUrl?: string) => {
         if (actionUrl) {
-            // If it's a known view, navigate to it
             if (actionUrl === 'STUDIO') {
                 navigate('/studio');
                 return;
             }
-            // For now, just mark as complete for demo purposes if it's not a navigation
-            // or if it's a placeholder
             console.log(`Navigating to ${actionUrl}`);
         }
-
-        // Toggle status for demo
-        setTasks((prev) =>
-            prev.map((t) => (t.id === taskId ? { ...t, status: "completed" } : t))
-        );
     };
 
     const getStatusColor = (status: string) => {
@@ -115,7 +107,7 @@ export default function SellerOnboarding() {
                 <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 object-contain" />
-                        <h1 className="text-2xl font-bold text-gray-900">Sierra Books</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">QuantumMint Bookstore</h1>
                     </div>
                     <nav className="flex gap-4 items-center">
                         <button onClick={() => navigate('/')} className="text-gray-700 hover:text-amber-600 font-medium">Home</button>
@@ -128,7 +120,7 @@ export default function SellerOnboarding() {
                 {/* Welcome Section */}
                 <section className="mb-12">
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to Sierra Books!</h1>
+                        <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to QuantumMint Bookstore!</h1>
                         <p className="text-xl text-gray-600">You're almost ready to start selling. Complete these steps to activate your seller account.</p>
                     </div>
                     <Card className="p-8 bg-gradient-to-r from-green-50 to-emerald-50">

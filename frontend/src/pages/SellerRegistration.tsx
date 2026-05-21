@@ -12,6 +12,8 @@ import {
     Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from '../utils/api';
+import { toast } from 'sonner';
 
 const Input = ({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
     <input
@@ -141,18 +143,24 @@ export default function SellerRegistration() {
 
     const submitApplication = async () => {
         if (!canSubmit) {
-            const errorToast = document.getElementById('error-toast');
-            if (errorToast) {
-                errorToast.classList.remove('hidden');
-                setTimeout(() => errorToast.classList.add('hidden'), 3000);
-            }
+            toast.error('Please complete all required fields');
             return;
         }
         setSubmitting(true);
         try {
-            await new Promise((r) => setTimeout(r, 700));
+            await api.seller.register({
+                businessName: formData.businessInfo.businessName,
+                businessInfo: formData.businessInfo,
+                taxInfo: formData.taxInfo,
+                paymentDetails: {
+                    phone: formData.personalInfo.phone,
+                    country: formData.personalInfo.country
+                }
+            });
+            toast.success('Application submitted successfully!');
             navigate('/seller/dashboard');
         } catch (e) {
+            toast.error('Failed to submit application');
             setSubmitting(false);
         }
     };
@@ -196,7 +204,7 @@ export default function SellerRegistration() {
                 <div className="container max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-2 cursor-pointer transition transform hover:scale-[1.02]" onClick={() => navigate('/')}>
                         <img src="/logo.png" alt="QuantumMint Logo" className="w-10 h-10 object-contain" />
-                        <h1 className="text-xl font-bold text-gray-900">Sierra Books Seller Portal</h1>
+                        <h1 className="text-xl font-bold text-gray-900">QuantumMint Seller Portal</h1>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button onClick={handleManualSave} variant="outline" className="hover:bg-amber-50 text-amber-700 border-amber-300" disabled={isSaving}>

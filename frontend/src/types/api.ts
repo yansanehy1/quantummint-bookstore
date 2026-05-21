@@ -5,7 +5,7 @@ export interface APIUser {
     email: string | null;
     name: string | null;
     phone: string | null;
-    role: 'user' | 'seller' | 'admin';
+    role: 'learner' | 'seller' | 'admin' | 'support';
     loginMethod: string | null;
     lastSignedIn: Date;
     createdAt: Date;
@@ -20,7 +20,7 @@ export interface RegisterRequest {
     name: string;
     email: string;
     password: string;
-    role?: 'user' | 'seller';
+    role?: 'learner' | 'seller';
 }
 
 // Book Service Types

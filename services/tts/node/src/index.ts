@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { buildSSML } from './ssml.js';
 import { synthesizeToFile } from './synth.js';
+import { voices } from './voice.js';
 import { v4 as uuid } from 'uuid';
 import path from 'path';
 import fs from 'fs';
@@ -83,5 +84,40 @@ app.post('/tts/synthesize', async (req, res) => {
     }
 });
 
+app.get('/tts/voices', (req, res) => {
+    const voiceList = Object.keys(voices).map(id => ({
+        id,
+        name: id === 'default' ? 'Default (Neutral)' : id,
+        language: 'en' // Defaulting to English for now
+    }));
+    res.json(voiceList);
+});
+
+// Health Check
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        service: 'tts-service',
+        timestamp: new Date().toISOString()
+    });
+});
+
 const PORT = process.env.PORT || 7001;
-app.listen(PORT, '127.0.0.1', () => console.log(`TTS service running on :${PORT}`));
+const server = app.listen(PORT, '127.0.0.1', () => console.log(`TTS service running on :${PORT}`));
+
+// Graceful Shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('SIGINT signal received: closing HTTP server');
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
+});

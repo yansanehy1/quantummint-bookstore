@@ -3,6 +3,7 @@ import { Book, Review } from '../types';
 import { Button } from './ui/Button';
 import { StarRating } from './ui/StarRating';
 import { X, Play, MessageSquare, Sparkles, ImagePlus } from 'lucide-react';
+import { toast } from 'sonner';
 import { generateBookSummary, generateBookCover } from '@/services/aiService';
 
 interface BookDetailsModalProps {
@@ -34,9 +35,10 @@ export const BookDetailsModal: React.FC<BookDetailsModalProps> = ({ book, onClos
     try {
       const summary = await generateBookSummary(book.title, book.description);
       onUpdateBook({ ...book, aiSummary: summary });
+      toast.success("AI Summary generated!");
     } catch (e) {
       console.error(e);
-      alert("Failed to generate summary");
+      toast.error("Failed to generate summary");
     } finally {
       setIsGeneratingSummary(false);
     }
@@ -47,9 +49,10 @@ export const BookDetailsModal: React.FC<BookDetailsModalProps> = ({ book, onClos
     try {
       const coverUrl = await generateBookCover(book.title, book.description);
       onUpdateBook({ ...book, coverUrl });
+      toast.success("AI Cover generated!");
     } catch (e) {
       console.error(e);
-      alert("Failed to generate cover");
+      toast.error("Failed to generate cover");
     } finally {
       setIsGeneratingCover(false);
     }

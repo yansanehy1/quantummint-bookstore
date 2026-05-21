@@ -1,0 +1,157 @@
+# docker-compose.video.yml
+version: '3.8'
+
+services:
+  # ===== VIDEO API (Express) =====
+  video-api:
+    build:
+      context: ./services/video/api
+      dockerfile: Dockerfile
+    container_name: quantummint-video-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"  # Local-only, proxied by Nginx
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - UPLOAD_DIR=/data/uploads
+      - VIDEO_STORAGE=/data/videos
+      - FRONTEND_URL=${APP_URL}
+      - FFMPEG_THREADS=2
+      - FFMPEG_HWACCEL=${GPU_ENABLED:-false}
+    volumes:
+      - video_data:/data
+      - ./services/video/api:/app:ro
+      - ./logs/video-api:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - quantummint-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===== VIDEO PROCESSOR WORKER =====
+  video-worker:
+    build:
+      context: ./services/video/worker
+      dockerfile: Dockerfile
+    container_name: quantummint-video-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - VIDEO_STORAGE=/data/videos
+      - FFMPEG_THREADS=2
+      - NVIDIA_VISIBLE_DEVICES=${GPU_ENABLED:-none}
+    volumes:
+      - video_data:/data
+      - ./services/video/worker:/app:ro
+      - ./logs/video-worker:/app/logs
+    # GPU support (only if Hostinger plan includes NVIDIA)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${GPU_COUNT:-0}
+              capabilities: [compute, utility, video]
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - quantummint-net
+
+  # ===== STREAMING SERVER (HLS/DASH) =====
+  streaming-server:
+    build:
+      context: ./services/video/streaming
+      dockerfile: Dockerfile
+    container_name: quantummint-streaming
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - VIDEO_DIR=/data/videos/encoded
+      - JWT_SECRET=${JWT_SECRET}
+      - CACHE_TTL=31536000
+    volumes:
+      - video_data:/data/videos/encoded:ro
+    depends_on:
+      - redis
+    networks:
+      - quantummint-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===== REDIS (Shared Cache/Queue) =====
+  redis:
+    image: redis:7-alpine
+    container_name: quantummint-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_data:/data
+      # Note: Ensure redis.conf exists if using this volume
+      # - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - quantummint-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # ===== POSTGRES (Shared Database) =====
+  postgres:
+    image: postgres:16-alpine
+    container_name: quantummint-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - quantummint-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  video_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/nvme/video_data  # Hostinger NVMe mount point
+      o: bind
+  redis_data:
+  postgres_data:
+
+networks:
+  quantummint-net:
+    driver: bridge

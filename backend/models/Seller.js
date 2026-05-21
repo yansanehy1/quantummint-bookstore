@@ -11,6 +11,14 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        businessInfo: {
+            type: DataTypes.JSON,
+            defaultValue: {}
+        },
+        taxInfo: {
+            type: DataTypes.JSON,
+            defaultValue: {}
+        },
         status: {
             type: DataTypes.ENUM('pending', 'approved', 'rejected'),
             defaultValue: 'pending'

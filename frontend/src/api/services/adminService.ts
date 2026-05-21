@@ -34,7 +34,7 @@ export const adminService = {
     /**
      * Update user role
      */
-    async updateUserRole(userId: string, role: 'user' | 'seller' | 'admin'): Promise<void> {
+    async updateUserRole(userId: string, role: 'learner' | 'seller' | 'admin' | 'support'): Promise<void> {
         return adminClient.put(`/admin/users/${userId}/role`, { role });
     },
 

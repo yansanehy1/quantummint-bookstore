@@ -3,6 +3,9 @@ const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
+// Exchange Rates
+router.get('/exchange-rate', paymentController.getExchangeRate);
+
 // Protected: all payment routes require auth
 router.post('/deposit', authenticateToken, paymentController.initiateDeposit);
 router.post('/withdraw', authenticateToken, paymentController.initiateWithdrawal);

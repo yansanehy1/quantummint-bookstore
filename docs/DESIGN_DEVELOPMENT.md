@@ -1,6 +1,6 @@
 # Design & Development Plan
 
-## QuantumMint Bookstore - Sierra Books
+## QuantumMint Bookstore
 
 ---
 

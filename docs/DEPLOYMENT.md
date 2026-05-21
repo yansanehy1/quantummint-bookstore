@@ -1,6 +1,6 @@
 # Deployment Guide
 
-## QuantumMint Bookstore - Sierra Books
+## QuantumMint Bookstore
 
 ---
 
@@ -50,7 +50,7 @@ npm run dev
 
 ```env
 # Application
-VITE_APP_NAME="QuantumMint Bookstore - Sierra Books"
+VITE_APP_NAME="QuantumMint Bookstore"
 VITE_APP_URL=http://localhost:5173
 
 # API Endpoints
@@ -395,6 +395,40 @@ pm2 startup
 # TTS service on port 7001
 pm2 start tts-service.js --name tts-service
 ```
+
+---
+
+## 💱 Backend: exchange rate & refunds
+
+Add these to the **backend** `.env` on VPS or Docker (also in `config/.env.production` and `infrastructure/.env.production`):
+
+```env
+# Live USD → SLL rate (wallet + subscriptions)
+FALLBACK_SLL_TO_USD=59
+EXCHANGE_RATE_CACHE_TTL_MS=3600000
+
+# Refund rate limits
+REFUND_SUBMIT_MAX_PER_HOUR=5
+REFUND_ADMIN_MAX_PER_WINDOW=60
+
+# Global API rate limit (optional overrides)
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=120
+
+# Subscription expiry emails (optional)
+SENDGRID_API_KEY=
+EMAIL_FROM=noreply@quantummint.net
+PUSH_NOTIFICATION_WEBHOOK_URL=
+```
+
+After deploy, verify:
+
+```bash
+curl https://quantummint.net/api/subscriptions/plans
+# Expect: { "plans": [...], "exchangeRate": <number> }
+```
+
+Full API and UI paths: [REFUNDS_AND_EXCHANGE_RATES.md](./REFUNDS_AND_EXCHANGE_RATES.md).
 
 ---
 

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, Mail, Lock, CheckCircle, ArrowRight } from 'lucide-react';
+import { BookOpen, User, Mail, Lock, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import api from '../utils/api';
+import { toast } from 'sonner';
 
 export default function SellerRequest() {
     const navigate = useNavigate();
@@ -12,12 +14,31 @@ export default function SellerRequest() {
         reason: '',
         experience: ''
     });
+    const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would send an API request
-        setSubmitted(true);
+        setSubmitting(true);
+        try {
+            // Call the real API to register interest
+            // We use the register endpoint but with minimal data
+            await api.seller.register({
+                businessName: formData.name,
+                businessInfo: {
+                    reason: formData.reason,
+                    experience: formData.experience,
+                    requestType: 'initial_interest'
+                }
+            });
+            setSubmitted(true);
+            toast.success('Interest registered successfully!');
+        } catch (error) {
+            console.error('Seller Request Error:', error);
+            toast.error('Failed to submit request. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
@@ -128,9 +149,15 @@ export default function SellerRequest() {
                         </div>
 
                         <div className="pt-4">
-                            <Button type="submit" className="w-full justify-center">
-                                Submit Application
-                                <ArrowRight className="ml-2 w-4 h-4" />
+                            <Button type="submit" className="w-full justify-center" disabled={submitting}>
+                                {submitting ? (
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</>
+                                ) : (
+                                    <>
+                                        Submit Application
+                                        <ArrowRight className="ml-2 w-4 h-4" />
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </form>

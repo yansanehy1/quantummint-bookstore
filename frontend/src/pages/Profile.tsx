@@ -10,7 +10,7 @@ export const Profile: React.FC = () => {
         email: user?.email || 'user@example.com',
         phone: '+232 XX XXX XXXX',
         location: 'Freetown, Sierra Leone',
-        bio: 'Passionate learner and educator on the Sierra Books platform.',
+        bio: 'Passionate learner and educator on the QuantumMint Bookstore platform.',
         website: 'https://example.com'
     });
 

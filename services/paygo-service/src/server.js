@@ -7,9 +7,29 @@ const jwt = require('jsonwebtoken');
 const winston = require('winston');
 const cron = require('node-cron');
 const moment = require('moment');
+const fetch = require('node-fetch');
 require('dotenv').config();
 
 const app = express();
+
+// Main Backend URL
+const MAIN_BACKEND_URL = process.env.MAIN_BACKEND_URL || 'http://localhost:3000';
+
+// Helper: Check if user has active subscription from main backend
+async function checkSubscriptionAccess(userId, productId, token) {
+  try {
+    const response = await fetch(`${MAIN_BACKEND_URL}/api/subscriptions/check-access?bookId=${productId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.hasAccess ? data : null;
+  } catch (error) {
+    logger.error('Error calling main backend for subscription check:', error);
+    return null;
+  }
+}
 
 // Middleware
 app.use(helmet());
@@ -306,16 +326,24 @@ app.post('/api/sessions/start', authenticateToken, async (req, res) => {
     const rate = rateResult.rows[0];
     const sessionToken = generateSessionToken();
 
-    // Check wallet balance
-    const balanceCheck = await pool.query(`
-      SELECT * FROM check_paygo_balance($1, $2, $3)
-    `, [userId, rate.rate_per_minute_leones, rate.rate_per_minute_usd]);
+    // Check if user has an active subscription for this product
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const subscription = await checkSubscriptionAccess(userId, product_id, token);
+    const isSponsored = !!subscription;
 
-    if (!balanceCheck.rows[0].can_proceed) {
-      return res.status(402).json({ 
-        error: 'Insufficient balance',
-        balance: balanceCheck.rows[0]
-      });
+    if (!isSponsored) {
+        // Check wallet balance only if not sponsored
+        const balanceCheck = await pool.query(`
+          SELECT * FROM check_paygo_balance($1, $2, $3)
+        `, [userId, rate.rate_per_minute_leones, rate.rate_per_minute_usd]);
+
+        if (!balanceCheck.rows[0].can_proceed) {
+          return res.status(402).json({ 
+            error: 'Insufficient balance',
+            balance: balanceCheck.rows[0]
+          });
+        }
     }
 
     // Get user wallet
@@ -328,19 +356,26 @@ app.post('/api/sessions/start', authenticateToken, async (req, res) => {
       INSERT INTO paygo_sessions (
         wallet_id, user_id, session_token, product_id, product_type,
         rate_per_minute_leones, rate_per_minute_usd,
-        max_quality, current_quality, started_at, last_heartbeat
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+        max_quality, current_quality, started_at, last_heartbeat,
+        metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW(), $10)
       RETURNING *
     `, [
       walletResult.rows[0].id, userId, sessionToken, product_id, product_type,
-      rate.rate_per_minute_leones, rate.rate_per_minute_usd,
-      quality, quality
+      isSponsored ? 0 : rate.rate_per_minute_leones, 
+      isSponsored ? 0 : rate.rate_per_minute_usd,
+      quality, quality,
+      JSON.stringify({ 
+          is_sponsored: isSponsored, 
+          subscription_id: subscription?.subscriptionId,
+          group_id: subscription?.groupId
+      })
     ]);
 
     res.json({
       session: sessionResult.rows[0],
-      rate: rate,
-      balance: balanceCheck.rows[0]
+      rate: isSponsored ? { ...rate, rate_per_minute_leones: 0, rate_per_minute_usd: 0 } : rate,
+      is_sponsored: isSponsored
     });
 
   } catch (error) {
@@ -537,6 +572,99 @@ app.get('/api/sessions/active', authenticateToken, async (req, res) => {
   } catch (error) {
     logger.error('Error fetching active sessions:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Report discrete usage (e.g., TTS synthesis or per-action charge)
+app.post('/api/usage/report', async (req, res) => {
+  try {
+    const { userId, productId, productType, durationSeconds, metadata } = req.body;
+
+    if (!userId || !productType || durationSeconds === undefined) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const durationMinutes = durationSeconds / 60;
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // 1. Get rate card
+      const rateResult = await client.query(`
+        SELECT * FROM paygo_rate_cards 
+        WHERE product_type = $1 AND is_active = true
+        ORDER BY is_default DESC LIMIT 1
+      `, [productType]);
+
+      if (rateResult.rows.length === 0) {
+        throw new Error(`No rate card found for ${productType}`);
+      }
+
+      const rate = rateResult.rows[0];
+      const leonesCharge = durationMinutes * rate.rate_per_minute_leones;
+      const usdCharge = durationMinutes * rate.rate_per_minute_usd;
+
+      // 2. Get wallet
+      const walletResult = await client.query(`
+        SELECT * FROM paygo_wallets WHERE user_id = $1 AND is_active = true FOR UPDATE
+      `, [userId]);
+
+      if (walletResult.rows.length === 0) {
+        throw new Error('Wallet not found');
+      }
+
+      const wallet = walletResult.rows[0];
+
+      // 3. Deduct from wallet
+      await client.query(`
+        UPDATE paygo_wallets 
+        SET 
+          leones_balance = leones_balance - $1,
+          usd_balance = usd_balance - $2,
+          total_spent_leones = total_spent_leones + $1,
+          total_spent_usd = total_spent_usd + $2,
+          updated_at = NOW()
+        WHERE id = $3
+      `, [leonesCharge, usdCharge, wallet.id]);
+
+      // 4. Record transaction
+      await client.query(`
+        INSERT INTO paygo_transactions ( 
+          wallet_id, user_id, transaction_type, 
+          leones_amount, usd_amount,
+          leones_balance_before, leones_balance_after,
+          usd_balance_before, usd_balance_after,
+          service_type, product_id, duration_seconds, duration_minutes,
+          rate_per_minute_leones, rate_per_minute_usd, status, metadata
+        ) VALUES (
+          $1, $2, 'charge',
+          $3, $4,
+          $5, $5 - $3,
+          $6, $6 - $4,
+          $7, $8, $9, $10,
+          $11, $12, 'completed', $13
+        )
+      `, [
+        wallet.id, userId, leonesCharge, usdCharge,
+        wallet.leones_balance, wallet.usd_balance,
+        productType, productId, durationSeconds, durationMinutes,
+        rate.rate_per_minute_leones, rate.rate_per_minute_usd,
+        JSON.stringify(metadata || {})
+      ]);
+
+      await client.query('COMMIT');
+      res.json({ message: 'Usage reported and charged', chargeLeones: leonesCharge, chargeUsd: usdCharge });
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    logger.error('Error reporting usage:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 

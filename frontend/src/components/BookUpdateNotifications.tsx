@@ -12,35 +12,25 @@ export interface BookUpdateNotification {
     read: boolean;
 }
 
-// Mock notifications - replace with actual API
-const mockNotifications: BookUpdateNotification[] = [
-    {
-        id: '1',
-        bookId: '123',
-        bookTitle: 'Introduction to Programming',
-        updateType: 'chapter_edited',
-        chapterNumber: 3,
-        chapterTitle: 'Variables and Data Types',
-        message: 'Chapter 3 has been updated with new examples',
-        timestamp: '2024-02-28T10:30:00Z',
-        read: false,
-    },
-    {
-        id: '2',
-        bookId: '456',
-        bookTitle: 'The Great Adventure',
-        updateType: 'chapter_added',
-        chapterNumber: 12,
-        chapterTitle: 'The Final Battle',
-        message: 'New chapter added: Chapter 12 - The Final Battle',
-        timestamp: '2024-02-27T15:45:00Z',
-        read: false,
-    },
-];
+// Notifications - initial state empty for production
+const initialNotifications: BookUpdateNotification[] = [];
 
 export default function BookUpdateNotifications() {
-    const [notifications, setNotifications] = useState<BookUpdateNotification[]>(mockNotifications);
+    const [notifications, setNotifications] = useState<BookUpdateNotification[]>(initialNotifications);
     const [showNotifications, setShowNotifications] = useState(false);
+
+import type { BookUpdateNotification } from '../types/types';
+...
+    useEffect(() => {
+        const handleNewNotifications = (event: Event) => {
+            const customEvent = event as CustomEvent;
+            const newNotifications = customEvent.detail.map((n: { notification: BookUpdateNotification }) => n.notification);
+            setNotifications(prev => [...newNotifications, ...prev]);
+        };
+
+        window.addEventListener('BOOK_NOTIFICATIONS_UPDATED', handleNewNotifications);
+        return () => window.removeEventListener('BOOK_NOTIFICATIONS_UPDATED', handleNewNotifications);
+    }, []);
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -194,14 +184,12 @@ export function useBookUpdateSubscription(bookId: string) {
     const [updateInfo, setUpdateInfo] = useState<BookUpdateNotification | null>(null);
 
     useEffect(() => {
-        // TODO: Replace with actual WebSocket or polling
-        // This would listen for real-time updates from the backend
-        const checkForUpdates = () => {
-            // Simulated update check
-            // In production, this would be a WebSocket connection or Server-Sent Events
+        // Poll for updates if WebSocket is not available
+        const checkForUpdates = async () => {
+            // Check for book-specific updates via API
         };
 
-        const interval = setInterval(checkForUpdates, 30000); // Check every 30 seconds
+        const interval = setInterval(checkForUpdates, 60000); // Check every minute
         return () => clearInterval(interval);
     }, [bookId]);
 

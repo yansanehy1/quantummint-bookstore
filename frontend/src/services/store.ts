@@ -30,7 +30,7 @@ export interface AppSystemSettings {
 }
 
 const MOCK_SETTINGS: AppSystemSettings = {
-    siteName: "Sierra Books",
+    siteName: "QuantumMint Bookstore",
     maintenanceMode: false,
     allowRegistrations: true,
     withdrawalFeePercent: 5,

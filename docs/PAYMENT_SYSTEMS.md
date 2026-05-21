@@ -2,7 +2,7 @@
 
 ## Overview
 
-QuantumMint Bookstore - Sierra Books supports four payment methods for deposits and withdrawals, optimized for Sierra Leone and international markets.
+QuantumMint Bookstore supports four payment methods for deposits and withdrawals, optimized for Sierra Leone and international markets.
 
 ---
 
@@ -569,13 +569,21 @@ Withdraw to:
 
 ---
 
+## 🔄 Refunds (implemented)
+
+Learners submit refund requests from **Wallet → Refunds**. Admins process them at **/admin/refunds**.
+
+See [REFUNDS_AND_EXCHANGE_RATES.md](./REFUNDS_AND_EXCHANGE_RATES.md) for API details, env vars, and worker notifications.
+
+---
+
 ## 📝 Next Steps
 
 1. Integrate Orange Money API (highest usage expected)
 2. Add Qmoney (best rates)
 3. Implement Afrimoney
 4. Set up Stripe Connect for international users
-5. Build payment method management UI
-6. Create comprehensive error handling
+5. ~~Build payment method management UI~~ (wallet UI in place)
+6. ~~Create comprehensive error handling~~ (partial — refunds use Zod + rate limits)
 7. Implement webhook processing
 8. Add payment analytics dashboard

@@ -1,5 +1,6 @@
 import re
 from typing import List, Dict, Any
+from formula_narrator import FormulaNarrator
 
 class SSMLGenerator:
     """
@@ -9,91 +10,62 @@ class SSMLGenerator:
     """
 
     def __init__(self):
-        # Basic LaTeX to spoken word mappings
-        self.latex_rules = {
-            r'\\frac\{([^}]+)\}\{([^}]+)\}': r'the fraction \1 over \2',
-            r'\\sqrt\{([^}]+)\}': r'the square root of \1',
-            r'\^2': r' squared',
-            r'\^3': r' cubed',
-            r'\^\{([^}]+)\}': r' to the power of \1',
-            r'\\int_\{([^}]+)\}\^\{([^}]+)\}': r'the integral from \1 to \2 of ',
-            r'\\int': r'the integral of ',
-            r'\\pi': r' pi ',
-            r'\\theta': r' theta ',
-            r'=': r' equals ',
-            r'\+': r' plus ',
-            r'-': r' minus ',
-            r'\*': r' times ',
-            r'\\cdot': r' times ',
-            r'\\pm': r' plus or minus ',
-            r'\\infty': r' infinity ',
+        # Default voices
+        self.voices = {
+            "narrative": "en-US-AriaNeural",
+            "tutor": "en-US-GuyNeural",
+            "character": "en-US-JennyNeural",
+            "formula": "en-US-DavisNeural"
         }
-
-        self.chem_pronunciation = {
-            'H2O': 'water',
-            'CO2': 'carbon dioxide',
-            'NaCl': 'sodium chloride',
-            'O2': 'oxygen',
-            'C6H12O6': 'glucose'
-        }
+        self.narrator = FormulaNarrator()
 
     def formula_to_speech(self, formula: str, type: str) -> str:
         """Converts a formula piece to spoken text with scientific rules"""
-        if type == "chemistry":
-            return self._chemistry_to_speech(formula)
-        else:
-            return self._latex_to_speech(formula)
+        return self.narrator.narrate(formula)
 
-    def _chemistry_to_speech(self, formula: str) -> str:
-        if formula in self.chem_pronunciation:
-            return self.chem_pronunciation[formula]
-        
-        # fallback: read H 2 O as "H two O"
-        spoken = ""
-        for char in formula:
-            if char.isdigit():
-                spoken += f" {char} "
-            else:
-                spoken += char
-        return spoken.strip()
-
-    def _latex_to_speech(self, latex: str) -> str:
-        spoken = latex
-        for pattern, replacement in self.latex_rules.items():
-            spoken = re.sub(pattern, replacement, spoken)
-        
-        # Clean up extra spaces
-        spoken = re.sub(r'\s+', ' ', spoken).strip()
-        return spoken
-
-    def generate_ssml(self, segments: List[Dict[str, Any]], complexity: float = 1.0) -> str:
+    def generate_ssml(self, segments: List[Dict[str, Any]], voice_map: Dict[str, str] = None) -> str:
         """
-        Wraps segments in SSML. 
-        Context-Aware Narration: Adapts tone and speed based on formula complexity.
+        Wraps segments in SSML with multi-voice support.
         """
-        ssml_parts = ["<speak>"]
+        if not voice_map:
+            voice_map = self.voices
+
+        ssml_parts = ["<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>"]
         
-        # Global prosody based on complexity
-        # slower for high complexity (derivations)
-        rate = "medium"
-        if complexity > 5:
-            rate = "slow"
-        elif complexity < 2:
-            rate = "medium" # default
-
-        ssml_parts.append(f'<prosody rate="{rate}">')
-
         for seg in segments:
-            if seg["type"] == "text":
-                ssml_parts.append(seg["content"])
-            elif seg["type"] in ["math", "chemistry"]:
-                spoken = self.formula_to_speech(seg["content"], seg["type"])
-                # Add emphasis and pauses around formulas
-                ssml_parts.append('<break time="200ms"/>')
-                ssml_parts.append(f'<emphasis level="strong">{spoken}</emphasis>')
-                ssml_parts.append('<break time="200ms"/>')
+            seg_type = seg["type"]
+            content = seg["content"]
+            
+            # Map segment type to voice
+            voice = voice_map.get(seg_type, voice_map.get("narrative"))
+            if seg_type == "math":
+                voice = voice_map.get("formula", voice)
+            elif seg_type == "dialogue":
+                voice = voice_map.get("character", voice)
+            elif seg_type == "step":
+                voice = voice_map.get("tutor", voice)
+
+            ssml_parts.append(f'<voice name="{voice}">')
+
+            if seg_type == "text":
+                ssml_parts.append(f'<prosody rate="medium">{content}</prosody>')
+            elif seg_type == "math" or seg_type == "chemistry":
+                spoken = self.formula_to_speech(content, seg_type)
+                # Adaptive narration: slow down for formulas
+                ssml_parts.append('<break time="300ms"/>')
+                ssml_parts.append(f'<prosody rate="slow" pitch="+5%"><emphasis level="strong">{spoken}</emphasis></prosody>')
+                ssml_parts.append('<break time="300ms"/>')
+            elif seg_type == "dialogue":
+                ssml_parts.append(f'<prosody pitch="+10%">{content}</prosody>')
+            elif seg_type == "step":
+                ssml_parts.append('<break time="500ms"/>')
+                ssml_parts.append(f'<prosody rate="medium" pitch="-5%"><emphasis level="moderate">{content}</emphasis></prosody>')
+                ssml_parts.append('<break time="500ms"/>')
+            else:
+                ssml_parts.append(content)
+
+            ssml_parts.append('</voice>')
                 
-        ssml_parts.append('</prosody>')
         ssml_parts.append("</speak>")
         
         return "".join(ssml_parts)

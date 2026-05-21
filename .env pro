@@ -1,0 +1,22 @@
+# API Service URLs (Production)
+VITE_USER_SERVICE_URL=https://quantummint.net/api
+VITE_BOOK_SERVICE_URL=https://quantummint.net/api
+VITE_AUDIO_SERVICE_URL=https://quantummint.net/api
+VITE_WALLET_SERVICE_URL=https://quantummint.net/api
+VITE_ORDER_SERVICE_URL=https://quantummint.net/api
+VITE_ANALYTICS_SERVICE_URL=https://quantummint.net/api
+VITE_PAYMENT_WEBHOOK_URL=https://quantummint.net/api
+VITE_NOTIFICATION_SERVICE_URL=https://quantummint.net/api
+VITE_SELLER_SERVICE_URL=https://quantummint.net/api
+VITE_ADMIN_SERVICE_URL=https://quantummint.net/api
+VITE_REFERRAL_SERVICE_URL=https://quantummint.net/api
+VITE_GIFT_SERVICE_URL=https://quantummint.net/api
+VITE_SEARCH_SERVICE_URL=https://quantummint.net/api
+
+# Database Credentials (Hostinger)
+DB_HOST=localhost
+DB_NAME=u730611218_sz8cV
+DB_USER=u730611218_1m2LP
+DB_PASS=2883Born@
+APP_URL=https://quantummint.net
+

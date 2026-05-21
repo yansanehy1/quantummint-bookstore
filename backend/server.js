@@ -1,112 +1,69 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const { Sequelize } = require('sequelize');
-const { errorHandler } = require('./middleware/errorHandler');
+const { main: logger } = require('./utils/logger');
+const { buildApp, connectDatabase } = require('./app');
 
-// basic environment validation
-['DB_NAME','DB_USER','DB_PASS','DB_HOST','JWT_SECRET'].forEach((name) => {
-    if (!process.env[name]) {
-        console.warn(`🚨 Warning: environment variable ${name} is not defined`);
+['DB_NAME', 'DB_USER', 'DB_PASS', 'DB_HOST', 'JWT_SECRET'].forEach((name) => {
+    if (!process.env[name] && process.env.NODE_ENV === 'production') {
+        logger.warn(`Warning: environment variable ${name} is not defined`);
     }
 });
 
-const app = express();
-app.set('trust proxy', 1);
-app.use(helmet());
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://quantummint.net',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    maxAge: 86400
-}));
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+const { app, sequelize: initialSequelize } = buildApp();
 
-// simple rate limiter for all requests
-app.use(rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 120, // limit each IP to 120 requests per windowMs
-    standardHeaders: true,
-    legacyHeaders: false,
-}));
+const startSubscriptionWorker = process.env.DISABLE_SUBSCRIPTION_WORKER === 'true'
+    ? () => {}
+    : require('./workers/subscriptionWorker').startSubscriptionWorker;
 
-// Initialize Sequelize
-let sequelize;
-
-if (process.env.DB_HOST && process.env.DB_NAME && process.env.DB_USER) {
-    // Connect to MySQL (Production/Hostinger)
-    sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
-        host: process.env.DB_HOST,
-        dialect: 'mysql',
-        port: process.env.DB_PORT || 3306,
-        logging: false, // set to console.log to see SQL queries
-        pool: {
-            max: 5,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-        }
-    });
-    console.log('📡 Using MySQL/MariaDB database');
-} else {
-    // Connect to SQLite (fallback for local development)
-    sequelize = new Sequelize({
-        dialect: 'sqlite',
-        storage: './database.sqlite',
-        logging: console.log
-    });
-    console.log('📂 Using SQLite database (local fallback)');
-}
-
-// Make sequelize accessible in controllers via req.app.get('sequelize')
-app.set('sequelize', sequelize);
-
-// Import Models
-const db = require('./models')(sequelize);
-// also expose models directly for controllers to use
-app.set('models', db);
-
-// Test Connection and Sync Models
-const { main: logger } = require('./utils/logger');
-
-sequelize.authenticate()
-    .then(() => {
-        logger.info(`Connected to ${sequelize.getDialect() === 'mysql' ? 'Hostinger MySQL' : 'local SQLite'}!`);
-        return sequelize.sync({ alter: true });
+connectDatabase(app, initialSequelize)
+    .then((sequelize) => {
+        logger.info(`Connected to ${sequelize.getDialect()} database`);
+        logger.info('Database schema ready');
+        startSubscriptionWorker(sequelize);
     })
-    .then(() => {
-        logger.info('Database & tables synced!');
-    })
-    .catch(err => logger.error('Connection failed:', err));
-
-// Import Routes
-const authRoutes = require('./routes/authRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const walletRoutes = require('./routes/walletRoutes');
-const purchaseRoutes = require('./routes/purchaseRoutes');
-const educationalRoutes = require('./routes/educational');
-
-// Use Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/wallet', walletRoutes);
-app.use('/api/purchase', purchaseRoutes);
-app.use('/api/educational', educationalRoutes);
-
-// Health check
-app.get('/', (req, res) => {
-    res.json({ status: 'QuantumMint API running', version: '1.0.0' });
-});
-
-// attach error handler last
-app.use(errorHandler);
+    .catch((err) => logger.error('Database connection failed:', err));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    const { logger } = require('./utils/logger');
+const server = app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
 });
+
+// ─── Health Check Endpoint ───────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'UP',
+        uptime: process.uptime(),
+        timestamp: new Date(),
+        version: process.env.npm_package_version || '1.0.0'
+    });
+});
+
+// ─── Graceful Shutdown ────────────────────────────────────────────────────────
+const shutdown = async (signal) => {
+    logger.info(`Received ${signal}. Starting graceful shutdown...`);
+    
+    // Set a timeout for forced shutdown
+    const forceShutdown = setTimeout(() => {
+        logger.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+    }, 10000);
+
+    server.close(async () => {
+        logger.info('HTTP server closed');
+        
+        try {
+            const sequelize = app.get('sequelize');
+            if (sequelize) {
+                await sequelize.close();
+                logger.info('Database connection closed');
+            }
+        } catch (err) {
+            logger.error('Error during database shutdown:', err);
+        }
+
+        clearTimeout(forceShutdown);
+        logger.info('Graceful shutdown complete');
+        process.exit(0);
+    });
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

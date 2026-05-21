@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -24,7 +24,7 @@ const SuccessMessage = ({ message, onClose }: { message: string | null; onClose:
 };
 
 export const Gifts = () => {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("send");
   const [selectedBook, setSelectedBook] = useState("");
   const [recipientPhone, setRecipientPhone] = useState("");

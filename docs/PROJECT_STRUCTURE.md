@@ -97,6 +97,11 @@ quantummint-bookstore/
 │   ├── README.md
 │   └── (DNS, email, setup guides)
 │
+├── docs/
+│   ├── REFUNDS_AND_EXCHANGE_RATES.md  ← Refund API, live rate, worker notifications
+│   ├── PAYMENT_SYSTEMS.md
+│   └── DEPLOYMENT.md
+│
 ├── config/                ← Environment templates
 │   ├── .env.example
 │   ├── .env.production

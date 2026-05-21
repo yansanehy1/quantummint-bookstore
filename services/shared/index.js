@@ -5,6 +5,7 @@ module.exports = {
         errorHandler: require('./http/errorHandler')
     },
     middleware: {
-        requestId: require('./middleware/requestId')
+        requestId: require('./middleware/requestId'),
+        auth: require('./middleware/auth')
     }
 };

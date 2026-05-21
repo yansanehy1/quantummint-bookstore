@@ -76,13 +76,10 @@ The QuantumMint platform consists of multiple integrated services providing ente
 
 ### Shared Infrastructure
 
-#### MongoDB
-- **Port:** 27017
-- **Purpose:** Primary database for all services
-- **Databases:**
-  - `quantummint` - Main application
-  - `quantummint-mail` - Mail server data
-  - `quantummint-domain` - Domain controller data
+#### Database Support
+- **Primary:** PostgreSQL (used by subscription and paygo services, now supported by main backend)
+- **Secondary/Development:** MySQL and SQLite
+- **MongoDB:** (Port 27017) Used by mail server and legacy services
 
 #### Redis
 - **Port:** 6379

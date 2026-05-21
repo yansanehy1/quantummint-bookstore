@@ -1,5 +1,5 @@
 /**
- * Cron Jobs for Sierra Books Email System
+ * Cron Jobs for QuantumMint Bookstore Email System
  * Scheduled tasks for email automation
  */
 
@@ -7,6 +7,8 @@ const cron = require('node-cron');
 const emailService = require('../emailService');
 const emailAutomation = require('../middleware/emailAutomation');
 const logger = require('../logger');
+const { models, sequelize } = require('../database');
+const { Op } = require('sequelize');
 
 class EmailCronJobs {
     constructor() {
@@ -129,34 +131,71 @@ class EmailCronJobs {
      * Get abandoned carts
      */
     async getAbandonedCarts() {
-        // TODO: Query database for abandoned carts
-        // Return carts that have items but no order placed
-        return [];
+        // Query the abandoned_cart_emails table for reminders that need to be sent
+        try {
+            return await models.AbandonedCartEmail.findAll({
+                where: {
+                    recovered: false,
+                    sent_at: {
+                        [Op.lt]: new Date(Date.now() - 60 * 60 * 1000) // At least 1 hour ago
+                    }
+                }
+            });
+        } catch (error) {
+            logger.error('Failed to get abandoned carts:', error);
+            return [];
+        }
     }
 
     /**
      * Process email queue
      */
     async processEmailQueue() {
-        // TODO: Query email_queue table for pending emails
-        // Process them based on priority and scheduled time
-        const pendingEmails = []; // await db.query('SELECT * FROM email_queue WHERE status = "pending" AND scheduled_for <= NOW() ORDER BY priority DESC, scheduled_for ASC LIMIT 100');
+        // Query email_queue table for pending emails
+        try {
+            const pendingEmails = await models.EmailQueue.findAll({
+                where: {
+                    status: 'pending',
+                    scheduled_for: {
+                        [Op.lte]: new Date()
+                    }
+                },
+                order: [
+                    ['priority', 'DESC'],
+                    ['scheduled_for', 'ASC']
+                ],
+                limit: 100
+            });
 
-        for (const email of pendingEmails) {
-            try {
-                await emailService.sendTransactional({
-                    to: email.recipient_email,
-                    templateId: email.template_name,
-                    dynamicData: email.dynamic_data
-                });
+            for (const email of pendingEmails) {
+                try {
+                    await email.update({ status: 'processing' });
 
-                // Mark as sent in queue
-                // await db.query('UPDATE email_queue SET status = "sent", processed_at = NOW() WHERE id = ?', [email.id]);
-            } catch (error) {
-                logger.error(`Failed to send queued email ${email.id}:`, error);
-                // Increment attempts and log error
-                // await db.query('UPDATE email_queue SET attempts = attempts + 1, last_error = ? WHERE id = ?', [error.message, email.id]);
+                    const result = await emailService.sendTransactional({
+                        to: email.recipient_email,
+                        templateId: email.template_name,
+                        dynamicData: email.dynamic_data
+                    });
+
+                    if (result.success) {
+                        await email.update({ 
+                            status: 'sent', 
+                            processed_at: new Date() 
+                        });
+                    } else {
+                        throw new Error(result.error || 'Failed to send email');
+                    }
+                } catch (error) {
+                    logger.error(`Failed to send queued email ${email.id}:`, error);
+                    await email.update({ 
+                        attempts: email.attempts + 1, 
+                        last_error: error.message,
+                        status: email.attempts >= 3 ? 'failed' : 'pending' // Retry up to 3 times
+                    });
+                }
             }
+        } catch (error) {
+            logger.error('Failed to process email queue:', error);
         }
     }
 
@@ -164,73 +203,130 @@ class EmailCronJobs {
      * Send weekly newsletter
      */
     async sendWeeklyNewsletter() {
-        // TODO: Get newsletter subscribers
-        // const subscribers = await db.query('SELECT * FROM user_email_preferences WHERE receives_newsletters = true AND unsubscribed_at IS NULL');
+        try {
+            const subscribers = await models.UserEmailPreference.findAll({
+                where: {
+                    receives_newsletters: true,
+                    unsubscribed_at: null
+                }
+            });
 
-        const newsletterData = {
-            weekNumber: this.getWeekNumber(),
-            newArrivals: [], // await getNewArrivals(),
-            staffPicks: [], // await getStaffPicks(),
-            upcomingEvents: [] // await getUpcomingEvents()
-        };
+            if (subscribers.length === 0) return;
 
-        // Send to subscribers in batches
-        // for (const subscriber of subscribers) {
-        //   await emailService.sendTransactional({
-        //     to: subscriber.email,
-        //     templateId: 'MONTHLY_NEWSLETTER',
-        //     dynamicData: newsletterData
-        //   });
-        // }
+            // In a real scenario, we'd fetch actual content here
+            const newsletterData = {
+                weekNumber: this.getWeekNumber(),
+                newArrivals: [], // This would be fetched from the main books database
+                staffPicks: [],
+                upcomingEvents: []
+            };
+
+            for (const subscriber of subscribers) {
+                try {
+                    await emailService.sendTransactional({
+                        to: subscriber.email,
+                        templateId: 'MONTHLY_NEWSLETTER',
+                        dynamicData: newsletterData
+                    });
+                } catch (error) {
+                    logger.error(`Failed to send newsletter to ${subscriber.email}:`, error);
+                }
+            }
+        } catch (error) {
+            logger.error('Failed to send weekly newsletter:', error);
+        }
     }
 
     /**
      * Send monthly recommendations
      */
     async sendMonthlyRecommendations() {
-        // TODO: Get users and their reading history
-        // Generate personalized recommendations
-        // Send recommendation emails
+        // Implementation would involve complex logic to match user history with books
+        logger.info('Monthly recommendations job triggered (Logic pending implementation)');
     }
 
     /**
      * Clean up old email logs
      */
     async cleanupOldLogs() {
-        // Delete logs older than 90 days
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - 90);
+        try {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - 90);
 
-        // TODO: await db.query('DELETE FROM email_logs WHERE sent_at < ? AND campaign_id IS NULL', [cutoffDate]);
-        logger.info('Cleaned up email logs older than 90 days');
+            const deletedCount = await models.EmailLog.destroy({
+                where: {
+                    sent_at: {
+                        [Op.lt]: cutoffDate
+                    },
+                    campaign_id: null // Only clean transactional logs, keep campaign logs longer
+                }
+            });
+
+            logger.info(`Cleaned up ${deletedCount} email logs older than 90 days`);
+        } catch (error) {
+            logger.error('Failed to cleanup old logs:', error);
+        }
     }
 
     /**
      * Check for back-in-stock alerts
      */
     async checkBackInStockAlerts() {
-        // TODO: Check for products that just came back in stock
-        // const restockedItems = await db.query('SELECT * FROM wishlist_alerts WHERE email_sent = false AND product_in_stock = true');
+        try {
+            // This would normally join with the main Books table
+            // For now, we'll use a raw query or assume a view exists
+            const [restockedItems] = await sequelize.query(`
+                SELECT w.*, b.title as book_title, b.coverImage as book_image, b.author as book_author
+                FROM wishlist_alerts w
+                JOIN Books b ON w.book_id = b.id
+                WHERE w.email_sent = false AND b.stock > 0
+            `);
 
-        // Group by user and send alerts
-        // for (const item of restockedItems) {
-        //   const user = await getUser(item.user_id);
-        //   const product = await getProduct(item.book_id);
-        //   await emailAutomation.onProductBackInStock(product, [user]);
-        // }
+            for (const item of restockedItems) {
+                try {
+                    // Send alert via emailAutomation
+                    // Note: This assumes onProductBackInStock handles individual users
+                    await emailAutomation.onProductBackInStock(
+                        { sku: item.book_id, title: item.book_title, coverImage: item.book_image, author: item.book_author },
+                        [{ email: item.user_email, name: item.user_name }]
+                    );
+
+                    // Mark as sent
+                    await sequelize.query('UPDATE wishlist_alerts SET email_sent = true, sent_at = NOW() WHERE id = ?', {
+                        replacements: [item.id]
+                    });
+                } catch (error) {
+                    logger.error(`Failed to send back-in-stock alert for item ${item.id}:`, error);
+                }
+            }
+        } catch (error) {
+            logger.error('Failed to check back-in-stock alerts:', error);
+        }
     }
 
     /**
      * Get daily sales data
      */
     async getDailySalesData() {
-        // TODO: Query database for today's sales
-        return {
-            totalOrders: 0,
-            totalRevenue: 0,
-            topProducts: [],
-            newCustomers: 0
-        };
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Raw query to main transactions/orders table
+            const [sales] = await sequelize.query(`
+                SELECT 
+                    COUNT(*) as totalOrders,
+                    SUM(amount) as totalRevenue,
+                    COUNT(DISTINCT userId) as newCustomers
+                FROM Transactions
+                WHERE createdAt >= ? AND status = 'completed'
+            `, { replacements: [today] });
+
+            return sales[0] || { totalOrders: 0, totalRevenue: 0, newCustomers: 0 };
+        } catch (error) {
+            logger.error('Failed to get daily sales data:', error);
+            return { totalOrders: 0, totalRevenue: 0, newCustomers: 0 };
+        }
     }
 
     /**

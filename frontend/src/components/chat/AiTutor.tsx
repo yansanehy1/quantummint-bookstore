@@ -8,7 +8,12 @@ interface Message {
   text: string;
 }
 
-export const AiTutor: React.FC = () => {
+interface AiTutorProps {
+  activeFormula?: string;
+  pageContent?: string;
+}
+
+export const AiTutor: React.FC<AiTutorProps> = ({ activeFormula, pageContent }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -34,11 +39,16 @@ export const AiTutor: React.FC = () => {
 
     try {
       const ai = createAIClient();
+      
+      let contextStr = "";
+      if (activeFormula) contextStr += `\nThe student is currently looking at this formula: ${activeFormula}`;
+      if (pageContent) contextStr += `\nRelevant page content: ${pageContent.substring(0, 500)}...`;
+
       // Using gemini-flash-lite-latest for fast responses as requested
       const chat = ai.chats.create({
         model: 'gemini-flash-lite-latest',
         config: {
-          systemInstruction: "You are a helpful and encouraging AI Tutor for students using the QuantumMint Bookstore platform. Keep answers concise and educational.",
+          systemInstruction: `You are a helpful and encouraging AI Tutor for students using the QuantumMint Bookstore platform. Keep answers concise and educational. ${contextStr}\nIf the student asks about a formula, provide a clear symbol-by-symbol breakdown and explain the physical/mathematical significance.`,
         }
       });
 

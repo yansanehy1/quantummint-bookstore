@@ -15,7 +15,9 @@ import {
   Users,
   BookOpen,
   Video,
-  Headphones
+  Headphones,
+  Mic,
+  BrainCircuit
 } from 'lucide-react';
 import { PayGOWallet } from '../components/PayGOWallet';
 import { usePayGO } from '../hooks/usePayGO';
@@ -66,7 +68,11 @@ export const PayGODashboard: React.FC = () => {
       case 'video':
         return <Video className="w-4 h-4" />;
       case 'audiobook':
-        return <Headphones className="w-4 h-4" />;
+      case 'tts':
+        return <Mic className="w-4 h-4" />;
+      case 'scientific':
+      case 'breakdown':
+        return <BrainCircuit className="w-4 h-4" />;
       case 'ebook':
         return <BookOpen className="w-4 h-4" />;
       default:

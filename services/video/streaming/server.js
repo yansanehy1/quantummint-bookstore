@@ -4,15 +4,29 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const { createClient } = require('redis');
+const jwt = require('jsonwebtoken');
 
 const PORT = process.env.PORT || 8000;
 const VIDEO_DIR = process.env.VIDEO_DIR || '/var/www/videos';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Redis for session tracking/auth
 const redis = createClient({
     url: process.env.REDIS_URL || 'redis://localhost:6379'
 });
 redis.connect().catch(console.error);
+
+async function verifyToken(token, videoId) {
+    if (!token) return false;
+    if (!JWT_SECRET) return true; // Skip in dev if not set
+    try {
+        const decoded = jwt.verify(token.replace('Bearer ', ''), JWT_SECRET);
+        // Additional logic can be added here (e.g., check if user has access to this videoId)
+        return !!decoded.id;
+    } catch (err) {
+        return false;
+    }
+}
 
 const server = http.createServer(async (req, res) => {
     // CORS
@@ -54,11 +68,16 @@ const server = http.createServer(async (req, res) => {
 
     const videoId = match[1];
     const relativePath = match[2];
-    const filePath = path.join(VIDEO_DIR, 'encoded', videoId, relativePath); // Adjust based on actual structure
 
     // Basic Auth Check (Token)
-    // const token = req.headers.authorization;
-    // if (!await verifyToken(token)) ...
+    const token = req.headers.authorization || url.parse(req.url, true).query.token;
+    if (!await verifyToken(token, videoId)) {
+        res.writeHead(401);
+        res.end('Unauthorized');
+        return;
+    }
+
+    const filePath = path.join(VIDEO_DIR, 'encoded', videoId, relativePath); // Adjust based on actual structure
 
     try {
         const stats = await fs.promises.stat(filePath);

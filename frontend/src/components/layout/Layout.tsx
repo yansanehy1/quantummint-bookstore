@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, LogOut } from 'lucide-react';
 import { getCurrentUser } from '@/services/store';
 import Sidebar from './Sidebar';
@@ -11,20 +11,20 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, onLogout }) => {
-  const [location] = useLocation();
+  const { pathname } = useLocation();
   const user = getCurrentUser();
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* New Sidebar Component */}
-      <Sidebar user={user} onLogout={onLogout} />
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative lg:ml-64">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-10 shrink-0">
           <div className="flex items-center gap-4">
             <span className="font-semibold text-slate-900 text-lg">
-              {location.includes('player') ? 'Immersive Reader' : 'Sierra Books'}
+              {pathname.includes('player') ? 'Immersive Reader' : 'QuantumMint Bookstore'}
             </span>
           </div>
           <div className="flex items-center gap-4">

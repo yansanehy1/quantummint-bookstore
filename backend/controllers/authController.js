@@ -1,12 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// we'll access models from request (populated in server.js)
 const asyncHandler = require('../middleware/asyncHandler');
+const { registerSchema, loginSchema } = require('../validation/authSchema');
+const { main: logger } = require('../utils/logger');
+const EmailService = require('../../services/shared/emailService');
+
+const emailService = new EmailService();
+emailService.initialize().catch(err => logger.error('Failed to initialize EmailService in AuthController', err));
 
 // Ensure we have a secret at startup.
 // Using a hardcoded default in production is a critical security flaw.
 if (!process.env.JWT_SECRET) {
-    const { main: logger } = require('../utils/logger');
     const nodeEnv = process.env.NODE_ENV || 'development';
 
     if (nodeEnv === 'production') {
@@ -27,29 +31,27 @@ const generateToken = (user) => {
     );
 };
 
-// basic email regex (not perfect but catches obvious mistakes)
-const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body || {};
+    // Validate request body
+    const validation = registerSchema.safeParse(req.body);
+    if (!validation.success) {
+        logger.warn(`[AuthController] Registration validation failed: ${validation.error.errors[0].message}`);
+        return res.status(400).json({ 
+            error: validation.error.errors[0].message,
+            details: validation.error.errors 
+        });
+    }
 
-    if (!name || !email || !password) {
-        return res.status(400).json({ error: 'Name, email and password are required' });
-    }
-    if (!EMAIL_REGEX.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-    }
-    if (typeof password !== 'string' || password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
+    const { name, email, password, role } = validation.data;
 
     // Check if user exists
     const { User } = req.app.get('models');
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
+        logger.info(`[AuthController] Registration attempt for existing email: ${email}`);
         return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -61,15 +63,28 @@ exports.register = asyncHandler(async (req, res) => {
     const user = await User.create({
         name,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: role || 'learner'
     });
 
+    logger.info(`[AuthController] User registered successfully: ${user.id} (${email})`);
+
+    // Send welcome email (async, don't block response)
+    emailService.sendWelcomeEmail(user).catch(err => logger.error(`Failed to send welcome email to ${email}`, err));
+
+    const token = generateToken(user);
     res.status(201).json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user)
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            walletBalance: {
+                usd: parseFloat(user.usdBalance) || 0,
+                sll: parseFloat(user.sllBalance) || 0,
+            },
+        },
+        token,
     });
 });
 
@@ -77,34 +92,48 @@ exports.register = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = asyncHandler(async (req, res) => {
-    const { email, password } = req.body || {};
+    // Validate request body
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+        logger.warn(`[AuthController] Login validation failed: ${validation.error.errors[0].message}`);
+        return res.status(400).json({ 
+            error: validation.error.errors[0].message,
+            details: validation.error.errors 
+        });
+    }
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
-    }
-    if (!EMAIL_REGEX.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-    }
+    const { email, password } = validation.data;
 
     // Check for user
     const { User } = req.app.get('models');
     const user = await User.findOne({ where: { email } });
     if (!user) {
+        logger.info(`[AuthController] Login attempt for non-existent user: ${email}`);
         return res.status(400).json({ error: 'Invalid credentials' });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+        logger.info(`[AuthController] Invalid password for user: ${email}`);
         return res.status(400).json({ error: 'Invalid credentials' });
     }
 
+    logger.info(`[AuthController] User logged in successfully: ${user.id} (${email})`);
+
+    const token = generateToken(user);
     res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user)
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            walletBalance: {
+                usd: parseFloat(user.usdBalance) || 0,
+                sll: parseFloat(user.sllBalance) || 0,
+            },
+        },
+        token,
     });
 });
 

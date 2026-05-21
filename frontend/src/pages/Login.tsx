@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   useEffect(() => {
     document.title = 'Login - Quantummint Bookstore';
   }, []);
-  const [role, setRole] = useState<'user' | 'seller'>('user');
+  const [role, setRole] = useState<'learner' | 'seller'>('learner');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +45,7 @@ const Login: React.FC = () => {
           Sign in to QuantumMint
         </h2>
         <p className="mt-2 text-center text-sm text-slate-600">
-          Or <a href="#" className="font-medium text-quantum-600 hover:text-quantum-500">start your 14-day free trial</a>
+          Don't have an account? <a href="/register" className="font-medium text-quantum-600 hover:text-quantum-500">Sign up now</a>
         </p>
       </div>
 
@@ -99,11 +99,11 @@ const Login: React.FC = () => {
               <label className="block text-sm font-medium text-slate-700">I am a...</label>
               <div className="mt-1 grid grid-cols-2 gap-3">
                 <div
-                  onClick={() => setRole('user')}
-                  className={`cursor-pointer p-3 border rounded-md text-center flex flex-col items-center gap-2 transition-all ${role === 'user' ? 'border-quantum-500 bg-quantum-50 ring-1 ring-quantum-500' : 'border-slate-300 hover:bg-slate-50'}`}
+                  onClick={() => setRole('learner')}
+                  className={`cursor-pointer p-3 border rounded-md text-center flex flex-col items-center gap-2 transition-all ${role === 'learner' ? 'border-quantum-500 bg-quantum-50 ring-1 ring-quantum-500' : 'border-slate-300 hover:bg-slate-50'}`}
                 >
-                  <BookOpen className={role === 'user' ? 'text-quantum-600' : 'text-slate-400'} />
-                  <span className={`text-sm font-medium ${role === 'user' ? 'text-quantum-900' : 'text-slate-500'}`}>User</span>
+                  <BookOpen className={role === 'learner' ? 'text-quantum-600' : 'text-slate-400'} />
+                  <span className={`text-sm font-medium ${role === 'learner' ? 'text-quantum-900' : 'text-slate-500'}`}>Learner</span>
                 </div>
                 <div
                   onClick={() => setRole('seller')}

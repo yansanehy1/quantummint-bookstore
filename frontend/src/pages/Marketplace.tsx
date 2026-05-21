@@ -1,89 +1,9 @@
 import * as React from 'react';
-const { useState } = React;
+const { useState, useEffect } = React;
 import { BookCard } from '../components/BookCard';
 import { Book } from '../types';
-
-// Mock book data for demonstration
-const MOCK_BOOKS: Book[] = [
-    {
-        id: '1',
-        title: 'The Art of Scientific Thinking',
-        author: 'Dr. Sarah Chen',
-        description: 'Learn the fundamental principles of scientific reasoning and critical thinking. Perfect for students and professionals alike.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 7200, // 2 hours
-        genre: 'Science & Technology',
-        rating: 4.8,
-        creatorId: 'creator1',
-        createdAt: '2024-01-15',
-    },
-    {
-        id: '2',
-        title: 'Business Strategy Essentials',
-        author: 'Michael Rodriguez',
-        description: 'Master the core concepts of modern business strategy with real-world examples and case studies.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 5400, // 1.5 hours
-        genre: 'Business & Economics',
-        rating: 4.6,
-        creatorId: 'creator2',
-        createdAt: '2024-01-20',
-    },
-    {
-        id: '3',
-        title: 'Mindfulness for Beginners',
-        author: 'Emma Thompson',
-        description: 'Start your mindfulness journey with practical exercises and guided meditations.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 3600, // 1 hour
-        genre: 'Self-Help',
-        rating: 4.9,
-        creatorId: 'creator3',
-        createdAt: '2024-02-01',
-    },
-    {
-        id: '4',
-        title: 'World War II: A Complete History',
-        author: 'Prof. James Anderson',
-        description: 'Comprehensive overview of the Second World War, from its causes to its lasting impact.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 14400, // 4 hours
-        genre: 'History',
-        rating: 4.7,
-        creatorId: 'creator4',
-        createdAt: '2024-02-10',
-    },
-    {
-        id: '5',
-        title: 'Introduction to Python Programming',
-        author: 'Alex Kumar',
-        description: 'Learn Python from scratch with hands-on examples and practical projects.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 10800, // 3 hours
-        genre: 'Education',
-        rating: 4.5,
-        creatorId: 'creator5',
-        createdAt: '2024-02-15',
-    },
-    {
-        id: '6',
-        title: 'The Mystery of Shadow Creek',
-        author: 'Rachel Williams',
-        description: 'A gripping mystery that will keep you on the edge of your seat till the very end.',
-        coverImage: '',
-        chapters: [],
-        totalDuration: 9000, // 2.5 hours
-        genre: 'Mystery & Thriller',
-        rating: 4.4,
-        creatorId: 'creator6',
-        createdAt: '2024-02-20',
-    },
-];
+import { booksAPI } from '../utils/api';
+import { Loader2 } from 'lucide-react';
 
 const GENRES = [
     'All',
@@ -113,9 +33,26 @@ export function Marketplace() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('All');
     const [sortBy, setSortBy] = useState('popular');
+    const [books, setBooks] = useState<Book[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBooks = async () => {
+            setLoading(true);
+            try {
+                const data = await booksAPI.getAll();
+                setBooks(data);
+            } catch (error) {
+                console.error('Failed to fetch books:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBooks();
+    }, []);
 
     // Filter and sort books
-    const filteredBooks = MOCK_BOOKS.filter((book) => {
+    const filteredBooks = books.filter((book) => {
         const matchesSearch =
             searchQuery === '' ||
             book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -128,15 +65,15 @@ export function Marketplace() {
     }).sort((a, b) => {
         switch (sortBy) {
             case 'newest':
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
             case 'rating':
-                return b.rating - a.rating;
+                return (b.rating || 0) - (a.rating || 0);
             case 'duration-short':
-                return a.totalDuration - b.totalDuration;
+                return (a.totalDuration || 0) - (b.totalDuration || 0);
             case 'duration-long':
-                return b.totalDuration - a.totalDuration;
+                return (b.totalDuration || 0) - (a.totalDuration || 0);
             default: // popular
-                return b.rating - a.rating;
+                return (b.rating || 0) - (a.rating || 0);
         }
     });
 
@@ -221,40 +158,24 @@ export function Marketplace() {
                             </select>
                         </div>
                     </div>
-
-                    {/* Results Count */}
-                    <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                        Showing {filteredBooks.length} audiobook{filteredBooks.length !== 1 ? 's' : ''}
-                        {searchQuery && ` for "${searchQuery}"`}
-                        {selectedGenre !== 'All' && ` in ${selectedGenre}`}
-                    </div>
                 </div>
 
-                {/* Book Grid */}
-                {filteredBooks.length > 0 ? (
+                {/* Books Grid */}
+                {loading ? (
+                    <div className="flex justify-center py-12">
+                        <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                    </div>
+                ) : filteredBooks.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredBooks.map((book) => (
                             <BookCard key={book.id} book={book} />
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-16">
-                        <div className="text-6xl mb-4">🔍</div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                            No audiobooks found
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            Try adjusting your search or filters
+                    <div className="text-center py-12">
+                        <p className="text-gray-600 dark:text-gray-400 text-lg">
+                            No books found matching your criteria
                         </p>
-                        <button
-                            onClick={() => {
-                                setSearchQuery('');
-                                setSelectedGenre('All');
-                            }}
-                            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                        >
-                            Clear Filters
-                        </button>
                     </div>
                 )}
             </div>

@@ -4,6 +4,16 @@ const path = require('path');
 const crypto = require('crypto');
 const { EventEmitter } = require('events');
 
+function sanitizePath(baseDir, userPath) {
+    const resolvedBase = path.resolve(baseDir);
+    const resolvedUser = path.resolve(baseDir, userPath);
+    
+    if (!resolvedUser.startsWith(resolvedBase + path.sep) && resolvedUser !== resolvedBase) {
+        throw new Error('Path traversal attempt detected');
+    }
+    return resolvedUser;
+}
+
 class QuantumUploadManager extends EventEmitter {
     constructor(config = {}) {
         super();
@@ -107,17 +117,12 @@ class QuantumUploadManager extends EventEmitter {
             throw new Error('Total upload size exceeds declared size');
         }
 
-        const chunkPath = path.join(this.config.tempDir, uploadId, `chunk_${chunkIndex}`);
-        const resolvedChunkPath = path.resolve(chunkPath);
-        if (!resolvedChunkPath.startsWith(path.resolve(this.config.tempDir))) {
-            throw new Error('Invalid chunk path');
-        }
-
-        await fs.writeFile(resolvedChunkPath, buffer);
+        const chunkPath = sanitizePath(this.config.tempDir, path.join(uploadId, `chunk_${chunkIndex}`));
+        await fs.writeFile(chunkPath, buffer);
 
         upload.chunks.push({
             index: chunkIndex,
-            path: resolvedChunkPath,
+            path: chunkPath,
             size: buffer.length
         });
 
@@ -144,11 +149,7 @@ class QuantumUploadManager extends EventEmitter {
             throw new Error('Invalid file extension');
         }
 
-        const finalPath = path.join(this.config.uploadDir, `${uploadId}${sanitizedExt}`);
-        const resolvedFinal = path.resolve(finalPath);
-        if (!resolvedFinal.startsWith(path.resolve(this.config.uploadDir))) {
-            throw new Error('Invalid final path');
-        }
+        const finalPath = sanitizePath(this.config.uploadDir, `${uploadId}${sanitizedExt}`);
 
         // Sort chunks by index
         upload.chunks.sort((a, b) => a.index - b.index);

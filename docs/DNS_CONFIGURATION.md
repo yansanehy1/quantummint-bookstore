@@ -1,7 +1,7 @@
 # DNS Configuration for quantummint.net
 
 ## Overview
-This document provides the DNS records needed for Sierra Books email system at `quantum.quantummint.net`.
+This document provides the DNS records needed for QuantumMint Bookstore email system at `quantum.quantummint.net`.
 
 ## Required DNS Records
 

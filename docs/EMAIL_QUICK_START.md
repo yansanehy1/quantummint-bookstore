@@ -1,7 +1,6 @@
-# Sierra Books Email System - Quick Start Guide
-
-## Overview
-This guide will help you get the Sierra Books email system up and running.
+# QuantumMint Bookstore Email System - Quick Start Guide
+...
+This guide will help you get the QuantumMint Bookstore email system up and running.
 
 ## Prerequisites
 - SendGrid account (for transactional emails)

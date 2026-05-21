@@ -26,9 +26,9 @@ class SubscriptionService {
     /**
      * Subscribe to a tier
      */
-    async subscribe(tier: SubscriptionTier): Promise<Subscription> {
+    async subscribe(tier: SubscriptionTier, currency: 'USD' | 'SLL' = 'SLL'): Promise<Subscription> {
         try {
-            const subscription = await api.subscriptions.subscribe(tier);
+            const subscription = await api.subscriptions.subscribe(tier, currency);
             this.currentSubscription = subscription;
             this.broadcastSubscriptionChange();
             return subscription;
@@ -41,9 +41,9 @@ class SubscriptionService {
     /**
      * Upgrade subscription
      */
-    async upgrade(tier: SubscriptionTier): Promise<Subscription> {
+    async upgrade(tier: SubscriptionTier, currency: 'USD' | 'SLL' = 'SLL'): Promise<Subscription> {
         try {
-            const subscription = await api.subscriptions.upgrade(tier);
+            const subscription = await api.subscriptions.upgrade(tier, currency);
             this.currentSubscription = subscription;
             this.broadcastSubscriptionChange();
             return subscription;

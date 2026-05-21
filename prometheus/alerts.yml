@@ -1,0 +1,64 @@
+# prometheus/alerts.yml
+groups:
+  - name: video_processing_alerts
+    rules:
+      # Alert if processing queue backs up
+      - alert: VideoQueueBackingUp
+        expr: video_queue_depth > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Video processing queue backing up"
+          description: "Queue depth is {{ $value }} jobs (threshold: 50)"
+
+      # Alert on high error rate
+      - alert: VideoProcessingHighErrorRate
+        expr: |
+          rate(video_processing_errors_total[5m]) 
+          / 
+          rate(video_processing_duration_seconds_count[5m]) 
+          > 0.1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High video processing error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # Alert on slow encoding
+      - alert: VideoEncodingTooSlow
+        expr: |
+          histogram_quantile(0.95, 
+            rate(video_processing_duration_seconds_bucket{quality="1080p"}[5m]) 
+          ) > 600
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "1080p video encoding too slow"
+          description: "95th percentile encoding time is {{ $value }}s (threshold: 600s)"
+
+      # Alert on GPU not being used (if enabled)
+      - alert: GPUUnderutilized
+        expr: |
+          video_processing_duration_seconds_count{gpu_used="true"} == 0 
+          and 
+          video_queue_depth > 10
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "GPU not being utilized"
+          description: "Queue has jobs but no GPU-accelerated processing detected"
+
+      # Alert on storage growth
+      - alert: VideoStorageGrowingFast
+        expr: |
+          rate(video_storage_bytes_total[1h]) > 1073741824  # 1GB/hour
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Video storage growing rapidly"
+          description: "Storage growing at {{ $value | humanizeBytes }}/hour"

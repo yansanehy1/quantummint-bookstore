@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
-    LayoutGrid, ShoppingBag, Mic2, BarChart2, Wallet as WalletIcon,
+    LayoutGrid, ShoppingBag, Mic2, BarChart2, Wallet as WalletIcon, Clock,
     Users, Map, ScanEye, LayoutDashboard, UserPlus, UserCircle,
     Shield, LogOut, BookOpen
 } from 'lucide-react';
@@ -23,6 +23,8 @@ const Sidebar: React.FC = () => {
                     <NavItem to="/library" icon={<BookOpen />} label="Library" />
                     <NavItem to="/analytics" icon={<BarChart2 />} label="Reading Analytics" />
                     <NavItem to="/wallet" icon={<WalletIcon />} label="Wallet" />
+                    <NavItem to="/subscriptions" icon={<Clock />} label="Subscriptions" />
+                    <NavItem to="/subscriptions/batch" icon={<Users />} label="Batch Subscribe" />
                     <NavItem to="/referrals" icon={<Users />} label="Referrals" />
 
                     <div className="pt-4 pb-2">
@@ -38,9 +40,9 @@ const Sidebar: React.FC = () => {
                                 <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:block">Creator</p>
                             </div>
                             <NavItem to="/studio" icon={<Mic2 />} label="Audiobook Studio" />
-                            <NavItem to="/seller/dashboard" icon={<LayoutDashboard />} label="Seller Dashboard" />
-                            <NavItem to="/seller/onboarding" icon={<UserPlus />} label="Seller Onboarding" />
-                            <NavItem to="/seller/registration" icon={<UserCircle />} label="Seller Registration" />
+                            <NavItem to="/seller/dashboard" icon={<LayoutDashboard />} label="Seller Portal" />
+                            <NavItem to="/seller/onboarding" icon={<UserPlus />} label="Onboarding" />
+                            <NavItem to="/seller/registration" icon={<UserCircle />} label="Registration" />
                         </>
                     )}
 
@@ -50,6 +52,7 @@ const Sidebar: React.FC = () => {
                                 <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:block">Admin</p>
                             </div>
                             <NavItem to="/admin" icon={<Shield />} label="Admin Dashboard" />
+                            <NavItem to="/admin/groups" icon={<Users />} label="Group Management" />
                         </>
                     )}
                 </nav>
